@@ -1,0 +1,1969 @@
+<!doctype html><html lang="zh-Hant-TW"><head><meta charset=utf8><title>移車快報</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: navy sidebar + top bar with the siren button; the map view is a main
+   column (alert bar, tile map, legend, latest reports) beside a report panel
+   for reporting parking spots. On narrow screens the sidebar becomes a top strip,
+   everything stacks and the siren becomes a floating button. */
+:root {
+  --bg: #f1f5fb;
+  --surface: #ffffff;
+  --surface2: #f5f8fc;
+  --ink: #13233d;
+  --muted: #5a6a82;
+  --line: #dde5f0;
+  --navy: #0c2a50;
+  --navy2: #12386a;
+  --navy-ink: #eaf1fb;
+  --navy-mute: #9db3d1;
+  --nav-on: #2f6df0;
+  --primary: #2563eb;
+  --primary-ink: #ffffff;
+  --red: #e0362f;
+  --red-t: #c0241d;
+  --orange: #f39c12;
+  --orange-t: #965700;
+  --blue: #2f6df0;
+  --blue-t: #1c56d4;
+  --green: #16a34a;
+  --green-t: #11702f;
+  --violet: #7c3aed;
+  --violet-t: #6428d1;
+  --grey: #8896ab;
+  --grey-t: #55657c;
+  --map-bg: #e8edf3;
+  --map-grid: #dde4ec;
+  --map-road: #ffffff;
+  --map-edge: #cbd5e1;
+  --map-label: #3f506a;
+  --campus: #dcefdf; --park: #bfe0c6; --water: #b4dcf0;
+  --market: #fbe6c4;
+  --focus: #2f6df0;
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a111d; --surface: #111b2c; --surface2: #16223a; --ink: #e7eefa; --muted: #9fb0c8; --line: #22314b;
+    --navy: #071a33; --navy2: #0d2a50; --primary: #2f6df0;
+    --red: #ff6a61; --red-t: #ff8c84; --orange: #f5a623; --orange-t: #f5b85a; --blue: #6d9cff; --blue-t: #8db3ff;
+    --green: #3fcf74; --green-t: #7be0a0; --violet: #9b6bff; --violet-t: #bda0ff; --grey: #7f8da3; --grey-t: #a3b0c4;
+    --map-bg: #16202f; --map-grid: #1b2738; --map-road: #2a3a52; --map-edge: #3a4c68; --map-label: #b2c0d6; --campus: #1b3328; --park: #25483a; --water: #1d4a66; --market: #3b2f1c;
+    --focus: #8db3ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a111d; --surface: #111b2c; --surface2: #16223a; --ink: #e7eefa; --muted: #9fb0c8; --line: #22314b;
+  --navy: #071a33; --navy2: #0d2a50; --primary: #2f6df0;
+  --red: #ff6a61; --red-t: #ff8c84; --orange: #f5a623; --orange-t: #f5b85a; --blue: #6d9cff; --blue-t: #8db3ff;
+  --green: #3fcf74; --green-t: #7be0a0; --violet: #9b6bff; --violet-t: #bda0ff; --grey: #7f8da3; --grey-t: #a3b0c4;
+  --map-bg: #16202f; --map-grid: #1b2738; --map-road: #2a3a52; --map-edge: #3a4c68; --map-label: #b2c0d6; --campus: #1b3328; --park: #25483a; --water: #1d4a66; --market: #3b2f1c;
+  --focus: #8db3ff;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.6; margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+svg.ic { flex: none; }
+h1, h2, h3, p { margin: 0; }
+
+.app { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
+
+/* sidebar */
+.side {
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy2) 100%); color: var(--navy-ink);
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  padding: 22px 16px 0 max(18px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 20px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo h1 { font-size: 26px; font-weight: 900; letter-spacing: .08em; line-height: 1.15; }
+.logo small { display: block; font-size: 11px; color: var(--navy-mute); letter-spacing: .06em; }
+.nav { display: grid; gap: 6px; }
+.nav button {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 48px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--navy-ink); font-size: 16px; font-weight: 700; text-align: left;
+}
+.nav button:hover { background: rgba(255,255,255,.08); }
+.nav button[aria-current="page"] { background: var(--nav-on); color: #fff; }
+.tip { border: 1px solid rgba(255,255,255,.22); border-radius: 12px; padding: 14px 14px 12px; font-size: 14px; }
+.tip h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 900; margin-bottom: 8px; }
+.tip h2 svg { color: #ffd166; }
+.tip ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.tip-art { margin-top: auto; position: relative; padding-top: 6px; }
+.tip-art .slogan { position: absolute; left: 6px; top: 6px; transform: rotate(-9deg); transform-origin: left top; font-weight: 700; font-size: 18px; line-height: 1.35; color: var(--navy-ink); letter-spacing: .06em; margin-top: 54px; }
+.tip-art svg { display: block; width: 100%; height: auto; }
+
+/* main */
+.main { min-width: 0; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 40px 24px; }
+.top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.search { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 0 14px; min-height: 46px; color: var(--muted); }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 16px; color: var(--ink); min-height: 44px; }
+.search:focus-within { border-color: var(--focus); }
+.area { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.area svg { color: var(--blue); }
+.top-right { display: flex; align-items: center; gap: 10px; margin-left: auto; position: relative; }
+.alarm {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border: 0; border-radius: 12px;
+  background: var(--violet); color: #fff; font-weight: 900; font-size: 16px; letter-spacing: .06em; box-shadow: 0 4px 14px color-mix(in srgb, var(--violet) 45%, transparent);
+}
+.alarm:hover { filter: brightness(1.1); }
+.iconbtn { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; color: var(--ink); display: grid; place-items: center; }
+.iconbtn:hover { background: var(--surface); }
+.iconbtn[aria-pressed="false"] { color: var(--muted); }
+.badge { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.who { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--line); display: grid; place-items: center; color: var(--muted); }
+.pop { position: absolute; top: 56px; right: 0; width: min(350px, 86vw); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px rgba(8,20,40,.22); z-index: 15; padding: 8px; }
+.pop h3 { font-size: 14px; padding: 6px 8px; color: var(--muted); }
+.pop button { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 8px; border-radius: 8px; }
+.pop button:hover { background: var(--surface2); }
+.pop .none { padding: 10px 8px; color: var(--muted); font-size: 14px; }
+
+#banner { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--muted); font-size: 14px; }
+#alertBar { display: flex; align-items: center; gap: 14px; margin: 0 0 14px; padding: 12px 16px; border-radius: 12px; background: var(--violet); color: #fff; }
+#alertBar .ab-t { flex: 1; min-width: 0; display: grid; }
+#alertBar strong { font-size: 16px; font-weight: 900; letter-spacing: .04em; }
+#alertBar span.s { font-size: 14px; overflow-wrap: anywhere; opacity: .95; }
+#alertBar .btn { background: #fff; color: #2d1473; border-color: #fff; white-space: nowrap; }
+#alertBar.flash { animation: flash 0.7s ease-in-out 5; }
+@keyframes flash { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--violet) 40%, transparent); filter: brightness(1.25); } }
+@media (prefers-reduced-motion: reduce) { #alertBar.flash { animation: none; outline: 4px solid var(--ink); } }
+
+.mapview { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.colA, .colB { display: grid; gap: 16px; min-width: 0; }
+@media (max-width: 1180px) {
+  .mapview { grid-template-columns: minmax(0, 1fr); }
+  .colA, .colB { display: contents; }
+  .mapcard { order: 1; } .legend { order: 2; } .formcard { order: 3; } .latest { order: 4; } .helpcard { order: 5; } .linkcard { order: 6; }
+}
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.mapcard { position: relative; overflow: hidden; }
+.mapbox { position: relative; aspect-ratio: 1000 / 650; background: var(--map-bg); }
+#map { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
+.mk { cursor: pointer; }
+.mk .p { stroke: #fff; stroke-width: 2; }
+.mk.grey .p { fill: var(--grey); }
+.mk.green .p { fill: var(--green); } .mk.violet .p { fill: var(--violet); }
+.mk .g { fill: #fff; font-weight: 900; font-size: 15px; text-anchor: middle; font-family: var(--font); pointer-events: none; }
+.mk:focus-visible { outline: none; } .mk:focus-visible .p { stroke: var(--ink); stroke-width: 3; }
+.mk.sel .p { stroke: var(--ink); stroke-width: 3; }
+.ring { fill: var(--violet); fill-opacity: .25; stroke: var(--violet); stroke-width: 2; pointer-events: none; }
+.draft .p { fill: var(--primary); stroke: #fff; stroke-width: 2; }
+.map-ctl { position: absolute; left: 12px; top: 12px; display: grid; gap: 10px; z-index: 2; }
+.map-ctl .grp { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(8,20,40,.16); }
+.map-ctl button { width: 42px; height: 42px; border: 0; background: var(--surface); color: var(--ink); display: grid; place-items: center; }
+.map-ctl .grp button + button { border-top: 1px solid var(--line); }
+.map-ctl button:hover { background: var(--surface2); }
+.map-ctl .solo { border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 2px 8px rgba(8,20,40,.16); }
+.map-note { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(86%, 420px); text-align: center; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 14px; font-weight: 700; line-height: 1.5; box-shadow: 0 2px 10px rgba(8,20,40,.18); pointer-events: none; }
+.map-tag { position: absolute; right: 10px; bottom: 8px; font-size: 11px; color: var(--map-label); background: color-mix(in srgb, var(--surface) 80%, transparent); padding: 1px 8px; border-radius: 6px; }
+.pickhint { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; pointer-events: none; white-space: nowrap; max-width: calc(100% - 140px); overflow: hidden; text-overflow: ellipsis; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 18px; font-size: 14px; font-weight: 500; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.dot { width: 14px; height: 14px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: inline-block; flex: none; }
+.dot.red { background: var(--red); } .dot.orange { background: var(--orange); } .dot.blue { background: var(--blue); } .dot.grey { background: var(--grey); } .dot.green { background: var(--green); } .dot.violet { background: var(--violet); }
+.legend b.red { color: var(--red-t); } .legend b.orange { color: var(--orange-t); } .legend b.blue { color: var(--blue-t); } .legend b.grey { color: var(--grey-t); } .legend b.green { color: var(--green-t); } .legend b.violet { color: var(--violet-t); }
+
+.latest { padding: 16px 18px 6px; }
+.sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.sec-head h2 { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 900; }
+.sec-head h2 svg { color: var(--primary); }
+.linkbtn { border: 0; background: transparent; color: var(--blue-t); font-weight: 700; font-size: 14px; padding: 6px 4px; }
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; background: transparent; border-left: 0; border-right: 0; border-bottom: 0; color: inherit; }
+.rows li:first-child .row { border-top: 0; }
+.row:hover { background: var(--surface2); }
+.thumb { width: 64px; height: 56px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); overflow: hidden; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb.green { color: var(--green-t); background: color-mix(in srgb, var(--green) 14%, var(--surface)); }
+.thumb.violet { color: var(--violet-t); background: color-mix(in srgb, var(--violet) 14%, var(--surface)); }
+.row .tl { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 14px; }
+.tl.red { color: var(--red-t); } .tl.orange { color: var(--orange-t); } .tl.blue { color: var(--blue-t); } .tl.grey { color: var(--grey-t); } .tl.green { color: var(--green-t); } .tl.violet { color: var(--violet-t); }
+.row .addr { font-weight: 700; overflow-wrap: anywhere; line-height: 1.4; }
+.row .meta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pill { font-size: 13px; font-weight: 700; padding: 3px 14px; border-radius: 999px; white-space: nowrap; }
+.pill.red { background: color-mix(in srgb, var(--red) 14%, var(--surface)); color: var(--red-t); }
+.pill.orange { background: color-mix(in srgb, var(--orange) 18%, var(--surface)); color: var(--orange-t); }
+.pill.blue { background: color-mix(in srgb, var(--blue) 14%, var(--surface)); color: var(--blue-t); }
+.pill.grey { background: color-mix(in srgb, var(--grey) 18%, var(--surface)); color: var(--grey-t); }
+.pill.green { background: color-mix(in srgb, var(--green) 16%, var(--surface)); color: var(--green-t); }
+.pill.violet { background: color-mix(in srgb, var(--violet) 16%, var(--surface)); color: var(--violet-t); }
+.row .chev { color: var(--muted); }
+@media (max-width: 560px) {
+  .row { grid-template-columns: 56px minmax(0, 1fr) auto; }
+  .row .chev { display: none; }
+  .thumb { width: 56px; height: 52px; }
+}
+.empty { padding: 26px 12px 30px; text-align: center; color: var(--muted); }
+.empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
+
+/* form */
+.formcard { padding: 18px; }
+.formcard form { display: grid; gap: 18px; margin-top: 16px; }
+.step h3 { font-size: 16px; font-weight: 900; margin-bottom: 8px; display: flex; align-items: baseline; gap: 8px; }
+.step h3 em { font-style: normal; font-weight: 400; font-size: 13px; color: var(--muted); }
+.addrbox { display: flex; align-items: center; gap: 8px; background: color-mix(in srgb, var(--blue) 9%, var(--surface)); border-radius: 10px; padding: 0 12px; min-height: 46px; }
+.addrbox svg { color: var(--blue); }
+.addrbox input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 16px; min-height: 44px; }
+.addrbox:focus-within { box-shadow: 0 0 0 2px var(--focus); }
+.relocate { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; border: 0; background: transparent; color: var(--blue-t); font-weight: 700; font-size: 14px; padding: 6px 2px; }
+.pinstate { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt-lab { font-size: 13px; font-weight: 700; color: var(--muted); margin: 10px 0 6px; }
+.opt-lab:first-child { margin-top: 0; }
+.pt { min-height: 42px; padding: 6px 16px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); font-weight: 700; font-size: 14px; }
+.pt[aria-pressed="true"] { border-color: var(--green); background: color-mix(in srgb, var(--green) 14%, var(--surface)); color: var(--green-t); }
+.pt.v[aria-pressed="true"] { border-color: var(--violet); background: color-mix(in srgb, var(--violet) 14%, var(--surface)); color: var(--violet-t); }
+.drop { border: 1.5px dashed var(--map-edge); border-radius: 12px; padding: 16px 12px; text-align: center; background: var(--surface2); color: var(--muted); font-size: 13px; width: 100%; }
+.drop strong { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--ink); font-size: 14px; margin-bottom: 2px; }
+.drop.over { border-color: var(--focus); background: color-mix(in srgb, var(--blue) 10%, var(--surface)); }
+.shots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.shot { position: relative; width: 72px; height: 64px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
+.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot button { position: absolute; top: 2px; right: 2px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(10,20,35,.75); color: #fff; display: grid; place-items: center; padding: 0; }
+.field { width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 16px; line-height: 1.5; }
+textarea.field { min-height: 88px; resize: vertical; }
+.field::placeholder, .addrbox input::placeholder, .search input::placeholder { color: var(--muted); opacity: .85; }
+.count { text-align: right; font-size: 12px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.formErr { min-height: 1.3em; font-size: 14px; font-weight: 700; color: var(--red-t); }
+#formErr { margin-top: -8px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 8px 16px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 700; font-size: 14px; }
+.btn:hover { border-color: var(--muted); }
+.btn[disabled] { opacity: .55; cursor: default; }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); min-height: 50px; font-size: 17px; width: 100%; letter-spacing: .06em; }
+.btn.primary.green { background: var(--green-t); border-color: var(--green-t); color: #fff; }
+.btn.primary.violet { background: var(--violet); border-color: var(--violet); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--red-t); }
+.btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.fine { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--muted); margin-top: -6px; }
+.fine svg { margin-top: 3px; }
+
+.helpcard, .linkcard { display: flex; gap: 14px; align-items: center; padding: 16px 18px; background: color-mix(in srgb, var(--blue) 8%, var(--surface)); }
+.helpcard .ib, .linkcard .ib { color: var(--blue-t); }
+.helpcard h3, .linkcard h3 { font-size: 16px; font-weight: 900; }
+.helpcard p, .linkcard p { font-size: 13px; color: var(--muted); }
+.helpcard .grow, .linkcard .grow { flex: 1; min-width: 0; }
+.helpcard .btn { background: var(--primary); color: #fff; border-color: var(--primary); text-decoration: none; white-space: nowrap; }
+.num { font-weight: 900; letter-spacing: .08em; user-select: all; }
+
+/* other views */
+.page { display: grid; gap: 16px; }
+.page-head h2 { font-size: 22px; font-weight: 900; }
+.page-head p { color: var(--muted); }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; }
+.filters select { min-height: 42px; padding: 6px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 15px; }
+.listcard { padding: 4px 18px; }
+.prose { padding: 20px 22px; display: grid; gap: 14px; max-width: 78ch; }
+.prose h3 { font-size: 17px; font-weight: 900; }
+.prose ol, .prose ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+
+/* dialogs */
+.veil { position: fixed; inset: 0; z-index: 30; background: rgba(8,16,30,.55); display: grid; place-items: center; padding: max(14px, env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px)) max(14px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); }
+.dlg { width: min(560px, 100%); max-height: 100%; overflow-y: auto; background: var(--surface); border-radius: 16px; padding: 18px; display: grid; gap: 14px; }
+.dlg-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.xbtn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--surface2); display: grid; place-items: center; }
+.dlg h2 { font-size: 20px; font-weight: 900; line-height: 1.35; overflow-wrap: anywhere; }
+.dlg .lead { color: var(--muted); font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 13px; font-weight: 700; padding: 2px 10px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--line); }
+.photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.photos img { width: 100%; border-radius: 10px; display: block; border: 1px solid var(--line); }
+.photos .wait { color: var(--muted); font-size: 14px; }
+.dnote { white-space: pre-wrap; overflow-wrap: anywhere; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.dact { display: flex; flex-wrap: wrap; gap: 8px; }
+.dact a.btn { text-decoration: none; color: inherit; }
+.dlg textarea.field { min-height: 70px; font-size: 14px; }
+.alarm-go { min-height: 60px; font-size: 20px; width: 100%; border: 0; border-radius: 14px; background: var(--violet); color: #fff; font-weight: 900; letter-spacing: .1em; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.alarm-go[disabled] { opacity: .6; }
+#toast { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; z-index: 40; }
+#toast span { background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; max-width: 100%; }
+.fab { display: none; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; height: auto; overflow: visible; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
+  .logo h1 { font-size: 22px; }
+  .nav { display: flex; flex: 1 1 100%; gap: 4px; overflow-x: auto; }
+  .nav button { padding: 8px 12px; min-height: 42px; font-size: 15px; white-space: nowrap; gap: 8px; }
+  .tip, .tip-art { display: none; }
+  .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+  .area { display: none; }
+  .top-right .alarm { display: none; }
+  .fab {
+    display: flex; align-items: center; gap: 8px; position: fixed; z-index: 25; min-height: 56px; padding: 0 22px; border: 0; border-radius: 28px;
+    right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background: var(--violet); color: #fff; font-weight: 900; font-size: 17px; letter-spacing: .06em; box-shadow: 0 6px 20px rgba(40,10,110,.4);
+  }
+}
+@media (prefers-reduced-motion: no-preference) { .btn, .row, .nav button { transition: background-color .15s, border-color .15s; } }
+.mk.red .p{fill:var(--red)}.mk.orange .p{fill:var(--orange)}.mk.blue .p{fill:var(--blue)}
+.legend .ln i{display:inline-block;width:24px;height:6px;border-radius:3px}
+.legend label{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-weight:700}
+.modes{margin:10px 0 2px}
+:root{--teal:#0d9488;--teal-t:#0b6b62}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--teal:#2dd4bf;--teal-t:#7ee8d8}}
+:root[data-theme="dark"]{--teal:#2dd4bf;--teal-t:#7ee8d8}
+.mk.teal .p{fill:var(--teal)}
+.dot.teal{background:var(--teal)}.legend b.teal{color:var(--teal-t)}.tl.teal{color:var(--teal-t)}
+.pill.teal{background:color-mix(in srgb,var(--teal) 16%,var(--surface));color:var(--teal-t)}
+.thumb.teal{color:var(--teal-t);background:color-mix(in srgb,var(--teal) 14%,var(--surface))}
+.pt.t[aria-pressed="true"]{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 14%,var(--surface));color:var(--teal-t)}
+.btn.primary.teal{background:var(--teal);border-color:var(--teal);color:#06302c}
+.gentle{border:1.5px solid color-mix(in srgb,var(--teal) 45%,var(--line));background:color-mix(in srgb,var(--teal) 8%,var(--surface));border-radius:12px;padding:10px 12px;font-size:14px;color:var(--ink)}
+.gentle strong{display:block;color:var(--teal-t);margin-bottom:2px}
+.nudge{border:1.5px dashed var(--teal);border-radius:12px;padding:12px;background:var(--surface2);display:grid;gap:8px}
+.nudge h3{font-size:15px;font-weight:900;color:var(--teal-t)}
+.nudge .msg{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.7}
+.nudge .row2{display:flex;gap:8px;flex-wrap:wrap}
+.btn.teal{border-color:var(--teal);color:var(--teal-t)}
+
+.step input[type=time]{min-height:42px;padding:6px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);font-size:16px}
+
+/* ===== RWD ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.main{width:100%;max-width:1480px;margin-inline:auto}
+.filters select,.dlg textarea.field{font-size:16px}
+.dlg{max-height:100%}
+.dlg .pill{white-space:normal}
+@media (min-width:901px){.app{min-height:100dvh}.side{height:100dvh}}
+@media (min-width:640px) and (max-width:1180px){
+  .mapview{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mapcard,.legend,.formcard,.latest{grid-column:1/-1}
+  .formcard form{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px;align-items:start}
+  #formErr,#send,.formcard .fine{grid-column:1/-1}
+  #formErr{margin-top:0}
+}
+@media (max-width:900px){
+  .nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));overflow:visible}
+  .nav button{justify-content:center}
+  .main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  #toast{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:560px){
+  .side{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  .main{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  .nav button{flex-direction:column;gap:2px;font-size:13px;padding:6px 2px;min-height:54px}
+  .logo small{font-size:10px}
+  .map-ctl{left:8px;top:8px;gap:8px}.map-ctl button{width:40px;height:40px}
+  .pickhint{font-size:12px;top:8px}.map-note{font-size:12px;padding:10px 12px}
+  .legend{padding:10px 14px;gap:6px 14px;font-size:13px}
+  .latest{padding:14px 14px 4px}.formcard{padding:14px}
+  .helpcard,.linkcard{flex-wrap:wrap}
+  #alertBar{flex-wrap:wrap}#alertBar .btn{width:100%}
+  .dlg{padding:16px;border-radius:14px}.dlg h2{font-size:18px}.alarm-go{font-size:18px}
+}
+@media (max-width:360px){.top-right{gap:4px}.who #who{display:none}.logo h1{font-size:20px}}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <svg width="58" height="52" viewBox="0 0 64 56" aria-hidden="true">
+        <rect x="5" y="22" width="46" height="24" rx="9" fill="#3b82f6"/>
+        <path d="M13 23l4.500-11h20l4.500 11z" fill="#cfe3ff"/>
+        <circle cx="16" cy="46" r="5.500" fill="#0a1d3a"/><circle cx="40" cy="46" r="5.500" fill="#0a1d3a"/>
+        <circle cx="13" cy="34" r="3" fill="#ffe08a"/><circle cx="43" cy="34" r="3" fill="#ffe08a"/>
+        <path d="M50 3a9.500 9.500 0 0 1 9.500 9.500C59.500 20 50 27 50 27s-9.500-7-9.500-14.500A9.500 9.500 0 0 1 50 3z" fill="#ef4444"/>
+        <circle cx="50" cy="12.500" r="3.500" fill="#fff"/>
+      </svg>
+      <div><h1>移車快報</h1><small>即時通報・守護交通・從你我做起</small></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="主選單"></nav>
+    <section class="tip" aria-labelledby="tipT">
+      <h2 id="tipT"><span data-ic="bulb"></span>通報小提醒</h2>
+      <ol>
+        <li>請如實回報，看到什麼就寫什麼，不要誤報或惡作劇。</li>
+        <li>請勿拍攝車牌特寫或公開個資。</li>
+        <li>車位和開單狀況變動很快，通報超過一段時間會自動變成已過期。</li>
+      </ol>
+    </section>
+    <div class="tip-art" aria-hidden="true">
+      <p class="slogan">少一點違停<br>多一點順暢！</p>
+      <svg viewBox="0 0 264 190">
+        <rect x="0" y="150" width="264" height="40" fill="#0a2447"/>
+        <path d="M0 168h264" stroke="#2a4a7c" stroke-width="2" stroke-dasharray="14 12"/>
+        <g fill="#1f4f6b"><ellipse cx="34" cy="96" rx="16" ry="30"/><rect x="31" y="110" width="6" height="44"/><ellipse cx="236" cy="104" rx="14" ry="26"/><rect x="233" y="116" width="6" height="38"/></g>
+        <g transform="translate(62 84)">
+          <path d="M6 54c0-12 4-18 14-22l14-18c3-4 8-6 14-6h28c7 0 12 2 16 7l14 17c11 2 18 8 18 22v10H6z" fill="#8fb4e6"/>
+          <path d="M40 32l10-14c2-3 5-4 9-4h24c4 0 7 1 9 4l9 14z" fill="#d7e6fa"/>
+          <circle cx="40" cy="64" r="11" fill="#0a1d3a"/><circle cx="40" cy="64" r="5" fill="#cfe0f6"/>
+          <circle cx="116" cy="64" r="11" fill="#0a1d3a"/><circle cx="116" cy="64" r="5" fill="#cfe0f6"/>
+          <rect x="144" y="44" width="8" height="6" rx="2" fill="#ffe08a"/>
+        </g>
+      </svg>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <label class="search">
+        <span data-ic="search"></span>
+        <span class="sr-only">搜尋地點</span>
+        <input id="q" type="search" placeholder="搜尋地點（例：逢甲大學、文華路、福星路）" autocomplete="off">
+      </label>
+      <div class="area"><span data-ic="pin"></span>台中市 西屯區 逢甲大學周邊</div>
+      <div class="top-right">
+        <button class="alarm" id="alarmTop" type="button"><span data-ic="siren"></span>開單警報</button>
+        <button class="iconbtn" id="snd" type="button" aria-pressed="true" aria-label="警報提示音"><span id="sndIc"></span></button>
+        <button class="iconbtn" id="bell" type="button" aria-label="進行中的警報與通報" aria-haspopup="true" aria-expanded="false"><span data-ic="bell"></span><span class="badge" id="badge" hidden>0</span></button>
+        <div class="who"><span class="avatar" data-ic="user"></span><span id="who">訪客</span></div>
+        <div class="pop" id="pop" hidden></div>
+      </div>
+    </header>
+    <div id="alertBar" role="status" hidden></div>
+    <div id="banner" role="status" hidden></div>
+
+    <section id="v-map" class="mapview">
+      <div class="colA">
+        <div class="card mapcard">
+          <div class="mapbox">
+            <svg id="map" viewBox="0 0 1000 650" role="img" aria-label="逢甲周邊地圖，點一下可標記位置"></svg>
+            <div class="map-ctl">
+              <div class="grp"><button type="button" id="zin" aria-label="放大"><span data-ic="plus"></span></button><button type="button" id="zout" aria-label="縮小"><span data-ic="minus"></span></button></div>
+              <button type="button" id="zhome" class="solo" aria-label="回到逢甲周邊"><span data-ic="locate"></span></button>
+              <button type="button" id="tilesw" class="solo" aria-label="切換底圖來源" title="切換底圖來源"><span data-ic="map"></span></button>
+            </div>
+            <div class="pickhint" id="pickhint">點地圖，標記位置</div>
+            <span class="map-tag" id="mapAttr"></span>
+            <div class="map-note" id="mapNote" hidden>底圖圖磚在這個環境載入不了（頁面可能被限制連到外部地圖），目前顯示簡易示意圖，仍可點選位置與回報。需要完整街道地圖，請改用下載的檔案開啟，或按左側地圖按鈕換底圖來源。</div>
+          </div>
+        </div>
+        <div class="card legend" aria-label="圖例">
+          <span><i class="dot violet"></i><b class="violet">正在開單</b>（警報）</span>
+          <span><i class="dot teal"></i><b class="teal">占用提醒</b>（勸導中）</span>
+          <span><i class="dot green"></i><b class="green">有車位</b></span>
+          <span><i class="dot grey"></i><b class="grey">已過期／已結束</b></span>
+          <span><i class="dot red"></i><b class="red">禁停中</b>（店家公告）</span>
+          <span><i class="dot orange"></i><b class="orange">稍後禁停</b></span>
+          <span class="ln"><i style="background:#2f6df0"></i>收費停車格</span>
+          <span class="ln"><i style="background:#86efac;border:1px solid #13233d"></i>可停車（創建者標示）</span>
+          <span class="ln"><i style="background:#f5c400"></i>黃線禁停</span>
+          <span class="ln"><i style="background:#e0362f"></i>紅線禁停臨停</span>
+          <label><input type="checkbox" id="lyLegal" checked>顯示車線</label>
+          <span id="osmNote" style="flex-basis:100%;font-weight:400;color:var(--muted);font-size:13px"></span>
+        </div>
+        <section class="card latest" aria-labelledby="latestT">
+          <div class="sec-head"><h2 id="latestT"><span data-ic="list"></span>最新通報</h2><button class="linkbtn" id="toAll" type="button">查看全部</button></div>
+          <ul class="rows" id="latestList"></ul>
+        </section>
+      </div>
+      <div class="colB">
+        <section class="card formcard" aria-label="送出通報">
+          <div class="sec-head"><h2><span data-ic="parking"></span>回報與標示</h2></div>
+          <div class="opts modes" id="modes" role="group" aria-label="回報類型"></div>
+          <form id="form" novalidate>
+            <div class="step">
+              <h3 id="s1t">1. 選擇位置</h3>
+              <div class="addrbox"><span data-ic="pin"></span><input id="addr" type="text" maxlength="60" placeholder="先在地圖上點選位置" aria-label="位置描述"></div>
+              <button class="relocate" type="button" id="relocate"><span data-ic="locate"></span><span id="relocateT">在地圖上選位置</span></button>
+              <p class="pinstate" id="pinstate"></p>
+            </div>
+            <div class="step" id="step2"></div>
+            <div class="step">
+              <h3>3. 上傳照片 <em id="s3em">（選填）</em></h3>
+              <button type="button" class="drop" id="drop"><strong><span data-ic="camera"></span>點擊上傳或拖曳照片</strong>支援 JPG、PNG（最多 3 張）<br>上傳時會自動遮蔽車牌數字，只留英文字母<br><span id="dropHint">占用勸導：請拍整體路況，不要拍車牌特寫</span></button>
+              <input id="file" class="sr-only" type="file" accept="image/jpeg,image/png" multiple tabindex="-1" aria-label="選擇照片">
+              <div class="shots" id="shots"></div>
+            </div>
+            <div class="step">
+              <h3>4. 補充說明 <em>（選填）</em></h3>
+              <textarea id="note" class="field" maxlength="200" aria-label="補充說明"></textarea>
+              <p class="count" id="count">0/200</p>
+            </div>
+            <p id="formErr" class="formErr" role="alert"></p>
+            <button type="submit" class="btn primary" id="send"></button>
+            <p class="fine"><span data-ic="info"></span><span id="fineT"></span></p>
+          </form>
+        </section>
+        <section class="card helpcard">
+          <span class="ib" data-ic="shield"></span>
+          <div class="grow"><h3>需要立即協助？</h3><p>若有緊急危險或嚴重阻礙交通，請撥打 <span class="num">110</span> 報警。</p></div>
+          <a class="btn" href="tel:110"><span data-ic="phone"></span>撥打 110</a>
+        </section>
+        <section class="card linkcard">
+          <span class="ib" data-ic="link"></span>
+          <div class="grow"><h3>各縣市交通違規檢舉管道</h3><p>正式檢舉請到所在縣市警察局官方網站查詢，並依當地規定辦理。</p></div>
+          <a class="linkbtn" href="https://www.npa.gov.tw" target="_blank" rel="noopener" aria-label="前往內政部警政署網站（另開新分頁）"><span data-ic="chev"></span></a>
+        </section>
+      </div>
+    </section>
+
+    <section id="v-records" class="page" hidden>
+      <div class="page-head"><h2>通報紀錄</h2><p>所有人送出的通報，新的在上面。</p></div>
+      <div class="filters">
+        <label class="sr-only" for="fKind">種類</label>
+        <select id="fKind"><option value="all">全部種類</option><option value="ticket">開單警報</option><option value="obstruct">占用勸導</option><option value="parking">車位</option><option value="nopark">店家禁停公告</option><option value="legal">車線標示</option></select>
+        <label class="sr-only" for="fStatus">狀態</label>
+        <select id="fStatus"><option value="all">全部狀態</option><option value="active">進行中</option><option value="ended">已結束／已處理</option><option value="expired">已過期</option></select>
+        <label class="sr-only" for="fRange">時間</label>
+        <select id="fRange"><option value="24">最近 24 小時</option><option value="168">最近 7 天</option><option value="all">全部</option></select>
+      </div>
+      <div class="card listcard"><ul class="rows" id="recList"></ul></div>
+    </section>
+
+    <section id="v-review" class="page" hidden>
+      <div class="page-head"><h2>審核</h2><p>使用者申請新增的可停車地點，檢視照片後核准或退回。</p></div>
+      <div class="card listcard"><ul class="rows" id="revList"></ul></div>
+    </section>
+
+    <section id="v-help" class="page" hidden>
+      <div class="page-head"><h2>使用說明</h2></div>
+      <div class="card prose">
+        <h3>正在開單？按警鈴</h3>
+        <ol>
+          <li>按右上角（手機是右下角）的「開單警報」。</li>
+          <li>點選最接近的路段或地點，選「正在開單」或「正在拖吊」。</li>
+          <li>按「按下警鈴」。所有開著這個頁面的人會立刻看到紫色警報列，並聽到提示音。</li>
+          <li>警報會持續 45 分鐘；有人按「還在這裡」會延長，按「已離開」會結束。</li>
+        </ol>
+        <h3>占用勸導：善意提醒，不是檢舉</h3>
+        <ol>
+          <li>在「回報與標示」選「占用勸導」，點地圖標出位置；想標一整段路，可按「標記一段路」再點終點。</li>
+          <li>選占用情況（嚴重阻礙車道、占用人行道…），可上傳現場照片（自動遮蔽車牌數字，請拍整體路況，不要拍車牌特寫）。</li>
+          <li>送出後，大家會看到青綠色提醒。點開通報可複製「友善提醒小卡」文字，當面或貼在擋風玻璃上，請對方方便時移車。</li>
+          <li>有人提醒過可按「已勸導」，車移走了按「已改善」。這裡不會公開車牌，也不會轉交警方。</li>
+          <li>如果有人受傷、救護或消防受阻，請直接撥 110／119。</li>
+        </ol>
+        <h3>回報車位</h3>
+        <ol>
+          <li>在地圖點出有位置的地方。</li>
+          <li>選汽車或機車、大約有幾個位置、是否收費。</li>
+          <li>車位變動很快，30 分鐘後會自動變成已過期；有人按「還有位」會延長，按「已滿了」會結束。</li>
+        </ol>
+        <h3>店家通報禁停時段</h3>
+        <ol>
+          <li>在「回報與標示」選「店家禁停」，點地圖標出巷口或店門前。</li>
+          <li>填店名和「每天幾點開始禁止停車」，結束時間可不填。</li>
+          <li>到了時段地圖會變紅色「禁」，還沒到時段是橘色提醒。公告不會自動過期，只有發布者可以撤銷。</li>
+        </ol>
+        <h3>新增停車地點與標示車線</h3>
+        <ol>
+          <li>一般使用者選「申請新增停車地點」，在地圖點可停車路段的起點和終點，並附上現場照片（必填），送出後等創建者審核；通過後顯示為淺綠色標線。</li>
+          <li>創建者（需要權限）可直接編輯車線：收費停車格、可停車（淺綠）、黃線（禁止停車）、紅線（禁停含臨停），並在「審核」頁核准或退回申請。</li>
+          <li>這是民眾標示，不是官方資料，請以現場標線與告示為準。</li>
+        </ol>
+        <h3>其他</h3>
+        <ul>
+          <li>「複製分享文字」會產生一段文字，可以直接貼到 LINE 群組。</li>
+          <li>自己送出的通報可以刪除。</li>
+          <li>想關掉警報提示音，按上方的喇叭按鈕。瀏覽器要先點過頁面，才會發出聲音。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="v-about" class="page" hidden>
+      <div class="page-head"><h2>關於我們</h2></div>
+      <div class="card prose">
+        <p>移車快報讓逢甲周邊的居民、學生和店家，即時告訴彼此哪裡有車位、哪裡正在開單。</p>
+        <h3>請注意</h3>
+        <ul>
+          <li>這裡是民眾互相通報的資訊，不是官方系統，也不會轉交給警方。</li>
+          <li>請如實回報。誤報或惡意洗版會讓大家失去信任，也可能讓人白跑一趟。</li>
+          <li>車位和開單狀況變動很快，到場請以現場為準。</li>
+          <li>地圖是示意圖，標記位置只是大概，請在位置描述補上巷口或門牌。</li>
+          <li>不蒐集車牌。請不要在照片和說明裡放車牌特寫、人臉、電話或住址。</li>
+          <li>有人受傷或發生火警請直接撥 119，需要警方到場請撥 110。</li>
+          <li>頁面版本：2026-10-17 中文地圖版（底圖：內政部國土測繪中心電子地圖）。</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+
+<button class="fab" id="alarmFab" type="button"><span data-ic="siren"></span>開單警報</button>
+<div id="overlay"></div>
+<div id="toast" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- constants ---------- */
+  var ICONS = {
+    search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    pin: '<path d="M12 21s-7-6.200-7-11.500a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/>',
+    bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.900 1.900 0 0 0 3.400 0"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    map: '<path d="M3 6.500 9 4l6 2.500L21 4v13.500L15 20l-6-2.500L3 20z"/><path d="M9 4v13.500M15 6.500V20"/>',
+    list: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6M9 15h6"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .900-1 1.700M12 17h.01"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.500h.01"/>',
+    car: '<path d="M5 16v-5l1.800-4.500A2 2 0 0 1 8.700 5h6.600a2 2 0 0 1 1.900 1.500L19 11v5"/><path d="M3 16h18v3H3zM7.500 13h.01M16.500 13h.01"/>',
+    camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/>',
+    send: '<path d="m21 3-9.500 18-2.300-7.700L1.500 11z"/><path d="m21 3-11.800 10.300"/>',
+    shield: '<path d="M12 3 4.500 6v5.500c0 4.500 3 8 7.500 9.500 4.500-1.500 7.500-5 7.500-9.500V6z"/><path d="m9 12 2 2 4-4"/>',
+    phone: '<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/>',
+    chev: '<path d="m9 6 6 6-6 6"/>',
+    close: '<path d="M6 6l12 12M18 6 6 18"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
+    locate: '<path d="m4 11 16-7-7 16-2-7z"/>',
+    bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.6.500 1 1.200 1 2.100h5c0-.9.400-1.600 1-2.100A6 6 0 0 0 12 3z"/>',
+    image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.800"/><path d="m21 16-5-5-9 9"/>',
+    siren: '<path d="M7 18v-6a5 5 0 0 1 10 0v6"/><path d="M5 21h14M12 3v2M4.500 6.500l1.400 1.400M19.500 6.500l-1.400 1.400"/>',
+    parking: '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M9.500 17V8h3a2.500 2.500 0 0 1 0 5h-3"/>',
+    vol: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/>',
+    mute: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="m17 9 5 6M22 9l-5 6"/>'
+  };
+  function icon(name, size) {
+    var sp = document.createElement('span');
+    sp.style.display = 'inline-flex';
+    sp.innerHTML = '<svg class="ic" viewBox="0 0 24 24" width="' + (size || 20) + '" height="' + (size || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || '') + '</svg>';
+    return sp;
+  }
+
+  var KINDS = ['parking', 'ticket', 'nopark', 'legal', 'obstruct'];
+  var OBS = {
+    lane: ['嚴重阻礙車道', '車輛占住車道，其他車輛需要閃避或無法通過，容易發生危險。'],
+    side: ['占用人行道', '行人被迫走到車道上，對長輩、孩童和推嬰兒車的人特別危險。'],
+    arcade: ['占用騎樓', '騎樓是行人通行的路，停車會讓人無法安全通過。'],
+    access: ['擋住無障礙／出入口', '輪椅、嬰兒車或住戶、店家的出入口被擋住，進出很困難。'],
+    safety: ['擋住消防栓／轉角', '消防栓或路口轉角被擋，緊急時救援車輛可能過不去。'],
+    other: ['其他占用', '這個位置的停放影響到大家的通行。']
+  };
+  var LTYPES = { paid: ['收費停車格', '#2f6df0'], white: ['可停車（淺綠線）', '#86efac'], yellow: ['黃線（禁止停車）', '#f5c400'], red: ['紅線（禁停含臨停）', '#e0362f'] };
+  function mins(t) { var a = String(t || '').split(':'); return a.length === 2 ? Number(a[0]) * 60 + Number(a[1]) : NaN; }
+  function inWindow(r) {
+    var f = mins(r.from), t = r.to ? mins(r.to) : 1440, d = new Date(), n = d.getHours() * 60 + d.getMinutes();
+    if (isNaN(f) || isNaN(t)) return false;
+    return f <= t ? (n >= f && n < t) : (n >= f || n < t);
+  }
+  function isLong(r) { return r.kind === 'nopark' || r.kind === 'legal'; }
+  function mapVis(r) { return r.kind !== 'legal' || r.review === 'approved' || (r.review === '' && r.ltype !== 'white'); }
+  function vis(r) { return mapVis(r) || ((r.review === 'pending' || r.review === 'rejected') && (canEdit || (uid && r.createdBy === uid))); }
+  function setReview(r, v) {
+    if (db) return db.doc('reports/' + r.id).update({ review: v, updatedAt: Date.now() });
+    r.review = v; renderAll(); return Promise.resolve();
+  }
+  function nudgeText(r) {
+    var o = OBS[r.otype] || OBS.other;
+    return '您好～打擾了！您的車停放的位置（' + r.address.replace(/ (附近|周邊)$/, '') + '）目前' + o[0] + '。' + o[1] + '\n方便的話，麻煩您移動一下車輛，謝謝您的體諒 🙏';
+  }
+  function kindIcon(r) { return r.kind === 'ticket' ? 'siren' : (r.kind === 'nopark' || r.kind === 'obstruct') ? 'alert' : 'parking'; }
+  function newDraft(k) { return { kind: k, pin: null, pin2: null, vehicles: {}, slots: '', fee: '', photos: [], addrTouched: false, shop: '', from: '', to: '', ltype: '', otype: '', seg: false }; }
+  function lineEl(x1, y1, x2, y2, lt, sw) {
+    var col = (LTYPES[lt] || LTYPES.white)[1], g = sv('g', {});
+    var a = { x1: x1, y1: y1, x2: x2, y2: y2, 'stroke-linecap': 'round' };
+    g.append(sv('line', Object.assign({}, a, { stroke: '#13233d', 'stroke-opacity': 0.6, 'stroke-width': sw + 3 })));
+    g.append(sv('line', Object.assign({}, a, { stroke: col, 'stroke-width': sw, 'stroke-dasharray': lt === 'paid' ? (sw * 1.6) + ' ' + (sw * 0.9) : 'none' })));
+    return g;
+  }
+  var VEH = { car: '汽車', moto: '機車' };
+  var SLOTS = []; for (var si = 1; si <= 10; si++) SLOTS.push([String(si), si + ' 個']); SLOTS.push(['10+', '10 個以上']);
+  var SLOTS_ALL = SLOTS.concat([['2-3', '2–3 個'], ['4+', '4 個以上']]);
+  var FEES = [['free', '免費'], ['paid', '收費'], ['unknown', '不確定']];
+    var TTL = { parking: 30 * 60000, ticket: 45 * 60000, obstruct: 90 * 60000 };
+  var MAP_W = 1000, MAP_H = 650;
+  /* Real basemap: raster tiles drawn inside the SVG (OpenStreetMap data, no API key needed).
+     Map units are linear in Web-Mercator pixels, so pins, zoom and pan keep working as before.
+     If a tile fails to load it is retried from the next source; the button on the map switches sources. */
+  var TILE_SOURCES = [
+    { name: '國土測繪中心電子地圖（中文）', url: 'https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', subs: [''], attr: '圖磚 © 內政部國土測繪中心' },
+    { name: 'OSM 法國站', url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', subs: ['a', 'b', 'c'], attr: '© OpenStreetMap 貢獻者・圖磚 OSM France' },
+    { name: 'OpenStreetMap 官方', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', subs: [''], attr: '© OpenStreetMap 貢獻者' }
+  ];
+  var tileIdx = 0;
+  try { var savedTile = Number(localStorage.getItem('ycb-tiles-v3')); if (savedTile >= 0 && savedTile < TILE_SOURCES.length) tileIdx = savedTile; } catch (e) {}
+  var Z0 = 17, U = 0.9;                       /* 1 pixel at zoom 17 = 0.9 map units (map is about 1.2 km wide) */
+  var CENTER = { lat: 24.1795, lng: 120.6480 };
+  var WORLD = 256 * Math.pow(2, Z0);
+  function lngToWx(lng) { return (lng + 180) / 360 * WORLD; }
+  function latToWy(lat) { var sn = Math.sin(lat * Math.PI / 180); return (0.5 - Math.log((1 + sn) / (1 - sn)) / (4 * Math.PI)) * WORLD; }
+  var ORG = { x: lngToWx(CENTER.lng) - MAP_W / U / 2, y: latToWy(CENTER.lat) - MAP_H / U / 2 };
+  function geoToMap(lat, lng) { return { x: (lngToWx(lng) - ORG.x) * U, y: (latToWy(lat) - ORG.y) * U }; }
+  function mapToGeo(x, y) {
+    var wx = x / U + ORG.x, wy = y / U + ORG.y;
+    var n = Math.PI - 2 * Math.PI * wy / WORLD;
+    return { lat: 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))), lng: wx / WORLD * 360 - 180 };
+  }
+  /* quick-pick places for the siren dialog and search (approximate points; r = snap radius in map units) */
+  var PLACES = [
+    { n: '逢甲夜市', lat: 24.1788, lng: 120.6464, r: 60 },
+    { n: '逢甲大學', lat: 24.1796, lng: 120.6480, r: 70 },
+    { n: '逢甲大學水湳校區', lat: 24.1803, lng: 120.6510, r: 50 }
+  ];
+  PLACES.forEach(function (p) { var m = geoToMap(p.lat, p.lng); p.x = Math.round(m.x); p.y = Math.round(m.y); });
+  var ROADS = ['文華路', '逢大路', '福星路', '逢甲路', '西屯路三段', '河南路三段'];
+  var SPOTS = PLACES.map(function (p) { return { n: p.n, x: p.x, y: p.y, addr: p.n + ' 周邊' }; });
+
+  /* ---------- state ---------- */
+  var db = null, uid = null, canEdit = false, canWrite = null, localMode = false, loading = true;
+  var reports = [], confirms = {}, localPhotos = {}, photoCache = {};
+  var view = 'map', search = '', selectedId = null, detailSig = '';
+  var draft = newDraft('parking');
+  var lastSubmit = 0, lastAlarm = 0, seenFirst = false;
+  var mv = { z: 1, cx: MAP_W / 2, cy: MAP_H / 2 };
+  var rf = { kind: 'all', status: 'all', range: '24' };
+  var soundOn = true;
+  try { soundOn = localStorage.getItem('ycb-sound') !== '0'; } catch (e) {}
+  var reduceMotion = false;
+  try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+  /* ---------- helpers ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var str = function (v, n) { return String(v == null ? '' : v).slice(0, n); };
+  var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    attrs = attrs || {};
+    Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v == null || v === false) return;
+      if (k === 'class') el.className = v;
+      else if (k.indexOf('on') === 0) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    });
+    var add = function (c) {
+      if (c == null || c === false) return;
+      if (Array.isArray(c)) { c.forEach(add); return; }
+      el.append(c.nodeType ? c : document.createTextNode(String(c)));
+    };
+    for (var i = 2; i < arguments.length; i++) add(arguments[i]);
+    return el;
+  }
+  var NS = 'http://www.w3.org/2000/svg';
+  function sv(tag, attrs, text) {
+    var el = document.createElementNS(NS, tag);
+    Object.keys(attrs || {}).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    if (text != null) el.textContent = text;
+    return el;
+  }
+
+  function norm(id, d) {
+    d = d || {};
+    if (KINDS.indexOf(d.kind) < 0) return null;
+    var kind = d.kind;
+    var thumb = typeof d.thumb === 'string' && d.thumb.indexOf('data:image/jpeg;base64,') === 0 && d.thumb.length < 30000 ? d.thumb : '';
+    return {
+      id: id,
+      kind: kind,
+      vehicles: Array.isArray(d.vehicles) ? d.vehicles.filter(function (v) { return VEH[v]; }).slice(0, 2) : [],
+      slots: SLOTS_ALL.map(function (a) { return a[0]; }).indexOf(d.slots) >= 0 ? d.slots : '',
+      fee: ['free', 'paid', 'unknown'].indexOf(d.fee) >= 0 ? d.fee : '',
+      tkind: d.tkind === 'tow' ? 'tow' : 'ticket',
+      shop: str(d.shop, 30),
+      from: /^\d\d:\d\d$/.test(d.from) ? d.from : '',
+      to: /^\d\d:\d\d$/.test(d.to) ? d.to : '',
+      ltype: LTYPES[d.ltype] ? d.ltype : '',
+      review: ['pending', 'approved', 'rejected'].indexOf(d.review) >= 0 ? d.review : '',
+      otype: OBS[d.otype] ? d.otype : '',
+      x2: clamp(Number(d.x2) || 0, 0, MAP_W),
+      y2: clamp(Number(d.y2) || 0, 0, MAP_H),
+      hasLine: d.x2 != null && d.y2 != null,
+      address: str(d.address, 60) || '未註明位置',
+      x: clamp(Number(d.x) || 0, 0, MAP_W),
+      y: clamp(Number(d.y) || 0, 0, MAP_H),
+      hasPin: d.x != null && d.y != null,
+      note: str(d.note, 200),
+      thumb: thumb,
+      photoCount: clamp(Number(d.photoCount) || 0, 0, 3),
+      status: d.status === 'done' ? 'done' : d.status === 'handling' ? 'handling' : 'open',
+      createdAt: Number(d.createdAt) || 0,
+      createdBy: str(d.createdBy, 80)
+    };
+  }
+  function lastSeen(r) {
+    var t = r.createdAt, c = confirms[r.id];
+    if (c) Object.keys(c).forEach(function (k) { if (c[k] > t) t = c[k]; });
+    return t;
+  }
+  function stateOf(r) {
+    if (r.status === 'done') return 'ended';
+    if (isLong(r)) return 'active';
+    if (Date.now() - lastSeen(r) > TTL[r.kind]) return 'expired';
+    return 'active';
+  }
+  function toneOf(r) {
+    var st = stateOf(r);
+    if (r.kind === 'legal' && r.review === 'pending') return 'orange';
+    if (r.kind === 'legal' && r.review === 'rejected') return 'grey';
+    if (r.kind === 'legal') return st === 'active' ? 'blue' : 'grey';
+    if (r.kind === 'nopark') return st !== 'active' ? 'grey' : inWindow(r) ? 'red' : 'orange';
+    if (r.kind === 'ticket') return st === 'active' ? 'violet' : 'grey';
+    if (r.kind === 'obstruct') return st === 'active' ? 'teal' : 'grey';
+    if (r.kind === 'parking') return st === 'active' ? 'green' : 'grey';
+    return 'grey';
+  }
+  function toneLabel(r) {
+    if (r.kind === 'legal') return (r.review === 'pending' ? '申請新增：' : r.review === 'rejected' ? '未通過：' : '') + (LTYPES[r.ltype] ? LTYPES[r.ltype][0] : '車道線');
+    if (r.kind === 'nopark') return r.status === 'done' ? '已撤銷' : inWindow(r) ? '禁止停車中' : '稍後禁停';
+    var st = stateOf(r);
+    if (r.kind === 'obstruct') return st === 'active' ? (OBS[r.otype] || OBS.other)[0] : st === 'ended' ? '已改善' : '已過期';
+    if (st === 'active') return r.kind === 'parking' ? '有車位' : (r.tkind === 'tow' ? '正在拖吊' : '正在開單');
+    if (st === 'ended') return r.kind === 'parking' ? '已滿' : '已離開';
+    return '已過期';
+  }
+  function pillLabel(r) {
+    if (r.kind === 'legal') return r.review === 'pending' ? '審核中' : r.review === 'rejected' ? '未通過' : '標示';
+    if (r.kind === 'nopark') return r.status === 'done' ? '已撤銷' : inWindow(r) ? '禁停中' : '未到時段';
+    var st = stateOf(r);
+    if (r.kind === 'obstruct') return st === 'active' ? (r.status === 'handling' ? '已勸導' : '待提醒') : st === 'ended' ? '已改善' : '已過期';
+    if (st === 'active') return r.kind === 'parking' ? '有位置' : '進行中';
+    if (st === 'ended') return r.kind === 'parking' ? '已滿' : '已離開';
+    return '已過期';
+  }
+  function isLive(r) {
+    if (r.kind === 'legal') return false;
+    if (r.kind === 'nopark') return r.status !== 'done' && inWindow(r);
+    var st = stateOf(r);
+    return st === 'active';
+  }
+  function summary(r) {
+    if (r.kind === 'legal') return [LTYPES[r.ltype] ? LTYPES[r.ltype][0] : '車道線'];
+    if (r.kind === 'nopark') return [(r.shop ? r.shop + '・' : '') + '每日 ' + r.from + (r.to ? '–' + r.to : ' 起') + ' 禁止停車'];
+    if (r.kind === 'parking') {
+      var out = [];
+      if (r.vehicles.length) out.push(r.vehicles.map(function (v) { return VEH[v]; }).join('、'));
+      SLOTS_ALL.forEach(function (s) { if (s[0] === r.slots) out.push('約 ' + s[1] + '空位'); });
+      FEES.forEach(function (f) { if (f[0] === r.fee) out.push(f[1] === '不確定' ? '收費不明' : f[1]); });
+      return out;
+    }
+    if (r.kind === 'obstruct') return [(OBS[r.otype] || OBS.other)[0]];
+    return [r.tkind === 'tow' ? '拖吊' : '開單'];
+  }
+  var KIND_NAME = { parking: '車位通報', ticket: '開單警報', nopark: '店家禁停公告', legal: '車線標示', obstruct: '占用勸導' };
+  var CONFIRM_LABEL = { parking: '還有位', ticket: '還在這裡', nopark: '仍有效', legal: '位置正確', obstruct: '還在這裡' };
+
+  function rel(t) {
+    var m = Math.floor((Date.now() - t) / 60000);
+    if (m < 1) return '剛剛';
+    if (m < 60) return m + ' 分鐘前';
+    var hr = Math.floor(m / 60);
+    if (hr < 24) return hr + ' 小時前';
+    return new Date(t).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  function abs(t) { return new Date(t).toLocaleString('zh-TW', { hour12: false }); }
+  function confirmCount(r) { return Object.keys(confirms[r.id] || {}).length; }
+
+  var toastTimer;
+  function toast(msg) {
+    var box = $('toast');
+    box.replaceChildren(h('span', {}, msg));
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { box.replaceChildren(); }, 3000);
+  }
+  function banner(msg) {
+    var b = $('banner');
+    if (!msg) { b.hidden = true; return; }
+    b.textContent = msg;
+    b.hidden = false;
+  }
+  function errText(ex) {
+    var c = ex && ex.code;
+    if (c === 'quota_exceeded') return '資料庫已滿，請等舊通報清除後再試';
+    if (c === 'invalid_argument') return '目前的權限無法寫入，可能是檢視模式';
+    if (c === 'resource_exhausted') return '操作太頻繁，請稍候再試';
+    if (c === 'revoked') return '存取權已變更，請重新開啟頁面';
+    return '操作失敗，請稍後再試';
+  }
+  function guard(fn) {
+    return function () { return Promise.resolve().then(fn).catch(function (ex) { toast(errText(ex)); }); };
+  }
+  function matches(r) {
+    if (!search) return true;
+    var q = search.toLowerCase();
+    return r.address.toLowerCase().indexOf(q) >= 0 || summary(r).join(' ').indexOf(search) >= 0 || toneLabel(r).indexOf(search) >= 0 || r.note.toLowerCase().indexOf(q) >= 0;
+  }
+
+  /* ---------- sound ---------- */
+  var audioCtx = null;
+  function ensureAudio() {
+    try {
+      if (!audioCtx) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {}
+  }
+  function siren() {
+    if (!soundOn || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+      var t0 = audioCtx.currentTime;
+      [[880, 0], [660, 0.22], [880, 0.44], [660, 0.66]].forEach(function (n) {
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'square'; o.frequency.value = n[0];
+        g.gain.setValueAtTime(0.0001, t0 + n[1]);
+        g.gain.exponentialRampToValueAtTime(0.09, t0 + n[1] + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + n[1] + 0.2);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t0 + n[1]); o.stop(t0 + n[1] + 0.22);
+      });
+    } catch (e) {}
+  }
+  function renderSound() {
+    var b = $('snd');
+    b.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+    b.setAttribute('title', soundOn ? '警報提示音：開' : '警報提示音：關');
+    $('sndIc').replaceChildren(icon(soundOn ? 'vol' : 'mute', 22));
+  }
+  function onNewAlert(r) {
+    toast('開單警報：' + r.address);
+    siren();
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+    var bar = $('alertBar');
+    bar.classList.remove('flash');
+    void bar.offsetWidth;
+    bar.classList.add('flash');
+  }
+
+  /* ---------- data layer ---------- */
+  function createReport(data, imgs) {
+    if (db) {
+      var ref = db.collection('reports').doc();
+      var p = imgs.length ? db.doc('photos/' + ref.id).set({ rid: ref.id, imgs: imgs }) : Promise.resolve();
+      return p.then(function () { return ref.set(data); });
+    }
+    var id = 'L' + Date.now();
+    localPhotos[id] = imgs;
+    reports.unshift(norm(id, data));
+    renderAll();
+    return Promise.resolve();
+  }
+  function setStatus(r, st) {
+    if (db) return db.doc('reports/' + r.id).update({ status: st, updatedAt: Date.now() });
+    r.status = st; renderAll();
+    return Promise.resolve();
+  }
+  function removeReport(r) {
+    if (db) {
+      var jobs = [db.doc('reports/' + r.id).delete()];
+      if (r.photoCount) jobs.push(db.doc('photos/' + r.id).delete());
+      if (uid) jobs.push(db.doc('confirms/' + r.id + '_' + uid).delete());
+      return Promise.all(jobs);
+    }
+    reports = reports.filter(function (x) { return x !== r; });
+    delete localPhotos[r.id];
+    renderAll();
+    return Promise.resolve();
+  }
+  function toggleConfirm(r) {
+    var set = confirms[r.id] || (confirms[r.id] = {});
+    if (!db) {
+      if (set[uid]) delete set[uid]; else set[uid] = Date.now();
+      renderAll();
+      return Promise.resolve();
+    }
+    var ref = db.doc('confirms/' + r.id + '_' + uid);
+    return set[uid] ? ref.delete() : ref.set({ rid: r.id, uid: uid, at: Date.now() });
+  }
+  function loadPhotos(r) {
+    if (photoCache[r.id]) return Promise.resolve(photoCache[r.id]);
+    if (!db) return Promise.resolve(localPhotos[r.id] || []);
+    return db.doc('photos/' + r.id).get().then(function (snap) {
+      var d = snap.exists ? snap.data() : null;
+      var imgs = d && Array.isArray(d.imgs) ? d.imgs.filter(function (u) {
+        return typeof u === 'string' && u.indexOf('data:image/jpeg;base64,') === 0 && u.length < 90000;
+      }).slice(0, 3) : [];
+      photoCache[r.id] = imgs;
+      return imgs;
+    });
+  }
+
+  /* ---------- map ---------- */
+  var mapSvg, gMarkers, gDraft, gLegal, gOsm, osmLines = [], showLegal = true;
+
+  function nearestName(x, y) {
+    var best = null, bd = 1e9;
+    PLACES.forEach(function (pl) {
+      var d = Math.hypot(x - pl.x, y - pl.y) - pl.r;
+      if (d < bd) { bd = d; best = pl.n; }
+    });
+    return bd < 0 ? best : null;
+  }
+  /* street / lane name for a spot, from OpenStreetMap's Nominatim (needs network; silently skipped if it fails) */
+  function lookupAddress(x, y) {
+    var g = mapToGeo(x, y);
+    var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&accept-language=zh-TW&lat=' + g.lat.toFixed(6) + '&lon=' + g.lng.toFixed(6);
+    return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      var a = d && d.address;
+      if (!a) return '';
+      var name = a.road || a.pedestrian || a.footway || a.path || a.neighbourhood || a.suburb || '';
+      return name ? name + ' 附近' : '';
+    }).catch(function () { return ''; });
+  }
+  var roadCache = {};
+  function roadPoint(name) {
+    if (roadCache[name]) return Promise.resolve(roadCache[name]);
+    var p0 = mapToGeo(0, MAP_H), p1 = mapToGeo(MAP_W, 0), fb = { x: MAP_W / 2, y: MAP_H / 2 };
+    var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&bounded=1&accept-language=zh-TW&q=' + encodeURIComponent('台中市西屯區 ' + name) + '&viewbox=' + [p0.lng, p1.lat, p1.lng, p0.lat].map(function (v) { return v.toFixed(5); }).join(',');
+    return Promise.race([fetch(url).then(function (r) { return r.json(); }), new Promise(function (res) { setTimeout(function () { res(null); }, 4000); })]).then(function (l) {
+      var d = l && l[0]; if (!d) return fb;
+      var m = geoToMap(Number(d.lat), Number(d.lon));
+      return (roadCache[name] = { x: Math.round(clamp(m.x, 0, MAP_W)), y: Math.round(clamp(m.y, 0, MAP_H)) });
+    }).catch(function () { return fb; });
+  }
+  function geoSearch(text) {
+    var p0 = mapToGeo(0, MAP_H), p1 = mapToGeo(MAP_W, 0);
+    var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&bounded=1&accept-language=zh-TW&q=' + encodeURIComponent(text) +
+      '&viewbox=' + [p0.lng, p1.lat, p1.lng, p0.lat].map(function (v) { return v.toFixed(5); }).join(',');
+    fetch(url).then(function (r) { return r.json(); }).then(function (list) {
+      var d = list && list[0];
+      if (!d) { toast('這個地圖範圍內找不到「' + text + '」'); return; }
+      var m = geoToMap(Number(d.lat), Number(d.lon));
+      showView('map');
+      focusOn(clamp(m.x, 0, MAP_W), clamp(m.y, 0, MAP_H), 3);
+      toast(String(d.name || d.display_name || text).split(',')[0]);
+    }).catch(function () { toast('搜尋失敗，請確認網路連線'); });
+  }
+
+  /* ---------- basemap tiles ---------- */
+  var gTiles, tileLayers = {}, tileSeen = {}, tileOk = 0, tileBad = 0;
+  function tileSrc(z, x, y, idx) {
+    var n = Math.pow(2, z), src = TILE_SOURCES[idx];
+    x = ((x % n) + n) % n;
+    return src.url.replace('{s}', src.subs[(x + y) % src.subs.length]).replace('{z}', z).replace('{x}', x).replace('{y}', y);
+  }
+  function noteTiles() {
+    var el = $('mapNote');
+    if (el) el.hidden = !(tileBad >= 4 && tileOk === 0);
+  }
+  function addTile(z, tx, ty, size, f) {
+    var key = z + '/' + tx + '/' + ty;
+    if (tileSeen[key]) return;
+    tileSeen[key] = 1;
+    var img = sv('image', {
+      x: (tx * 256 / f - ORG.x) * U, y: (ty * 256 / f - ORG.y) * U,
+      width: size + 0.6, height: size + 0.6, preserveAspectRatio: 'none', 'data-tile': key
+    });
+    var tried = 0;
+    img.setAttribute('href', tileSrc(z, tx, ty, tileIdx));
+    img.addEventListener('load', function () { tileOk++; noteTiles(); });
+    img.addEventListener('error', function () {
+      tried++;
+      if (tried < TILE_SOURCES.length) img.setAttribute('href', tileSrc(z, tx, ty, (tileIdx + tried) % TILE_SOURCES.length));
+      else { tileBad++; noteTiles(); }
+    });
+    tileLayers[z].append(img);
+  }
+  function updateTiles() {
+    if (!gTiles) return;
+    var w = MAP_W / mv.z, hh = MAP_H / mv.z, x0 = mv.cx - w / 2, y0 = mv.cy - hh / 2;
+    var zs = [Z0];
+    if (mv.z >= 1.5) zs.push(Z0 + 1);
+    if (mv.z >= 3) zs.push(Z0 + 2);
+    if (mv.z >= 6) zs.push(Z0 + 3);
+    zs.forEach(function (z) {
+      var f = Math.pow(2, z - Z0), size = 256 / f * U;
+      var tx0 = Math.floor((x0 / U + ORG.x) * f / 256), tx1 = Math.floor(((x0 + w) / U + ORG.x) * f / 256);
+      var ty0 = Math.floor((y0 / U + ORG.y) * f / 256), ty1 = Math.floor(((y0 + hh) / U + ORG.y) * f / 256);
+      if (!tileLayers[z]) { tileLayers[z] = sv('g', {}); gTiles.append(tileLayers[z]); }
+      for (var ty = ty0; ty <= ty1; ty++) for (var tx = tx0; tx <= tx1; tx++) addTile(z, tx, ty, size, f);
+    });
+  }
+  function setTileSource(i) {
+    tileIdx = i;
+    try { localStorage.setItem('ycb-tiles-v3', String(i)); } catch (e) {}
+    Object.keys(tileLayers).forEach(function (z) { tileLayers[z].remove(); });
+    tileLayers = {}; tileSeen = {}; tileOk = 0; tileBad = 0;
+    noteTiles();
+    $('mapAttr').textContent = TILE_SOURCES[i].attr;
+    updateTiles();
+  }
+
+  function buildMap() {
+    mapSvg = $('map');
+    gTiles = sv('g', {});
+    gTiles.append(sv('rect', { x: 0, y: 0, width: MAP_W, height: MAP_H, fill: 'var(--map-bg)' }));
+    for (var gx = 0; gx <= MAP_W; gx += 100) gTiles.append(sv('line', { x1: gx, y1: 0, x2: gx, y2: MAP_H, stroke: 'var(--map-grid)', 'stroke-width': 2 }));
+    for (var gy = 0; gy <= MAP_H; gy += 100) gTiles.append(sv('line', { x1: 0, y1: gy, x2: MAP_W, y2: gy, stroke: 'var(--map-grid)', 'stroke-width': 2 }));
+    PLACES.forEach(function (pl) {
+      gTiles.append(sv('circle', { cx: pl.x, cy: pl.y, r: 6, fill: 'var(--map-edge)' }));
+      gTiles.append(sv('text', { x: pl.x + 12, y: pl.y + 5, fill: 'var(--map-label)', 'font-size': 18, 'font-weight': 700, 'font-family': 'var(--font)' }, pl.n));
+    });
+    mapSvg.append(gTiles);
+    gMarkers = sv('g', {});
+    gDraft = sv('g', {});
+    gLegal = sv('g', {});
+    gOsm = sv('g', { 'pointer-events': 'none' });
+    mapSvg.append(gOsm, gLegal, gMarkers, gDraft);
+
+    var drag = null;
+    mapSvg.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      var m = mapSvg.getScreenCTM();
+      drag = { x: e.clientX, y: e.clientY, cx: mv.cx, cy: mv.cy, moved: false, target: e.target, k: m ? 1 / m.a : 1 };
+    });
+    mapSvg.addEventListener('pointermove', function (e) {
+      if (!drag || mv.z <= 1) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+      drag.moved = true;
+      mv.cx = drag.cx - dx * drag.k;
+      mv.cy = drag.cy - dy * drag.k;
+      applyView();
+    });
+    mapSvg.addEventListener('pointerup', function (e) {
+      var d = drag; drag = null;
+      if (!d || d.moved) return;
+      var mk = d.target.closest ? d.target.closest('[data-rid]') : null;
+      if (mk) { openDetail(mk.getAttribute('data-rid')); return; }
+      var pt = mapSvg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      var p = pt.matrixTransform(mapSvg.getScreenCTM().inverse());
+      placePin(clamp(p.x, 0, MAP_W), clamp(p.y, 0, MAP_H));
+    });
+    mapSvg.addEventListener('pointercancel', function () { drag = null; });
+    mapSvg.addEventListener('keydown', function (e) {
+      var mk = e.target.closest ? e.target.closest('[data-rid]') : null;
+      if (mk && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDetail(mk.getAttribute('data-rid')); }
+    });
+
+    mapSvg.addEventListener('wheel', function (e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      var pt = mapSvg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      var p = pt.matrixTransform(mapSvg.getScreenCTM().inverse()), oz = mv.z, nz = clamp(oz * (e.deltaY < 0 ? 1.3 : 1 / 1.3), 1, 8);
+      mv.cx = p.x - (p.x - mv.cx) * oz / nz; mv.cy = p.y - (p.y - mv.cy) * oz / nz; mv.z = nz; applyView();
+    }, { passive: false });
+    $('zin').addEventListener('click', function () { zoomTo(mv.z * 1.5); });
+    $('zout').addEventListener('click', function () { zoomTo(mv.z / 1.5); });
+    $('tilesw').addEventListener('click', function () {
+      var i = (tileIdx + 1) % TILE_SOURCES.length;
+      setTileSource(i);
+      toast('底圖來源：' + TILE_SOURCES[i].name);
+    });
+    $('mapAttr').textContent = TILE_SOURCES[tileIdx].attr;
+    $('zhome').addEventListener('click', function () { mv = { z: 1, cx: MAP_W / 2, cy: MAP_H / 2 }; applyView(); });
+    applyView();
+  }
+  function zoomTo(z) { mv.z = clamp(z, 1, 8); applyView(); }
+  function focusOn(x, y, z) { mv.z = z; mv.cx = x; mv.cy = y; applyView(); }
+  function applyView() {
+    var w = MAP_W / mv.z, hh = MAP_H / mv.z;
+    mv.cx = clamp(mv.cx, w / 2, MAP_W - w / 2);
+    mv.cy = clamp(mv.cy, hh / 2, MAP_H - hh / 2);
+    mapSvg.setAttribute('viewBox', (mv.cx - w / 2) + ' ' + (mv.cy - hh / 2) + ' ' + w + ' ' + hh);
+    mapSvg.style.touchAction = mv.z > 1 ? 'none' : 'pan-y';
+    updateTiles();
+    renderMarkers();
+  }
+  var PIN_D = 'M0 -24 C-11 -24 -17 -15 -17 -8 C-17 3 0 20 0 20 C0 20 17 3 17 -8 C17 -15 11 -24 0 -24Z';
+  function pinEl(cls, x, y, glyph, extra) {
+    var k = 1 / Math.pow(mv.z, 0.6) * (extra || 1);
+    var g = sv('g', { class: cls, transform: 'translate(' + x + ' ' + y + ') scale(' + k + ')' });
+    g.append(sv('path', { class: 'p', d: PIN_D }));
+    g.append(sv('text', { class: 'g', x: 0, y: -4 }, glyph));
+    return g;
+  }
+  var ORDER = { parking: 1, obstruct: 2, ticket: 3 };
+  function onMap(r, now) {
+    if (r.kind === 'legal') return false;
+    if (!r.hasPin || !matches(r)) return false;
+    return stateOf(r) === 'active';
+  }
+  function renderMarkers() {
+    gMarkers.replaceChildren();
+    gLegal.replaceChildren();
+    var sw = 7 / Math.pow(mv.z, 0.6);
+    gOsm.replaceChildren();
+    if (showLegal) osmLines.slice(0, 2000).forEach(function (l) {
+      var pts = l[1].map(function (q) { return q[0] + ',' + q[1]; }).join(' '), col = LTYPES[l[0]][1], w = sw * 0.8, g = sv('g', {});
+      g.append(sv('polyline', { points: pts, fill: 'none', stroke: '#13233d', 'stroke-opacity': 0.55, 'stroke-width': w + 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+      g.append(sv('polyline', { points: pts, fill: 'none', stroke: col, 'stroke-width': w, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'stroke-dasharray': l[0] === 'paid' ? (w * 1.6) + ' ' + (w * 0.9) : 'none' }));
+      gOsm.append(g);
+    });
+    if (showLegal) reports.filter(function (r) { return r.kind === 'legal' && r.hasLine && stateOf(r) === 'active' && mapVis(r) && matches(r); }).slice(0, 300).forEach(function (r) {
+      var g = lineEl(r.x, r.y, r.x2, r.y2, r.ltype, sw * (r.id === selectedId ? 1.5 : 1));
+      g.append(sv('line', { x1: r.x, y1: r.y, x2: r.x2, y2: r.y2, stroke: '#000', 'stroke-opacity': 0, 'stroke-width': sw + 16, 'stroke-linecap': 'round', 'pointer-events': 'stroke' }));
+      g.setAttribute('class', 'mk'); g.setAttribute('data-rid', r.id); g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', toneLabel(r) + '：' + r.address);
+      gLegal.append(g);
+    });
+    reports.filter(function (r) { return r.kind === 'obstruct' && r.hasLine && stateOf(r) === 'active' && matches(r); }).slice(0, 100).forEach(function (r) {
+      gLegal.append(sv('line', { x1: r.x, y1: r.y, x2: r.x2, y2: r.y2, stroke: '#0d9488', 'stroke-opacity': 0.45, 'stroke-width': sw * 2.2, 'stroke-linecap': 'round', 'pointer-events': 'none' }));
+    });
+    var now = Date.now();
+    var list = reports.filter(function (r) { return onMap(r, now); }).slice(0, 150)
+      .sort(function (a, b) { return ORDER[a.kind] - ORDER[b.kind]; });
+    list.forEach(function (r) {
+      var tone = toneOf(r);
+      var glyph = r.kind === 'nopark' ? '禁' : r.kind === 'obstruct' ? '擋' : tone === 'green' ? 'P' : '!';
+      var big = r.kind === 'ticket' ? 1.2 : 1;
+      var g = pinEl('mk ' + tone + (r.id === selectedId ? ' sel' : ''), r.x, r.y, glyph, (r.id === selectedId ? 1.25 : 1) * big);
+      if (r.kind === 'ticket' && !reduceMotion) {
+        var ring = sv('circle', { class: 'ring', cx: 0, cy: -6, r: 18 });
+        ring.append(sv('animate', { attributeName: 'r', values: '18;40;18', dur: '1.6s', repeatCount: 'indefinite' }));
+        ring.append(sv('animate', { attributeName: 'opacity', values: '1;0;1', dur: '1.6s', repeatCount: 'indefinite' }));
+        g.insertBefore(ring, g.firstChild);
+      }
+      g.setAttribute('data-rid', r.id);
+      g.setAttribute('tabindex', '0');
+      g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', toneLabel(r) + '：' + r.address);
+      gMarkers.append(g);
+    });
+    gDraft.replaceChildren();
+    if (draft.kind === 'obstruct' && draft.pin && draft.pin2) gDraft.append(sv('line', { x1: draft.pin.x, y1: draft.pin.y, x2: draft.pin2.x, y2: draft.pin2.y, stroke: '#0d9488', 'stroke-opacity': 0.5, 'stroke-width': sw * 2.2, 'stroke-linecap': 'round' }));
+    if (draft.kind === 'legal' && draft.pin && draft.pin2) gDraft.append(lineEl(draft.pin.x, draft.pin.y, draft.pin2.x, draft.pin2.y, draft.ltype || 'white', sw));
+    if (draft.pin) gDraft.append(pinEl('draft', draft.pin.x, draft.pin.y, '＋', 1.15));
+    if (draft.pin2) gDraft.append(pinEl('draft', draft.pin2.x, draft.pin2.y, '＋', 1.15));
+    var need2 = (draft.kind === 'legal' || (draft.kind === 'obstruct' && draft.seg)) && draft.pin && !draft.pin2;
+    $('pickhint').hidden = !!draft.pin && !need2;
+    $('pickhint').textContent = need2 ? (draft.kind === 'obstruct' ? '再點一下，標記這段路的終點' : '再點一下，標記線的終點') : draft.kind === 'legal' ? '點地圖，標記線的起點' : '點地圖，標記位置';
+  }
+
+  var pinToken = 0;
+  function placePin(x, y) {
+    if ((draft.kind === 'legal' || (draft.kind === 'obstruct' && draft.seg)) && draft.pin && !draft.pin2) { draft.pin2 = { x: Math.round(x), y: Math.round(y) }; renderMarkers(); renderPinState(); return; }
+    draft.pin2 = null;
+    draft.pin = { x: Math.round(x), y: Math.round(y) };
+    var token = ++pinToken;
+    if (!draft.addrTouched) {
+      var near = nearestName(x, y);
+      $('addr').value = near ? near + ' 附近' : '地圖標記位置';
+      lookupAddress(x, y).then(function (name) {
+        if (name && token === pinToken && !draft.addrTouched && draft.pin) $('addr').value = name;
+      });
+    }
+    renderMarkers();
+    renderPinState();
+  }
+  function renderPinState() {
+    $('pinstate').textContent = !draft.pin ? '' : ((draft.kind === 'legal' || (draft.kind === 'obstruct' && draft.seg)) && !draft.pin2) ? '起點已標記，請再點地圖標記終點。' : '已在地圖標記，可在上方補上巷口或門牌。';
+    $('relocateT').textContent = draft.pin ? '重新標記位置' : '在地圖上選位置';
+  }
+
+  /* ---------- built-in parking lines (OpenStreetMap via Overpass, cached 7 days) ---------- */
+  function osmClass(t) {
+    var kind = '', fee = false;
+    Object.keys(t).forEach(function (k) {
+      var v = t[k];
+      if (/^parking:lane:(both|left|right)$/.test(k)) {
+        if (v === 'no_stopping') kind = 'red';
+        else if (v === 'no_parking' && kind !== 'red') kind = 'yellow';
+        else if (!kind && /^(parallel|diagonal|perpendicular|marked|yes)$/.test(v)) kind = 'white';
+      } else if (/^parking:(both|left|right)$/.test(k) && !kind && /^(lane|street_side|on_kerb)$/.test(v)) kind = 'white';
+      if ((/fee/.test(k) && v === 'yes') || (/^parking:condition/.test(k) && v === 'ticket')) fee = true;
+    });
+    if (t.amenity === 'parking') { kind = fee || t.fee === 'yes' ? 'paid' : 'white'; }
+    return kind === 'white' && fee ? 'paid' : kind;
+  }
+  function loadOsm() {
+    var note = $('osmNote');
+    function show(list, msg) { osmLines = list.filter(function (l) { return l[0] !== 'white'; }); note.textContent = msg; renderMarkers(); }
+    try {
+      var c = JSON.parse(localStorage.getItem('ycb-osm-v1') || 'null');
+      if (c && Date.now() - c.t < 7 * 86400000 && c.lines) { show(c.lines, '內建車線：OpenStreetMap 資料，涵蓋不完整，請以現場標線為準。'); return; }
+    } catch (e) {}
+    note.textContent = '車線資料載入中…';
+    var a = mapToGeo(0, MAP_H), b = mapToGeo(MAP_W, 0);
+    var bb = [a.lat, a.lng, b.lat, b.lng].map(function (v) { return v.toFixed(5); }).join(',');
+    var q = '[out:json][timeout:25];(' + ['parking:lane:both', 'parking:lane:left', 'parking:lane:right', 'parking:both', 'parking:left', 'parking:right'].map(function (k) { return 'way["' + k + '"](' + bb + ');'; }).join('') + 'way["amenity"="parking"](' + bb + '););out tags geom;';
+    fetch('https://overpass-api.de/api/interpreter', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(q) })
+      .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+      .then(function (d) {
+        var lines = [];
+        (d.elements || []).forEach(function (e) {
+          var k = osmClass(e.tags || {});
+          if (!k || !e.geometry || e.geometry.length < 2) return;
+          lines.push([k, e.geometry.map(function (g) { var m = geoToMap(g.lat, g.lon); return [Math.round(m.x), Math.round(m.y)]; })]);
+        });
+        try { localStorage.setItem('ycb-osm-v1', JSON.stringify({ t: Date.now(), lines: lines })); } catch (e) {}
+        show(lines, lines.length ? '內建車線：OpenStreetMap 資料，涵蓋不完整，請以現場標線為準。' : 'OpenStreetMap 在這個範圍沒有車線資料，可自行標示補充。');
+      })
+      .catch(function () { note.textContent = '內建車線載入失敗（需要網路），可自行標示車線。'; });
+  }
+
+  /* ---------- lists ---------- */
+  function thumbEl(r) {
+    var t = h('span', { class: 'thumb ' + (toneOf(r) === 'grey' ? '' : toneOf(r)) });
+    if (r.thumb) t.append(h('img', { src: r.thumb, alt: '' }));
+    else t.append(icon(kindIcon(r), 24));
+    return t;
+  }
+  function rowEl(r) {
+    var tone = toneOf(r);
+    var bits = [];
+    var sum = summary(r);
+    if (sum.length) bits.push(sum.join('・'));
+    if (r.photoCount) bits.push(r.photoCount + ' 張照片');
+    var n = confirmCount(r);
+    if (n) bits.push(n + ' 人' + (r.kind === 'parking' ? '確認有位' : '確認還在'));
+    var info = h('span', {},
+      h('span', { class: 'tl ' + tone }, icon(kindIcon(r), 16), toneLabel(r)),
+      h('span', { class: 'addr', style: 'display:block' }, r.address),
+      h('span', { class: 'meta', style: 'display:block' },
+        h('span', { class: 'time', 'data-t': lastSeen(r) }, rel(lastSeen(r))),
+        bits.map(function (b) { return ' ・ ' + b; }).join('')));
+    var btn = h('button', { type: 'button', class: 'row', onclick: function () { openDetail(r.id); } },
+      thumbEl(r), info, h('span', { class: 'pill ' + tone }, pillLabel(r)), h('span', { class: 'chev' }, icon('chev', 18)));
+    return h('li', {}, btn);
+  }
+  function emptyEl(filtered) {
+    return h('li', { class: 'empty' },
+      h('strong', {}, filtered ? '沒有符合條件的通報' : '還沒有人通報'),
+      filtered ? '換個關鍵字或放寬篩選看看。' : '有車位或正在開單，都可以通報；按右上角「開單警報」最快。');
+  }
+  function latestSort(a, b) {
+    var la = isLive(a) ? 1 : 0, lb = isLive(b) ? 1 : 0;
+    if (a.kind === 'ticket' && la && !(b.kind === 'ticket' && lb)) return -1;
+    if (b.kind === 'ticket' && lb && !(a.kind === 'ticket' && la)) return 1;
+    return lastSeen(b) - lastSeen(a);
+  }
+  function renderLatest() {
+    var list = $('latestList');
+    if (loading) { list.replaceChildren(h('li', { class: 'empty' }, '讀取通報中…')); return; }
+    var rows = reports.filter(function (r) { return r.kind !== 'legal' && matches(r); }).sort(latestSort).slice(0, 6);
+    list.replaceChildren.apply(list, rows.length ? rows.map(rowEl) : [emptyEl(!!search && reports.length > 0)]);
+  }
+  function grpOf(r) {
+    var st = stateOf(r);
+    if (st === 'done' || st === 'ended') return 'ended';
+    if (st === 'expired') return 'expired';
+    return 'active';
+  }
+  function renderRecords() {
+    var list = $('recList');
+    if (loading) { list.replaceChildren(h('li', { class: 'empty' }, '讀取通報中…')); return; }
+    var lim = rf.range === 'all' ? Infinity : Number(rf.range) * 3600000, now = Date.now();
+    var rows = reports.filter(function (r) {
+      return (isLong(r) || now - r.createdAt <= lim) && vis(r) && matches(r) &&
+        (rf.kind === 'all' || r.kind === rf.kind) &&
+        (rf.status === 'all' || grpOf(r) === rf.status);
+    });
+    list.replaceChildren.apply(list, rows.length ? rows.map(rowEl) : [emptyEl(reports.length > 0)]);
+  }
+
+  function activeTickets() {
+    return reports.filter(function (r) { return r.kind === 'ticket' && stateOf(r) === 'active'; })
+      .sort(function (a, b) { return lastSeen(b) - lastSeen(a); });
+  }
+  function renderAlertBar() {
+    var bar = $('alertBar');
+    var al = activeTickets();
+    if (!al.length) { bar.hidden = true; bar.replaceChildren(); return; }
+    bar.hidden = false;
+    bar.replaceChildren(
+      icon('siren', 26),
+      h('div', { class: 'ab-t' },
+        h('strong', {}, '目前有 ' + al.length + ' 處正在' + (al.every(function (r) { return r.tkind === 'tow'; }) ? '拖吊' : '開單')),
+        h('span', { class: 's' }, al.slice(0, 3).map(function (r) { return r.address + '（' + rel(lastSeen(r)) + '）'; }).join('、'))),
+      h('button', { type: 'button', class: 'btn', onclick: function () {
+        showView('map');
+        focusOn(al[0].x, al[0].y, 1.8);
+        openDetail(al[0].id);
+      } }, '看詳情'));
+  }
+  function renderBell() {
+    var tickets = activeTickets();
+    var b = $('badge');
+    var n = tickets.length;
+    b.hidden = !n;
+    b.textContent = n > 9 ? '9+' : String(n);
+    if (!$('pop').hidden) renderPop();
+  }
+  function renderPop() {
+    var pop = $('pop');
+    var items = reports.filter(isLive).sort(latestSort).slice(0, 6);
+    pop.replaceChildren(h('h3', {}, '進行中的警報與通報'));
+    if (!items.length) pop.append(h('p', { class: 'none' }, '目前沒有進行中的通報。'));
+    items.forEach(function (r) {
+      pop.append(h('button', { type: 'button', onclick: function () { closePop(); openDetail(r.id); } },
+        h('strong', { class: 'tl ' + toneOf(r), style: 'display:flex;gap:6px;align-items:center' }, icon(kindIcon(r), 16), toneLabel(r) + '・' + r.address),
+        h('span', { class: 'meta', style: 'display:block;font-size:13px;color:var(--muted)' }, rel(lastSeen(r)))));
+    });
+  }
+  function closePop() { $('pop').hidden = true; $('bell').setAttribute('aria-expanded', 'false'); }
+
+  function renderReview() {
+    var list = $('revList'), rows = reports.filter(function (r) { return r.kind === 'legal' && r.review === 'pending'; }).sort(function (a, b) { return b.createdAt - a.createdAt; });
+    list.replaceChildren.apply(list, rows.length ? rows.map(rowEl) : [h('li', { class: 'empty' }, h('strong', {}, '目前沒有待審核的申請'), '有人申請新增停車地點時會出現在這裡。')]);
+    var rb = document.querySelector('#nav [data-v="review"]');
+    if (rb && rb.lastChild) rb.lastChild.textContent = '審核' + (rows.length ? '（' + rows.length + '）' : '');
+  }
+  function renderAll() {
+    renderReview();
+    renderMarkers();
+    renderLatest();
+    if (view === 'records') renderRecords();
+    renderAlertBar();
+    renderBell();
+    if ($('overlay').firstChild && selectedId) refreshDetail();
+    tickTimes();
+  }
+  function tickTimes() {
+    document.querySelectorAll('.time[data-t]').forEach(function (el) { el.textContent = rel(Number(el.getAttribute('data-t'))); });
+  }
+
+  /* ---------- detail dialog ---------- */
+  var lastFocus = null;
+  function openDetail(id) {
+    var r = reports.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    selectedId = id;
+    lastFocus = document.activeElement;
+    detailSig = '';
+    buildDetail(r);
+    renderMarkers();
+  }
+  function closeDialog() {
+    $('overlay').replaceChildren();
+    selectedId = null;
+    renderMarkers();
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+  }
+  function sigOf(r) { return [r.id, r.status, r.note, r.address, confirmCount(r), !!(confirms[r.id] && confirms[r.id][uid]), stateOf(r), r.review, canWrite].join('|'); }
+  function refreshDetail() {
+    var r = reports.filter(function (x) { return x.id === selectedId; })[0];
+    if (!r) { closeDialog(); return; }
+    if (sigOf(r) !== detailSig) buildDetail(r, true);
+  }
+  function shareText(r) {
+    var s = summary(r).join('、');
+    return '【移車快報】' + toneLabel(r) + '｜' + r.address + (s ? '｜' + s : '') + (r.note ? '\n' + r.note : '') + '\n' + rel(lastSeen(r)) + '回報';
+  }
+  function copyShare(r, host) {
+    var text = shareText(r);
+    var fallback = function () {
+      var box = host.querySelector('textarea');
+      if (!box) { box = h('textarea', { class: 'field', readonly: true, rows: '3', 'aria-label': '請手動複製這段文字', style: 'flex-basis:100%' }); host.append(box); }
+      box.value = text; box.focus(); box.select();
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast('已複製，可貼到 LINE 群組'); }, fallback);
+      else fallback();
+    } catch (ex) { fallback(); }
+  }
+  function nudgeEl(r) {
+    var box = h('div', { class: 'nudge' }, h('h3', {}, '先勸導，再考慮其他方式'),
+      h('p', { class: 'msg' }, nudgeText(r)));
+    var row = h('div', { class: 'row2' });
+    row.append(h('button', { type: 'button', class: 'btn teal', onclick: function () {
+      var t = nudgeText(r);
+      try { if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { toast('已複製友善提醒，可貼到訊息或寫在紙條上'); }); else toast('請長按文字手動複製'); } catch (e) { toast('請長按文字手動複製'); }
+    } }, '複製提醒文字'));
+    if (r.status !== 'done') row.append(h('button', { type: 'button', class: 'btn teal' + (r.status === 'handling' ? ' on' : ''), disabled: canWrite === false || r.status === 'handling',
+      onclick: guard(function () { return setStatus(r, 'handling').then(function () { toast('謝謝你的提醒！'); }); }) }, r.status === 'handling' ? '已有人勸導' : '我已勸導'));
+    box.append(row, h('p', { class: 'lead' }, '提醒時請保持禮貌，不要拍或公開車牌。若有人受傷或救護、消防受阻，請直接撥 110／119。'));
+    return box;
+  }
+  function buildDetail(r, keepFocus) {
+    detailSig = sigOf(r);
+    var tone = toneOf(r);
+    var writable = canWrite !== false;
+    var mine = !!(confirms[r.id] && confirms[r.id][uid]);
+    var canDel = writable && (localMode || (uid && r.createdBy === uid) || canEdit);
+
+    var photos = h('div', { class: 'photos' });
+    if (r.photoCount) {
+      photos.append(h('p', { class: 'wait' }, '照片載入中…'));
+      loadPhotos(r).then(function (imgs) {
+        if (selectedId !== r.id) return;
+        photos.replaceChildren.apply(photos, imgs.length ? imgs.map(function (u) { return h('img', { src: u, alt: '現場照片' }); }) : [h('p', { class: 'wait' }, '照片無法顯示')]);
+      }).catch(function () { photos.replaceChildren(h('p', { class: 'wait' }, '照片無法顯示')); });
+    }
+
+    var act = h('div', { class: 'dact' });
+    act.append(h('button', {
+      type: 'button', class: 'btn' + (mine ? ' on' : ''), 'aria-pressed': mine ? 'true' : 'false', disabled: !uid || !writable,
+      onclick: guard(function () { return toggleConfirm(r); })
+    }, CONFIRM_LABEL[r.kind] + ' · ' + confirmCount(r)));
+    var ended = r.status === 'done';
+    if (!isLong(r) || canDel) act.append(h('button', {
+      type: 'button', class: 'btn', disabled: !writable,
+      onclick: guard(function () { return setStatus(r, ended ? 'open' : 'done'); })
+    }, ended ? '重新開啟' : (r.kind === 'parking' ? '已滿了' : r.kind === 'obstruct' ? '已改善' : isLong(r) ? '撤銷' : '已離開')));
+    act.append(h('button', { type: 'button', class: 'btn', onclick: function () { copyShare(r, act); } }, '複製分享文字'));
+    act.append(h('a', {
+      class: 'btn', target: '_blank', rel: 'noopener',
+      href: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('台中市西屯區 ' + r.address.replace(/ (附近|周邊)$/, ''))
+    }, '在 Google 地圖開啟'));
+    if (canEdit && r.kind === 'legal' && r.review === 'pending') {
+      act.append(h('button', { type: 'button', class: 'btn on', onclick: guard(function () { return setReview(r, 'approved').then(function () { toast('已核准，地圖會顯示淺綠色標線'); }); }) }, '核准'),
+        h('button', { type: 'button', class: 'btn danger', onclick: guard(function () { return setReview(r, 'rejected').then(function () { toast('已退回申請'); }); }) }, '退回'));
+    }
+    if (canDel) {
+      var armed = false, timer;
+      var del = h('button', { type: 'button', class: 'btn danger' }, '刪除');
+      del.addEventListener('click', function () {
+        if (!armed) { armed = true; del.textContent = '再按一次刪除'; timer = setTimeout(function () { armed = false; del.textContent = '刪除'; }, 3000); return; }
+        clearTimeout(timer);
+        del.disabled = true;
+        guard(function () { return removeReport(r).then(function () { toast('已刪除'); }); })().then(function () { del.disabled = false; });
+      });
+      act.append(del);
+    }
+
+    var closeBtn = h('button', { type: 'button', class: 'xbtn', 'aria-label': '關閉', onclick: closeDialog }, icon('close', 18));
+    var dlg = h('div', { class: 'dlg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dT' },
+      h('div', { class: 'dlg-top' },
+        h('div', { class: 'seg' }, h('span', { class: 'pill ' + tone }, KIND_NAME[r.kind] + '・' + toneLabel(r) + '・' + pillLabel(r))),
+        closeBtn),
+      h('h2', { id: 'dT' }, r.address),
+      h('div', { class: 'chips' }, summary(r).map(function (l) { return h('span', { class: 'chip' }, l); }),
+        h('span', { class: 'chip', title: abs(r.createdAt) }, abs(r.createdAt))),
+      h('p', { class: 'lead' }, isLong(r) ? '這是長期有效的標示，不會自動過期，只有發布者可以撤銷。僅供參考，請以現場標線與告示為準。' : '最後確認：' + rel(lastSeen(r)) + '。' + (r.kind === 'ticket' ? '45' : r.kind === 'obstruct' ? '90' : '30') + ' 分鐘沒人確認會自動變成已過期。'),
+      r.photoCount ? photos : null,
+      r.note ? h('p', { class: 'dnote' }, r.note) : null,
+      r.kind === 'obstruct' ? nudgeEl(r) : null,
+      act);
+    var veil = h('div', { class: 'veil', onclick: function (e) { if (e.target === veil) closeDialog(); } }, dlg);
+    $('overlay').replaceChildren(veil);
+    if (!keepFocus) closeBtn.focus();
+  }
+
+  /* ---------- alarm dialog ---------- */
+  function openAlarm() {
+    if (canWrite === false) { toast('你目前是檢視者，不能送出警報'); return; }
+    ensureAudio();
+    lastFocus = document.activeElement;
+    selectedId = null;
+    var sel = { spot: null, tkind: 'ticket' };
+    var spots = ROADS.map(function (n) { return { n: n, road: true, addr: n + ' 路段' }; });
+    if (draft.pin) {
+      spots.unshift({ n: '地圖上標記的位置', x: draft.pin.x, y: draft.pin.y, addr: $('addr').value.trim() || ((nearestName(draft.pin.x, draft.pin.y) || '地圖標記位置')) });
+      sel.spot = spots[0];
+    }
+    var err = h('p', { class: 'formErr', role: 'alert' });
+    var go = h('button', { type: 'button', class: 'alarm-go' }, icon('siren', 26), '按下警鈴');
+    var spotBox = h('div', { class: 'opts' });
+    var kindBox = h('div', { class: 'opts' });
+    function paint() {
+      spotBox.replaceChildren.apply(spotBox, spots.map(function (s) {
+        return h('button', { type: 'button', class: 'pt v', 'aria-pressed': sel.spot === s ? 'true' : 'false', onclick: function () { sel.spot = s; err.textContent = ''; paint(); } }, s.n);
+      }));
+      kindBox.replaceChildren.apply(kindBox, [['ticket', '正在開單'], ['tow', '正在拖吊']].map(function (k) {
+        return h('button', { type: 'button', class: 'pt v', 'aria-pressed': sel.tkind === k[0] ? 'true' : 'false', onclick: function () { sel.tkind = k[0]; paint(); } }, k[1]);
+      }));
+    }
+    paint();
+    var note = h('input', { class: 'field', type: 'text', maxlength: '40', placeholder: '例如：約 3 個人，從巷口往內走', 'aria-label': '補充說明（選填）' });
+    go.addEventListener('click', function () {
+      if (!sel.spot) { err.textContent = '請先選一個路段'; return; }
+      if (Date.now() - lastAlarm < 30000) { err.textContent = '剛剛才按過警鈴，請等 30 秒再按'; return; }
+      go.disabled = true;
+      var s = sel.spot;
+      (s.road ? roadPoint(s.n).then(function (p) { s = Object.assign({}, s, p); }) : Promise.resolve()).then(function () { return createReport({
+        kind: 'ticket', tkind: sel.tkind, address: s.addr.slice(0, 60), x: s.x, y: s.y, note: note.value.trim().slice(0, 40),
+        status: 'open', createdAt: Date.now(), createdBy: uid || ''
+      }, []); }).then(function () {
+        lastAlarm = Date.now();
+        closeDialog();
+        toast('警鈴已送出，大家都收到了');
+        showView('map');
+        focusOn(s.x, s.y, 1.6);
+      }).catch(function (ex) { err.textContent = errText(ex); go.disabled = false; });
+    });
+    var closeBtn = h('button', { type: 'button', class: 'xbtn', 'aria-label': '關閉', onclick: closeDialog }, icon('close', 18));
+    var dlg = h('div', { class: 'dlg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'aT' },
+      h('div', { class: 'dlg-top' }, h('h2', { id: 'aT' }, '開單警報'), closeBtn),
+      h('p', { class: 'lead' }, '看到有人正在開單或拖吊？選所在路段，按警鈴，所有開著這個頁面的人會馬上收到。'),
+      h('div', {}, h('p', { class: 'opt-lab' }, '在哪個路段'), spotBox),
+      h('div', {}, h('p', { class: 'opt-lab' }, '正在做什麼'), kindBox),
+      h('div', {}, h('p', { class: 'opt-lab' }, '補充（選填）'), note),
+      err, go);
+    var veil = h('div', { class: 'veil', onclick: function (e) { if (e.target === veil) closeDialog(); } }, dlg);
+    $('overlay').replaceChildren(veil);
+    closeBtn.focus();
+  }
+
+  /* ---------- form ---------- */
+  function ptBtn(label, pressed, onclick) {
+    var b = h('button', { type: 'button', class: 'pt', 'aria-pressed': pressed ? 'true' : 'false' }, label);
+    b.addEventListener('click', function () { onclick(b); });
+    return b;
+  }
+  function renderStep2() {
+    var box = $('step2');
+    if (draft.kind === 'nopark') return renderNopark(box);
+    if (draft.kind === 'legal') return renderLegal(box);
+    if (draft.kind === 'obstruct') return renderObstruct(box);
+    var veh = h('div', { class: 'opts' }), slots = h('div', { class: 'opts' }), fee = h('div', { class: 'opts' });
+    Object.keys(VEH).forEach(function (k) {
+      veh.append(ptBtn(VEH[k], draft.vehicles[k], function (b) { draft.vehicles[k] = !draft.vehicles[k]; b.setAttribute('aria-pressed', draft.vehicles[k] ? 'true' : 'false'); }));
+    });
+    function paintOne(wrap, list, key) {
+      wrap.replaceChildren.apply(wrap, list.map(function (o) {
+        return ptBtn(o[1], draft[key] === o[0], function () { draft[key] = draft[key] === o[0] ? '' : o[0]; paintOne(wrap, list, key); });
+      }));
+    }
+    paintOne(slots, SLOTS, 'slots');
+    paintOne(fee, FEES, 'fee');
+    box.replaceChildren(h('h3', {}, '2. 車位資訊'),
+      h('p', { class: 'opt-lab' }, '可停的車種（可複選）'), veh,
+      h('p', { class: 'opt-lab' }, '大約剩幾個位置'), slots,
+      h('p', { class: 'opt-lab' }, '是否收費'), fee);
+  }
+  function modes() { return [['parking', '回報車位'], ['obstruct', '占用勸導'], ['nopark', '店家禁停'], ['legal', canEdit ? '編輯車線（創建者）' : '申請新增停車地點']]; }
+  var KCFG = {
+    parking: ['例如：巷子底還有兩個機車位，剛有車離開', 'parking', '回報有車位', 'btn primary green', '車位變動很快，30 分鐘沒人確認會自動變成已過期。到場請以現場為準。'],
+    obstruct: ['例如：機車停滿人行道，推嬰兒車的人要繞到馬路上', 'alert', '送出占用提醒', 'btn primary teal', '這不是檢舉，不會轉交警方，也不會公開車牌。目的是讓大家看到並善意提醒，請對方方便時移車。'],
+    nopark: ['例如：門口與對面巷子都不能停，違停會請拖吊', 'alert', '發布禁停公告', 'btn primary', '禁停時段每天自動套用，不會過期，只有發布者可以撤銷。僅供參考，請以現場告示為準。'],
+    legal: ['例如：這側是收費格，平日 8–22 點收費', 'parking', '送出車線標示', 'btn primary', '車線標示是民眾標示，不是官方資料，請以現場標線為準。']
+  };
+  function renderNopark(box) {
+    var shop = h('input', { class: 'field', type: 'text', maxlength: '30', placeholder: '店名（例：○○早餐店）', 'aria-label': '店名', value: draft.shop || '', oninput: function (e) { draft.shop = e.target.value; } });
+    var f = h('input', { type: 'time', 'aria-label': '每天幾點開始禁止停車', value: draft.from || '', oninput: function (e) { draft.from = e.target.value; } });
+    var t = h('input', { type: 'time', 'aria-label': '幾點結束（選填）', value: draft.to || '', oninput: function (e) { draft.to = e.target.value; } });
+    box.replaceChildren(h('h3', {}, '2. 店家禁停時段'),
+      h('p', { class: 'opt-lab' }, '店名'), shop,
+      h('p', { class: 'opt-lab' }, '每天幾點開始禁止停車'), f,
+      h('p', { class: 'opt-lab' }, '到幾點結束（選填，不填就到午夜）'), t);
+  }
+  function renderObstruct(box) {
+    var wrap = h('div', { class: 'opts' }), segBtn = h('button', { type: 'button', class: 'relocate' });
+    function paint() {
+      wrap.replaceChildren.apply(wrap, Object.keys(OBS).map(function (k) {
+        var b = ptBtn(OBS[k][0], draft.otype === k, function () { draft.otype = draft.otype === k ? '' : k; paint(); });
+        b.classList.add('t'); return b;
+      }));
+      segBtn.replaceChildren(icon('locate'), draft.seg ? (draft.pin2 ? '已標記一段路（按此取消）' : '請在地圖點這段路的終點（按此取消）') : '標記一段路（選填，占用範圍較長時使用）');
+    }
+    segBtn.addEventListener('click', function () { draft.seg = !draft.seg; if (!draft.seg) draft.pin2 = null; paint(); renderMarkers(); renderPinState(); });
+    paint();
+    box.replaceChildren(h('h3', {}, '2. 占用情況'),
+      h('div', { class: 'gentle' }, h('strong', {}, '勸導優先'), '先用友善的方式讓對方知道，多數人只是沒注意到。這裡不會公開車牌，也不是正式檢舉。'),
+      h('p', { class: 'opt-lab' }, '選最接近的情況'), wrap, segBtn);
+  }
+  function renderLegal(box) {
+    if (!canEdit) {
+      draft.ltype = 'white';
+      box.replaceChildren(h('h3', {}, '2. 申請類型'), h('div', { class: 'gentle' }, h('strong', {}, '申請新增可停車路段'), '請在地圖點出可停車路段的起點和終點，並附上現場照片。創建者審核通過後，會顯示為淺綠色標線。'));
+      return;
+    }
+    var wrap = h('div', { class: 'opts' });
+    function paint() {
+      wrap.replaceChildren.apply(wrap, Object.keys(LTYPES).map(function (k) {
+        return ptBtn(LTYPES[k][0], draft.ltype === k, function () { draft.ltype = draft.ltype === k ? '' : k; paint(); renderMarkers(); });
+      }));
+    }
+    paint();
+    box.replaceChildren(h('h3', {}, '2. 這段是什麼線'), wrap);
+  }
+  function renderKind() {
+    var c = KCFG[draft.kind];
+    var applying = draft.kind === 'legal' && !canEdit;
+    if (applying) { c = ['例如：這條巷子路邊可停車，晚上人較少', 'parking', '送出審核申請', 'btn primary', '新增停車地點需經創建者審核，通過後才會以淺綠色標線顯示在地圖上。申請必須附上現場照片。']; draft.ltype = 'white'; }
+    $('s3em').textContent = applying ? '（必填）' : '（選填）';
+    $('note').setAttribute('placeholder', c[0]);
+    var send = $('send');
+    send.className = c[3];
+    send.replaceChildren(icon(c[1], 22), c[2]);
+    $('fineT').textContent = c[4];
+    var dh = $('dropHint'); if (dh) dh.hidden = draft.kind !== 'obstruct';
+    $('s1t').textContent = draft.kind === 'legal' ? '1. 在地圖點線的起點和終點' : '1. 選擇位置';
+    var box = $('modes');
+    box.replaceChildren.apply(box, modes().map(function (m) {
+      return ptBtn(m[1], draft.kind === m[0], function () { draft.kind = m[0]; draft.pin2 = null; draft.seg = false; renderKind(); renderPinState(); renderMarkers(); });
+    }));
+    formErr('');
+    renderStep2();
+  }
+
+  function buildForm() {
+    $('addr').addEventListener('input', function () { draft.addrTouched = $('addr').value.length > 0; });
+    $('relocate').addEventListener('click', function () {
+      $('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast('在地圖上點一下，標記位置');
+    });
+    $('note').addEventListener('input', function () { $('count').textContent = $('note').value.length + '/200'; });
+
+    var drop = $('drop'), file = $('file');
+    drop.addEventListener('click', function () { file.click(); });
+    ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+    ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
+    drop.addEventListener('drop', function (e) { addPhotos(e.dataTransfer ? e.dataTransfer.files : []); });
+    file.addEventListener('change', function () { addPhotos(file.files); file.value = ''; });
+    $('form').addEventListener('submit', onSubmit);
+    renderKind();
+  }
+
+  var ocrP = null;
+  function loadOcr() {
+    if (ocrP) return ocrP;
+    ocrP = new Promise(function (res, rej) {
+      if (window.Tesseract) return res(window.Tesseract);
+      var sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+      sc.onload = function () { res(window.Tesseract); };
+      sc.onerror = function () { rej(new Error('ocr')); };
+      document.head.append(sc);
+    }).then(function (T) {
+      return T.createWorker('eng', 1, { langPath: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng/4.0.0_best_int' });
+    }).then(function (w) {
+      return w.setParameters({ tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-', tessedit_pageseg_mode: '11' }).then(function () { return w; });
+    }).catch(function () { ocrP = null; throw new Error('ocr'); });
+    return ocrP;
+  }
+  /* black out digits (and O / I, which Taiwan plates never use as letters so they are misread digits); keep the other letters */
+  function maskPlates(cv) {
+    return loadOcr().then(function (w) { return w.recognize(cv); }).catch(function () { throw new Error('ocr'); }).then(function (res) {
+      var d = res.data || {}, ctx = cv.getContext('2d'), n = 0;
+      ctx.fillStyle = '#000';
+      function nz(t) { return String(t || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''); }
+      function plateLike(t) { return /^[A-Z0-9]{2,4}-?[A-Z0-9]{2,4}$/.test(t) && /[A-Z]/.test(t) && /[0-9OI]/.test(t) && t.replace(/-/g, '').length >= 5; }
+      function blk(b) { if (!b) return; var p = 3; ctx.fillRect(b.x0 - p, b.y0 - p, b.x1 - b.x0 + 2 * p, b.y1 - b.y0 + 2 * p); }
+      function hide(wd) {
+        if (wd._m) return; wd._m = 1;
+        var sy = wd.symbols || [];
+        if (sy.length) sy.forEach(function (c) { if (/[0-9OI]/i.test(c.text)) blk(c.bbox); }); else blk(wd.bbox);
+      }
+      var lines = d.lines && d.lines.length ? d.lines : [{ words: d.words || [] }];
+      lines.forEach(function (ln) {
+        var ws = ln.words || [];
+        for (var i = 0; i < ws.length; i++) {
+          var a = nz(ws[i].text), b = i + 1 < ws.length ? nz(ws[i + 1].text) : '';
+          if (plateLike(a)) { hide(ws[i]); n++; }
+          else if (b && plateLike(a + '-' + b)) { hide(ws[i]); hide(ws[i + 1]); n++; }
+        }
+      });
+      return n;
+    });
+  }
+  function loadImg(file) {
+    return new Promise(function (res, rej) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onload = function () { URL.revokeObjectURL(u); res(im); };
+      im.onerror = function () { URL.revokeObjectURL(u); rej(new Error('bad image')); };
+      im.src = u;
+    });
+  }
+  function scaled(src, side) {
+    var sc = Math.min(1, side / Math.max(src.width, src.height)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(src.width * sc));
+    c.height = Math.max(1, Math.round(src.height * sc));
+    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+    return c;
+  }
+  async function shrink(file) {
+    var cv = scaled(await loadImg(file), 1280);
+    var masked = await maskPlates(cv);
+    var tries = [[800, 0.62], [640, 0.5], [520, 0.42], [420, 0.36]], full = '';
+    for (var i = 0; i < tries.length; i++) {
+      full = scaled(cv, tries[i][0]).toDataURL('image/jpeg', tries[i][1]);
+      if (full.length <= 70000) break;
+    }
+    if (full.length > 70000) throw new Error('too big');
+    return { full: full, thumb: scaled(cv, 160).toDataURL('image/jpeg', 0.6), masked: masked };
+  }
+  async function addPhotos(files) {
+    var list = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\/(jpeg|png)$/.test(f.type) && f.size < 20 * 1024 * 1024; });
+    if (!list.length) { formErr('請選擇 JPG 或 PNG 照片'); return; }
+    var room = 3 - draft.photos.length;
+    if (room <= 0) { formErr('最多上傳 3 張照片'); return; }
+    formErr('');
+    for (var i = 0; i < Math.min(room, list.length); i++) {
+      toast('正在自動遮蔽車牌數字，請稍候…');
+      try {
+        var ph = await shrink(list[i]);
+        draft.photos.push(ph);
+        toast(ph.masked ? '已遮蔽 ' + ph.masked + ' 組車牌數字' : '沒偵測到車牌；請確認照片裡沒有清楚的車牌');
+      } catch (e) {
+        formErr(e && e.message === 'ocr' ? '無法自動遮蔽車牌（需要網路載入辨識模組），為保護隱私，這張照片沒有加入。' : '有一張照片無法處理，請換一張');
+      }
+    }
+    renderShots();
+  }
+  function renderShots() {
+    var box = $('shots');
+    box.replaceChildren.apply(box, draft.photos.map(function (p, i) {
+      return h('div', { class: 'shot' }, h('img', { src: p.thumb, alt: '已選照片 ' + (i + 1) }),
+        h('button', { type: 'button', 'aria-label': '移除照片 ' + (i + 1), onclick: function () { draft.photos.splice(i, 1); renderShots(); } }, icon('close', 14)));
+    }));
+  }
+  function formErr(msg) { $('formErr').textContent = msg || ''; }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    formErr('');
+    var addr = $('addr').value.trim();
+    var data = {
+      kind: draft.kind, address: addr.slice(0, 60), note: $('note').value.trim().slice(0, 200),
+      thumb: draft.photos.length ? draft.photos[0].thumb : '', photoCount: draft.photos.length,
+      status: 'open', createdAt: Date.now(), createdBy: uid || ''
+    };
+    if (!draft.pin) return formErr('請先在地圖上點選位置');
+    if (!addr) return formErr('請填寫位置描述');
+    data.x = draft.pin.x; data.y = draft.pin.y;
+    if (draft.kind === 'nopark') {
+      if (!draft.from) return formErr('請選每天幾點開始禁止停車');
+      data.shop = draft.shop.trim().slice(0, 30); data.from = draft.from; data.to = draft.to || '';
+    } else if (draft.kind === 'legal') {
+      if (!draft.pin2) return formErr('請在地圖上再點一下，標記線的終點');
+      if (!draft.ltype) return formErr('請選這段是什麼線');
+      if (!canEdit && !draft.photos.length) return formErr('申請新增停車地點需要附上現場照片');
+      data.x2 = draft.pin2.x; data.y2 = draft.pin2.y; data.ltype = draft.ltype; data.review = canEdit ? 'approved' : 'pending';
+    }
+    if (draft.kind === 'obstruct') {
+      if (!draft.otype) return formErr('請選占用情況');
+      data.otype = draft.otype;
+      if (draft.seg && draft.pin2) { data.x2 = draft.pin2.x; data.y2 = draft.pin2.y; }
+    }
+    if (draft.kind === 'parking') {
+    data.vehicles = Object.keys(VEH).filter(function (k) { return draft.vehicles[k]; });
+    if (!data.vehicles.length) return formErr('請選可停的車種');
+    if (!draft.slots) return formErr('請選大約剩幾個位置');
+    data.slots = draft.slots;
+    data.fee = draft.fee || 'unknown';
+    }
+    if (Date.now() - lastSubmit < 15000) return formErr('剛剛才送出一則，請等幾秒再送');
+    var btn = $('send');
+    btn.disabled = true;
+    try {
+      await createReport(data, draft.photos.map(function (p) { return p.full; }));
+      lastSubmit = Date.now();
+      draft = newDraft(draft.kind);
+      $('addr').value = ''; $('note').value = ''; $('count').textContent = '0/200';
+      renderShots(); renderPinState(); renderStep2(); renderMarkers();
+      toast(draft.kind === 'obstruct' ? '已送出占用提醒，謝謝你的善意' : draft.kind === 'parking' ? '已回報車位' : draft.kind === 'nopark' ? '已發布禁停公告' : canEdit ? '已標示車線' : '已送出申請，審核通過後會顯示在地圖上');
+    } catch (ex) {
+      formErr(errText(ex));
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /* ---------- nav / search / views ---------- */
+  var NAV = [['map', 'map', '即時地圖'], ['records', 'list', '通報紀錄'], ['help', 'help', '使用說明'], ['about', 'info', '關於我們']];
+  function buildNav() {
+    var nav = $('nav');
+    nav.replaceChildren();
+    NAV.concat(canEdit ? [['review', 'shield', '審核']] : []).forEach(function (n) {
+      nav.append(h('button', { type: 'button', 'data-v': n[0], onclick: function () { showView(n[0]); } }, icon(n[1], 22), n[2]));
+    });
+  }
+  function showView(v) {
+    view = v;
+    ['map', 'records', 'review', 'help', 'about'].forEach(function (id) { $('v-' + id).hidden = id !== v; });
+    document.querySelectorAll('#nav button').forEach(function (b) {
+      if (b.getAttribute('data-v') === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    if (v === 'records') renderRecords();
+    if (v === 'review') renderReview();
+    window.scrollTo(0, 0);
+  }
+  function buildMisc() {
+    document.querySelectorAll('[data-ic]').forEach(function (el) {
+      var ic = icon(el.getAttribute('data-ic'), el.classList.contains('avatar') ? 22 : 20);
+      if (el.classList.contains('avatar')) el.append(ic); else el.replaceWith(ic);
+    });
+    $('fKind').addEventListener('change', function () { rf.kind = $('fKind').value; renderRecords(); });
+    $('fStatus').addEventListener('change', function () { rf.status = $('fStatus').value; renderRecords(); });
+    $('fRange').addEventListener('change', function () { rf.range = $('fRange').value; renderRecords(); });
+    $('toAll').addEventListener('click', function () { showView('records'); });
+    $('lyLegal').addEventListener('change', function () { showLegal = this.checked; renderMarkers(); });
+
+    $('alarmTop').addEventListener('click', openAlarm);
+    $('alarmFab').addEventListener('click', openAlarm);
+    $('snd').addEventListener('click', function () {
+      soundOn = !soundOn;
+      try { localStorage.setItem('ycb-sound', soundOn ? '1' : '0'); } catch (e) {}
+      ensureAudio();
+      renderSound();
+      if (soundOn) siren();
+    });
+    document.addEventListener('pointerdown', ensureAudio, { passive: true });
+
+    var q = $('q');
+    q.addEventListener('input', function () { search = q.value.trim(); renderAll(); });
+    q.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' || !search) return;
+      var hit = PLACES.filter(function (p) { return p.n.indexOf(search) >= 0; })[0];
+      if (hit) { showView('map'); focusOn(hit.x, hit.y, 2.5); return; }
+      geoSearch(search);
+    });
+
+    $('bell').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var pop = $('pop');
+      if (pop.hidden) { renderPop(); pop.hidden = false; $('bell').setAttribute('aria-expanded', 'true'); } else closePop();
+    });
+    document.addEventListener('click', function (e) { if (!$('pop').hidden && !$('pop').contains(e.target)) closePop(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if ($('overlay').firstChild) closeDialog(); else closePop();
+    });
+    renderSound();
+  }
+
+  /* ---------- init ---------- */
+  async function init() {
+    buildNav();
+    buildMisc();
+    buildMap();
+    buildForm();
+    showView('map');
+    renderAll();
+    loadOsm();
+
+    var user = null;
+    try {
+      if (window.claude && window.claude.use) {
+        db = await window.claude.use('db');
+        user = await window.claude.use('user');
+      }
+    } catch (e) { db = null; }
+
+    try {
+      if (user) {
+        if (user.id) uid = await user.id();
+        if (user.canEdit) canEdit = !!user.canEdit();
+        if (user.can) canWrite = await user.can('data.write');
+      }
+    } catch (e) {}
+
+    if (!db) { canEdit = true; }
+    buildNav(); showView(view); renderKind();
+    if (!db) {
+      localMode = true;
+      uid = 'local';
+      loading = false;
+      banner('目前是離線示範模式：通報只會留在這個頁面，重新整理後就會消失，也不會有其他人收到警報。登入後開啟，才能和大家共用通報。');
+      renderAll();
+    } else {
+      $('who').textContent = '已登入';
+      if (canWrite === false) {
+        ['addr', 'note', 'send', 'relocate', 'drop'].forEach(function (id) { $(id).disabled = true; });
+        banner('你目前是檢視者，可以看通報，但不能新增或更新。');
+      }
+      db.collection('reports').orderBy('createdAt', 'desc').limit(200).onSnapshot(function (snap) {
+        var fresh = [];
+        if (seenFirst) {
+          snap.docChanges().forEach(function (c) {
+            if (c.type !== 'added') return;
+            var d = c.doc.data() || {};
+            if (d.kind === 'ticket' && Date.now() - (Number(d.createdAt) || 0) < 180000 && str(d.createdBy, 80) !== uid) fresh.push(norm(c.doc.id, d));
+          });
+        }
+        reports = snap.docs.map(function (d) { return norm(d.id, d.data()); }).filter(Boolean);
+        loading = false;
+        seenFirst = true;
+        renderAll();
+        if (fresh.length) onNewAlert(fresh[0]);
+      }, function (e) {
+        loading = false;
+        banner(e && e.code === 'revoked' ? '存取權已變更，請重新開啟頁面。' : '無法讀取通報，請重新整理頁面。');
+        renderAll();
+      });
+      db.collection('confirms').limit(1000).onSnapshot(function (snap) {
+        var map = {};
+        snap.docs.forEach(function (d) {
+          var v = d.data() || {};
+          var rid = str(v.rid, 80), u = str(v.uid, 80);
+          if (!rid || !u) return;
+          (map[rid] || (map[rid] = {}))[u] = Number(v.at) || 1;
+        });
+        confirms = map;
+        renderAll();
+      }, function () {});
+    }
+    setInterval(function () { tickTimes(); renderAlertBar(); renderBell(); renderMarkers(); }, 30000);
+  }
+  init();
+})();
+</script>
+
+</body></html>
