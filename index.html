@@ -1,1969 +1,1110 @@
-<!doctype html><html lang="zh-Hant-TW"><head><meta charset=utf8><title>移車快報</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10294f">
+<title>移車快報</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-/* Layout: navy sidebar + top bar with the siren button; the map view is a main
-   column (alert bar, tile map, legend, latest reports) beside a report panel
-   for reporting parking spots. On narrow screens the sidebar becomes a top strip,
-   everything stacks and the siren becomes a floating button. */
-:root {
-  --bg: #f1f5fb;
-  --surface: #ffffff;
-  --surface2: #f5f8fc;
-  --ink: #13233d;
-  --muted: #5a6a82;
-  --line: #dde5f0;
-  --navy: #0c2a50;
-  --navy2: #12386a;
-  --navy-ink: #eaf1fb;
-  --navy-mute: #9db3d1;
-  --nav-on: #2f6df0;
-  --primary: #2563eb;
-  --primary-ink: #ffffff;
-  --red: #e0362f;
-  --red-t: #c0241d;
-  --orange: #f39c12;
-  --orange-t: #965700;
-  --blue: #2f6df0;
-  --blue-t: #1c56d4;
-  --green: #16a34a;
-  --green-t: #11702f;
-  --violet: #7c3aed;
-  --violet-t: #6428d1;
-  --grey: #8896ab;
-  --grey-t: #55657c;
-  --map-bg: #e8edf3;
-  --map-grid: #dde4ec;
-  --map-road: #ffffff;
-  --map-edge: #cbd5e1;
-  --map-label: #3f506a;
-  --campus: #dcefdf; --park: #bfe0c6; --water: #b4dcf0;
-  --market: #fbe6c4;
-  --focus: #2f6df0;
-  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0a111d; --surface: #111b2c; --surface2: #16223a; --ink: #e7eefa; --muted: #9fb0c8; --line: #22314b;
-    --navy: #071a33; --navy2: #0d2a50; --primary: #2f6df0;
-    --red: #ff6a61; --red-t: #ff8c84; --orange: #f5a623; --orange-t: #f5b85a; --blue: #6d9cff; --blue-t: #8db3ff;
-    --green: #3fcf74; --green-t: #7be0a0; --violet: #9b6bff; --violet-t: #bda0ff; --grey: #7f8da3; --grey-t: #a3b0c4;
-    --map-bg: #16202f; --map-grid: #1b2738; --map-road: #2a3a52; --map-edge: #3a4c68; --map-label: #b2c0d6; --campus: #1b3328; --park: #25483a; --water: #1d4a66; --market: #3b2f1c;
-    --focus: #8db3ff;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0a111d; --surface: #111b2c; --surface2: #16223a; --ink: #e7eefa; --muted: #9fb0c8; --line: #22314b;
-  --navy: #071a33; --navy2: #0d2a50; --primary: #2f6df0;
-  --red: #ff6a61; --red-t: #ff8c84; --orange: #f5a623; --orange-t: #f5b85a; --blue: #6d9cff; --blue-t: #8db3ff;
-  --green: #3fcf74; --green-t: #7be0a0; --violet: #9b6bff; --violet-t: #bda0ff; --grey: #7f8da3; --grey-t: #a3b0c4;
-  --map-bg: #16202f; --map-grid: #1b2738; --map-road: #2a3a52; --map-edge: #3a4c68; --map-label: #b2c0d6; --campus: #1b3328; --park: #25483a; --water: #1d4a66; --market: #3b2f1c;
-  --focus: #8db3ff;
-  color-scheme: dark;
-}
-
-* { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.6; margin: 0; }
-button, input, select, textarea { font: inherit; color: inherit; }
-button { cursor: pointer; }
-:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-svg.ic { flex: none; }
-h1, h2, h3, p { margin: 0; }
-
-.app { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
+:root{--navy:#10294f;--navy2:#17386b;--blue:#1d6bf3;--teal:#0d9488;--red:#e11d48;--amber:#f59e0b;--green:#16a34a;--purple:#2563eb;--bg:#f3f6fb;--ink:#14213d;--mut:#64748b;--line:#e2e8f0;--r:14px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;padding:0}
+input,select,textarea{font:inherit;color:inherit}
+#app{display:grid;grid-template-columns:216px minmax(0,1fr) 392px;grid-template-rows:64px minmax(0,1fr);height:100dvh}
 
 /* sidebar */
-.side {
-  background: linear-gradient(180deg, var(--navy) 0%, var(--navy2) 100%); color: var(--navy-ink);
-  position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  padding: 22px 16px 0 max(18px, env(safe-area-inset-left, 0px));
-  display: flex; flex-direction: column; gap: 20px;
+#side{grid-row:1/3;background:linear-gradient(180deg,#12306a,#0b1f45);color:#fff;padding:18px 14px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+.brand{display:flex;gap:10px;align-items:center}
+.brand .lg{width:44px;height:44px;border-radius:12px;background:#fff;display:grid;place-items:center;font-size:26px;flex:none}
+.brand b{font-size:22px;letter-spacing:1px;display:block}
+.brand small{font-size:10.5px;opacity:.75}
+#side nav{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+#side nav button{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;font-size:16px;text-align:left;opacity:.9}
+#side nav button.on{background:var(--blue);opacity:1;box-shadow:0 4px 14px rgba(29,107,243,.45)}
+#side nav button:hover:not(.on){background:rgba(255,255,255,.08)}
+.tips{margin-top:8px;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:14px;font-size:13px;line-height:1.7}
+.tips h4{margin:0 0 6px;font-size:14px}
+.tips ol{margin:0;padding-left:18px}
+.slogan{margin-top:auto;text-align:center;font-size:14px;opacity:.85;padding:10px 0}
+
+/* top bar */
+#top{grid-column:2/4;background:#fff;display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);z-index:5}
+#search{flex:1;max-width:520px;display:flex;align-items:center;gap:8px;background:#f1f5f9;border:1px solid var(--line);border-radius:999px;padding:0 14px;height:40px}
+#search input{flex:1;border:0;background:none;outline:0;min-width:0}
+.chip{display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px;white-space:nowrap}
+.sp{flex:1}
+#bell{position:relative;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px}
+#bell i{position:absolute;top:2px;right:0;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-style:normal;display:none;place-items:center;padding:0 4px}
+#acct{display:flex;gap:8px;align-items:center;font-weight:600;font-size:14px;white-space:nowrap}
+#acct .av{width:36px;height:36px;border-radius:50%;background:#e2e8f0;display:grid;place-items:center}
+
+/* map */
+#mapwrap{position:relative;grid-column:2;min-height:0}
+#map{position:absolute;inset:0;z-index:1}
+#map.picking{cursor:crosshair}
+#map.picking .leaflet-marker-pane *,#map.picking .leaflet-overlay-pane path{pointer-events:none!important}
+.legend{position:absolute;left:12px;bottom:18px;z-index:500;background:rgba(255,255,255,.94);border-radius:12px;padding:8px 12px;display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;box-shadow:0 2px 10px rgba(0,0,0,.15);max-width:calc(100% - 24px)}
+.legend span{display:flex;gap:5px;align-items:center;white-space:nowrap}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.legend i.ln{width:18px;height:5px;border-radius:3px}
+#pickbar{display:none;position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:800;background:#0f172a;color:#fff;border-radius:14px;padding:10px 12px;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.35);width:max-content;max-width:calc(100% - 20px);flex-wrap:wrap;justify-content:center;font-size:14px}
+#pickbar.show{display:flex}
+#pickbar button{padding:7px 12px;border-radius:9px;background:#334155;font-size:14px}
+#pickbar button.ok{background:var(--blue)}
+#pickbar button:disabled{opacity:.4}
+.pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.pin span{transform:rotate(45deg);font-size:14px;color:#fff;font-weight:800;line-height:1}
+.pin.pending{opacity:.55}
+.apin{width:34px;height:34px;border-radius:50%;background:var(--red);border:2px solid #fff;display:grid;place-items:center;font-size:18px;box-shadow:0 0 0 0 rgba(225,29,72,.7);animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 16px rgba(225,29,72,0)}100%{box-shadow:0 0 0 0 rgba(225,29,72,0)}}
+.dot{width:14px;height:14px;border-radius:50%;background:#1d6bf3;border:3px solid #fff;box-shadow:0 0 0 6px rgba(29,107,243,.25)}
+.vt{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #0f172a}
+
+/* panel */
+#panel{grid-column:3;background:var(--bg);overflow:auto;padding:14px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+.grab{display:none}
+.card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+.card h2,.card h3{margin:0}
+.hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hd h2{font-size:19px}
+.x{width:34px;height:34px;border-radius:50%;font-size:18px;color:var(--mut)}
+.x:hover{background:#f1f5f9}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:11px;background:#eef2f8;font-weight:600;font-size:15px;min-height:44px}
+.btn.pri{background:var(--blue);color:#fff}
+.btn.red{background:var(--red);color:#fff}
+.btn.ok{background:var(--green);color:#fff}
+.btn.ghost{background:#fff;border:1px solid var(--line)}
+.btn.block{width:100%}
+.btn.sm{padding:6px 10px;min-height:32px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.step{margin-bottom:16px}
+.step>b{display:block;margin-bottom:8px;font-size:15px}
+.step b em{font-style:normal;color:var(--mut);font-weight:400;font-size:12.5px}
+.hint{font-size:12.5px;color:var(--mut);margin:6px 0 0;line-height:1.6}
+.hint.warn{color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:6px 10px;font-weight:600}
+.kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kind{border:2px solid var(--line);border-radius:12px;padding:10px 4px;font-size:13.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff}
+.kind i{font-style:normal;font-size:22px}
+.kind.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,#fff);color:var(--c)}
+.seg{display:inline-flex;background:#eef2f8;border-radius:10px;padding:3px;margin-bottom:8px}
+.seg button{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:600;min-height:36px}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.sum{font-size:13.5px;background:#f1f5f9;border-radius:10px;padding:9px 12px;margin:8px 0;color:var(--mut)}
+.sum.ok{background:#ecfdf5;color:#047857}
+.in,select.in,textarea.in{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;background:#fff;outline:0;min-height:44px}
+.in:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,107,243,.15)}
+textarea.in{min-height:84px;resize:vertical}
+.cnt{text-align:right;font-size:12px;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chipb{padding:9px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:14px;font-weight:500;min-height:40px}
+.chipb.on{border-color:var(--c,var(--blue));background:color-mix(in srgb,var(--c,var(--blue)) 10%,#fff);color:var(--c,var(--blue));font-weight:700}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.nums .chipb{border-radius:10px;text-align:center;padding:9px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two label{font-size:12.5px;color:var(--mut);display:block;margin-bottom:4px}
+.drop{border:2px dashed #bcc8da;border-radius:12px;padding:16px;text-align:center;background:#f8fafc;color:var(--mut);font-size:14px;width:100%}
+.thumbs{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.thumbs div{position:relative;width:82px;height:82px;border-radius:10px;overflow:hidden}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.thumbs button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;background:rgba(15,23,42,.75);color:#fff;font-size:13px}
+.sos{background:#e8f0fe;display:flex;gap:12px;align-items:center;border-radius:var(--r);padding:14px}
+.sos div{flex:1;font-size:13px;line-height:1.6}
+.sos b{font-size:15px}
+.feed{display:flex;flex-direction:column}
+.fi{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);text-align:left;width:100%}
+.fi:last-child{border:0}
+.fi .th{width:60px;height:52px;border-radius:9px;background:#e2e8f0;flex:none;overflow:hidden;display:grid;place-items:center;font-size:22px}
+.fi .th img{width:100%;height:100%;object-fit:cover}
+.fi .tx{flex:1;min-width:0}
+.fi .tg{font-size:12.5px;font-weight:700}
+.fi .tt{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi .sb{font-size:12px;color:var(--mut)}
+.pill{font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.pill.r{background:#ffe4e9;color:var(--red)}
+.pill.y{background:#fef3c7;color:#b45309}
+.pill.g{background:#dcfce7;color:#15803d}
+.pill.b{background:#dbeafe;color:#1d4ed8}
+.pill.t{background:#ccfbf1;color:#0f766e}
+.pill.n{background:#e2e8f0;color:#475569}
+.empty{text-align:center;color:var(--mut);padding:22px 0;font-size:14px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow:auto}
+.tabs button{padding:8px 12px;border-radius:999px;background:#eef2f8;font-size:13.5px;font-weight:600;white-space:nowrap}
+.tabs button.on{background:var(--navy);color:#fff}
+.pc{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.pc .meta{font-size:13px;color:var(--mut);margin:4px 0}
+.pc .ph{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.pc .ph img,.ph img{width:76px;height:76px;object-fit:cover;border-radius:8px;cursor:zoom-in}
+.lrow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.lrow i{width:22px;height:6px;border-radius:3px;flex:none}
+.lrow span{flex:1;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow select{border:1px solid var(--line);border-radius:8px;padding:5px;font-size:13px}
+.help h3{margin:14px 0 6px;font-size:15px}
+.help p,.help li{font-size:13.5px;line-height:1.75;color:#334155}
+.help ul{margin:0;padding-left:20px}
+.sw{display:inline-block;width:22px;height:6px;border-radius:3px;vertical-align:middle;margin-right:6px}
+
+/* floating alarm */
+#alarmFab{position:fixed;z-index:1000;right:410px;bottom:24px;background:var(--red);color:#fff;border-radius:999px;padding:0 20px 0 16px;height:56px;display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;box-shadow:0 8px 24px rgba(225,29,72,.5);animation:pulse 2s infinite}
+#alarmFab span{font-size:24px}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:3000;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:14px}
+.modal.show{display:flex}
+.modal .box{background:#fff;border-radius:18px;padding:18px;width:100%;max-width:460px;max-height:92dvh;overflow:auto}
+.modal .box.wide{max-width:760px}
+.big2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big2 button{border:2px solid var(--line);border-radius:14px;padding:14px 6px;font-weight:800;font-size:17px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:84px}
+.big2 button span{font-size:28px}
+.big2 button.on{border-color:var(--red);background:#fff1f3;color:var(--red)}
+.cwrap{background:#0f172a;border-radius:12px;overflow:hidden;margin:10px 0}
+#maskCv{display:block;width:100%;height:auto;touch-action:none;max-height:56dvh;object-fit:contain;margin:0 auto}
+.msg{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:13.5px;line-height:1.6}
+.msg.ok{background:#ecfdf5;color:#047857}.msg.er{background:#fff1f3;color:#be123c}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:11px 16px;border-radius:12px;z-index:4000;font-size:14px;display:none;max-width:90vw;text-align:center}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:3500;display:none;align-items:center;justify-content:center}
+#lb img{max-width:96vw;max-height:92dvh;border-radius:8px}
+.leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.6;min-width:190px}
+.leaflet-popup-content h4{margin:0 0 4px;font-size:15.5px}
+.pp-tag{display:inline-block;font-size:12px;font-weight:700;color:#fff;border-radius:6px;padding:1px 8px;margin-bottom:4px}
+#bnav{display:none}
+
+/* mobile */
+@media (max-width:899px){
+  #app{display:block;position:relative}
+  #side{display:none}
+  #top{position:absolute;top:0;left:0;right:0;z-index:700;padding:max(8px,env(safe-area-inset-top)) 10px 8px;height:auto;border:0;background:rgba(255,255,255,.96);box-shadow:0 2px 10px rgba(0,0,0,.12);gap:8px}
+  .chip,#acct span{display:none}
+  #search{max-width:none;height:42px}
+  #bell{width:38px;height:38px}
+  #mapwrap{position:absolute;inset:0}
+  .leaflet-top{margin-top:max(62px,calc(env(safe-area-inset-top) + 56px))}
+  .leaflet-control-zoom{display:none}
+  .legend{display:none}
+  #pickbar{top:calc(max(62px,env(safe-area-inset-top) + 56px) + 4px)}
+  #panel{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom));height:62dvh;border-radius:20px 20px 0 0;transform:translateY(calc(100% + 90px));transition:transform .25s ease;z-index:900;box-shadow:0 -6px 24px rgba(15,23,42,.25);padding-top:6px}
+  body.sheet-open #panel{transform:none}
+  .grab{display:block;flex:none;align-self:center;width:44px;height:5px;border-radius:3px;background:#cbd5e1;margin:2px 0 4px}
+  #bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:950;background:#fff;border-top:1px solid var(--line);height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}
+  #bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;color:var(--mut)}
+  #bnav button span{font-size:21px}
+  #bnav button.on{color:var(--blue);font-weight:700}
+  #bnav button.add span{background:var(--blue);color:#fff;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:26px;margin-top:-22px;box-shadow:0 4px 14px rgba(29,107,243,.5)}
+  #alarmFab{right:12px;bottom:calc(72px + env(safe-area-inset-bottom));height:52px;padding:0 16px 0 12px;font-size:15px}
+  body.sheet-open #alarmFab{bottom:calc(62dvh + 70px + env(safe-area-inset-bottom))}
+  body.picking-mode #alarmFab{display:none}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+  .modal{align-items:flex-end;padding:0}
+  .modal .box{border-radius:20px 20px 0 0;max-width:none;padding-bottom:max(18px,env(safe-area-inset-bottom))}
 }
-.logo { display: flex; align-items: center; gap: 10px; }
-.logo h1 { font-size: 26px; font-weight: 900; letter-spacing: .08em; line-height: 1.15; }
-.logo small { display: block; font-size: 11px; color: var(--navy-mute); letter-spacing: .06em; }
-.nav { display: grid; gap: 6px; }
-.nav button {
-  display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 48px; border: 0; border-radius: 10px;
-  background: transparent; color: var(--navy-ink); font-size: 16px; font-weight: 700; text-align: left;
-}
-.nav button:hover { background: rgba(255,255,255,.08); }
-.nav button[aria-current="page"] { background: var(--nav-on); color: #fff; }
-.tip { border: 1px solid rgba(255,255,255,.22); border-radius: 12px; padding: 14px 14px 12px; font-size: 14px; }
-.tip h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 900; margin-bottom: 8px; }
-.tip h2 svg { color: #ffd166; }
-.tip ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
-.tip-art { margin-top: auto; position: relative; padding-top: 6px; }
-.tip-art .slogan { position: absolute; left: 6px; top: 6px; transform: rotate(-9deg); transform-origin: left top; font-weight: 700; font-size: 18px; line-height: 1.35; color: var(--navy-ink); letter-spacing: .06em; margin-top: 54px; }
-.tip-art svg { display: block; width: 100%; height: auto; }
-
-/* main */
-.main { min-width: 0; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 40px 24px; }
-.top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
-.search { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 0 14px; min-height: 46px; color: var(--muted); }
-.search input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 16px; color: var(--ink); min-height: 44px; }
-.search:focus-within { border-color: var(--focus); }
-.area { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-.area svg { color: var(--blue); }
-.top-right { display: flex; align-items: center; gap: 10px; margin-left: auto; position: relative; }
-.alarm {
-  display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border: 0; border-radius: 12px;
-  background: var(--violet); color: #fff; font-weight: 900; font-size: 16px; letter-spacing: .06em; box-shadow: 0 4px 14px color-mix(in srgb, var(--violet) 45%, transparent);
-}
-.alarm:hover { filter: brightness(1.1); }
-.iconbtn { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; color: var(--ink); display: grid; place-items: center; }
-.iconbtn:hover { background: var(--surface); }
-.iconbtn[aria-pressed="false"] { color: var(--muted); }
-.badge { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--red); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
-.who { display: flex; align-items: center; gap: 8px; font-weight: 700; }
-.avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--line); display: grid; place-items: center; color: var(--muted); }
-.pop { position: absolute; top: 56px; right: 0; width: min(350px, 86vw); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px rgba(8,20,40,.22); z-index: 15; padding: 8px; }
-.pop h3 { font-size: 14px; padding: 6px 8px; color: var(--muted); }
-.pop button { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 8px; border-radius: 8px; }
-.pop button:hover { background: var(--surface2); }
-.pop .none { padding: 10px 8px; color: var(--muted); font-size: 14px; }
-
-#banner { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--muted); font-size: 14px; }
-#alertBar { display: flex; align-items: center; gap: 14px; margin: 0 0 14px; padding: 12px 16px; border-radius: 12px; background: var(--violet); color: #fff; }
-#alertBar .ab-t { flex: 1; min-width: 0; display: grid; }
-#alertBar strong { font-size: 16px; font-weight: 900; letter-spacing: .04em; }
-#alertBar span.s { font-size: 14px; overflow-wrap: anywhere; opacity: .95; }
-#alertBar .btn { background: #fff; color: #2d1473; border-color: #fff; white-space: nowrap; }
-#alertBar.flash { animation: flash 0.7s ease-in-out 5; }
-@keyframes flash { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--violet) 40%, transparent); filter: brightness(1.25); } }
-@media (prefers-reduced-motion: reduce) { #alertBar.flash { animation: none; outline: 4px solid var(--ink); } }
-
-.mapview { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
-.colA, .colB { display: grid; gap: 16px; min-width: 0; }
-@media (max-width: 1180px) {
-  .mapview { grid-template-columns: minmax(0, 1fr); }
-  .colA, .colB { display: contents; }
-  .mapcard { order: 1; } .legend { order: 2; } .formcard { order: 3; } .latest { order: 4; } .helpcard { order: 5; } .linkcard { order: 6; }
-}
-
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
-.mapcard { position: relative; overflow: hidden; }
-.mapbox { position: relative; aspect-ratio: 1000 / 650; background: var(--map-bg); }
-#map { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
-.mk { cursor: pointer; }
-.mk .p { stroke: #fff; stroke-width: 2; }
-.mk.grey .p { fill: var(--grey); }
-.mk.green .p { fill: var(--green); } .mk.violet .p { fill: var(--violet); }
-.mk .g { fill: #fff; font-weight: 900; font-size: 15px; text-anchor: middle; font-family: var(--font); pointer-events: none; }
-.mk:focus-visible { outline: none; } .mk:focus-visible .p { stroke: var(--ink); stroke-width: 3; }
-.mk.sel .p { stroke: var(--ink); stroke-width: 3; }
-.ring { fill: var(--violet); fill-opacity: .25; stroke: var(--violet); stroke-width: 2; pointer-events: none; }
-.draft .p { fill: var(--primary); stroke: #fff; stroke-width: 2; }
-.map-ctl { position: absolute; left: 12px; top: 12px; display: grid; gap: 10px; z-index: 2; }
-.map-ctl .grp { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(8,20,40,.16); }
-.map-ctl button { width: 42px; height: 42px; border: 0; background: var(--surface); color: var(--ink); display: grid; place-items: center; }
-.map-ctl .grp button + button { border-top: 1px solid var(--line); }
-.map-ctl button:hover { background: var(--surface2); }
-.map-ctl .solo { border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 2px 8px rgba(8,20,40,.16); }
-.map-note { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(86%, 420px); text-align: center; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: 14px; font-weight: 700; line-height: 1.5; box-shadow: 0 2px 10px rgba(8,20,40,.18); pointer-events: none; }
-.map-tag { position: absolute; right: 10px; bottom: 8px; font-size: 11px; color: var(--map-label); background: color-mix(in srgb, var(--surface) 80%, transparent); padding: 1px 8px; border-radius: 6px; }
-.pickhint { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; pointer-events: none; white-space: nowrap; max-width: calc(100% - 140px); overflow: hidden; text-overflow: ellipsis; }
-
-.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 18px; font-size: 14px; font-weight: 500; }
-.legend span { display: inline-flex; align-items: center; gap: 8px; }
-.dot { width: 14px; height: 14px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: inline-block; flex: none; }
-.dot.red { background: var(--red); } .dot.orange { background: var(--orange); } .dot.blue { background: var(--blue); } .dot.grey { background: var(--grey); } .dot.green { background: var(--green); } .dot.violet { background: var(--violet); }
-.legend b.red { color: var(--red-t); } .legend b.orange { color: var(--orange-t); } .legend b.blue { color: var(--blue-t); } .legend b.grey { color: var(--grey-t); } .legend b.green { color: var(--green-t); } .legend b.violet { color: var(--violet-t); }
-
-.latest { padding: 16px 18px 6px; }
-.sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.sec-head h2 { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 900; }
-.sec-head h2 svg { color: var(--primary); }
-.linkbtn { border: 0; background: transparent; color: var(--blue-t); font-weight: 700; font-size: 14px; padding: 6px 4px; }
-.rows { list-style: none; margin: 0; padding: 0; }
-.row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; background: transparent; border-left: 0; border-right: 0; border-bottom: 0; color: inherit; }
-.rows li:first-child .row { border-top: 0; }
-.row:hover { background: var(--surface2); }
-.thumb { width: 64px; height: 56px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); overflow: hidden; }
-.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.thumb.green { color: var(--green-t); background: color-mix(in srgb, var(--green) 14%, var(--surface)); }
-.thumb.violet { color: var(--violet-t); background: color-mix(in srgb, var(--violet) 14%, var(--surface)); }
-.row .tl { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 14px; }
-.tl.red { color: var(--red-t); } .tl.orange { color: var(--orange-t); } .tl.blue { color: var(--blue-t); } .tl.grey { color: var(--grey-t); } .tl.green { color: var(--green-t); } .tl.violet { color: var(--violet-t); }
-.row .addr { font-weight: 700; overflow-wrap: anywhere; line-height: 1.4; }
-.row .meta { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.pill { font-size: 13px; font-weight: 700; padding: 3px 14px; border-radius: 999px; white-space: nowrap; }
-.pill.red { background: color-mix(in srgb, var(--red) 14%, var(--surface)); color: var(--red-t); }
-.pill.orange { background: color-mix(in srgb, var(--orange) 18%, var(--surface)); color: var(--orange-t); }
-.pill.blue { background: color-mix(in srgb, var(--blue) 14%, var(--surface)); color: var(--blue-t); }
-.pill.grey { background: color-mix(in srgb, var(--grey) 18%, var(--surface)); color: var(--grey-t); }
-.pill.green { background: color-mix(in srgb, var(--green) 16%, var(--surface)); color: var(--green-t); }
-.pill.violet { background: color-mix(in srgb, var(--violet) 16%, var(--surface)); color: var(--violet-t); }
-.row .chev { color: var(--muted); }
-@media (max-width: 560px) {
-  .row { grid-template-columns: 56px minmax(0, 1fr) auto; }
-  .row .chev { display: none; }
-  .thumb { width: 56px; height: 52px; }
-}
-.empty { padding: 26px 12px 30px; text-align: center; color: var(--muted); }
-.empty strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
-
-/* form */
-.formcard { padding: 18px; }
-.formcard form { display: grid; gap: 18px; margin-top: 16px; }
-.step h3 { font-size: 16px; font-weight: 900; margin-bottom: 8px; display: flex; align-items: baseline; gap: 8px; }
-.step h3 em { font-style: normal; font-weight: 400; font-size: 13px; color: var(--muted); }
-.addrbox { display: flex; align-items: center; gap: 8px; background: color-mix(in srgb, var(--blue) 9%, var(--surface)); border-radius: 10px; padding: 0 12px; min-height: 46px; }
-.addrbox svg { color: var(--blue); }
-.addrbox input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 16px; min-height: 44px; }
-.addrbox:focus-within { box-shadow: 0 0 0 2px var(--focus); }
-.relocate { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; border: 0; background: transparent; color: var(--blue-t); font-weight: 700; font-size: 14px; padding: 6px 2px; }
-.pinstate { font-size: 13px; color: var(--muted); margin-top: 2px; }
-.opts { display: flex; flex-wrap: wrap; gap: 8px; }
-.opt-lab { font-size: 13px; font-weight: 700; color: var(--muted); margin: 10px 0 6px; }
-.opt-lab:first-child { margin-top: 0; }
-.pt { min-height: 42px; padding: 6px 16px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); font-weight: 700; font-size: 14px; }
-.pt[aria-pressed="true"] { border-color: var(--green); background: color-mix(in srgb, var(--green) 14%, var(--surface)); color: var(--green-t); }
-.pt.v[aria-pressed="true"] { border-color: var(--violet); background: color-mix(in srgb, var(--violet) 14%, var(--surface)); color: var(--violet-t); }
-.drop { border: 1.5px dashed var(--map-edge); border-radius: 12px; padding: 16px 12px; text-align: center; background: var(--surface2); color: var(--muted); font-size: 13px; width: 100%; }
-.drop strong { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--ink); font-size: 14px; margin-bottom: 2px; }
-.drop.over { border-color: var(--focus); background: color-mix(in srgb, var(--blue) 10%, var(--surface)); }
-.shots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.shot { position: relative; width: 72px; height: 64px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
-.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.shot button { position: absolute; top: 2px; right: 2px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(10,20,35,.75); color: #fff; display: grid; place-items: center; padding: 0; }
-.field { width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 16px; line-height: 1.5; }
-textarea.field { min-height: 88px; resize: vertical; }
-.field::placeholder, .addrbox input::placeholder, .search input::placeholder { color: var(--muted); opacity: .85; }
-.count { text-align: right; font-size: 12px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
-.formErr { min-height: 1.3em; font-size: 14px; font-weight: 700; color: var(--red-t); }
-#formErr { margin-top: -8px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 8px 16px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 700; font-size: 14px; }
-.btn:hover { border-color: var(--muted); }
-.btn[disabled] { opacity: .55; cursor: default; }
-.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); min-height: 50px; font-size: 17px; width: 100%; letter-spacing: .06em; }
-.btn.primary.green { background: var(--green-t); border-color: var(--green-t); color: #fff; }
-.btn.primary.violet { background: var(--violet); border-color: var(--violet); }
-.btn.primary:hover { filter: brightness(1.08); }
-.btn.danger { color: var(--red-t); }
-.btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.fine { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--muted); margin-top: -6px; }
-.fine svg { margin-top: 3px; }
-
-.helpcard, .linkcard { display: flex; gap: 14px; align-items: center; padding: 16px 18px; background: color-mix(in srgb, var(--blue) 8%, var(--surface)); }
-.helpcard .ib, .linkcard .ib { color: var(--blue-t); }
-.helpcard h3, .linkcard h3 { font-size: 16px; font-weight: 900; }
-.helpcard p, .linkcard p { font-size: 13px; color: var(--muted); }
-.helpcard .grow, .linkcard .grow { flex: 1; min-width: 0; }
-.helpcard .btn { background: var(--primary); color: #fff; border-color: var(--primary); text-decoration: none; white-space: nowrap; }
-.num { font-weight: 900; letter-spacing: .08em; user-select: all; }
-
-/* other views */
-.page { display: grid; gap: 16px; }
-.page-head h2 { font-size: 22px; font-weight: 900; }
-.page-head p { color: var(--muted); }
-.filters { display: flex; flex-wrap: wrap; gap: 10px; }
-.filters select { min-height: 42px; padding: 6px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 15px; }
-.listcard { padding: 4px 18px; }
-.prose { padding: 20px 22px; display: grid; gap: 14px; max-width: 78ch; }
-.prose h3 { font-size: 17px; font-weight: 900; }
-.prose ol, .prose ul { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
-
-/* dialogs */
-.veil { position: fixed; inset: 0; z-index: 30; background: rgba(8,16,30,.55); display: grid; place-items: center; padding: max(14px, env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px)) max(14px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); }
-.dlg { width: min(560px, 100%); max-height: 100%; overflow-y: auto; background: var(--surface); border-radius: 16px; padding: 18px; display: grid; gap: 14px; }
-.dlg-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.xbtn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--surface2); display: grid; place-items: center; }
-.dlg h2 { font-size: 20px; font-weight: 900; line-height: 1.35; overflow-wrap: anywhere; }
-.dlg .lead { color: var(--muted); font-size: 14px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { font-size: 13px; font-weight: 700; padding: 2px 10px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--line); }
-.photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
-.photos img { width: 100%; border-radius: 10px; display: block; border: 1px solid var(--line); }
-.photos .wait { color: var(--muted); font-size: 14px; }
-.dnote { white-space: pre-wrap; overflow-wrap: anywhere; }
-.seg { display: flex; flex-wrap: wrap; gap: 6px; }
-.dact { display: flex; flex-wrap: wrap; gap: 8px; }
-.dact a.btn { text-decoration: none; color: inherit; }
-.dlg textarea.field { min-height: 70px; font-size: 14px; }
-.alarm-go { min-height: 60px; font-size: 20px; width: 100%; border: 0; border-radius: 14px; background: var(--violet); color: #fff; font-weight: 900; letter-spacing: .1em; display: flex; align-items: center; justify-content: center; gap: 10px; }
-.alarm-go[disabled] { opacity: .6; }
-#toast { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; z-index: 40; }
-#toast span { background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; max-width: 100%; }
-.fab { display: none; }
-
-@media (max-width: 900px) {
-  .app { grid-template-columns: minmax(0, 1fr); }
-  .side { position: static; height: auto; overflow: visible; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
-  .logo h1 { font-size: 22px; }
-  .nav { display: flex; flex: 1 1 100%; gap: 4px; overflow-x: auto; }
-  .nav button { padding: 8px 12px; min-height: 42px; font-size: 15px; white-space: nowrap; gap: 8px; }
-  .tip, .tip-art { display: none; }
-  .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); }
-  .area { display: none; }
-  .top-right .alarm { display: none; }
-  .fab {
-    display: flex; align-items: center; gap: 8px; position: fixed; z-index: 25; min-height: 56px; padding: 0 22px; border: 0; border-radius: 28px;
-    right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    background: var(--violet); color: #fff; font-weight: 900; font-size: 17px; letter-spacing: .06em; box-shadow: 0 6px 20px rgba(40,10,110,.4);
-  }
-}
-@media (prefers-reduced-motion: no-preference) { .btn, .row, .nav button { transition: background-color .15s, border-color .15s; } }
-.mk.red .p{fill:var(--red)}.mk.orange .p{fill:var(--orange)}.mk.blue .p{fill:var(--blue)}
-.legend .ln i{display:inline-block;width:24px;height:6px;border-radius:3px}
-.legend label{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-weight:700}
-.modes{margin:10px 0 2px}
-:root{--teal:#0d9488;--teal-t:#0b6b62}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--teal:#2dd4bf;--teal-t:#7ee8d8}}
-:root[data-theme="dark"]{--teal:#2dd4bf;--teal-t:#7ee8d8}
-.mk.teal .p{fill:var(--teal)}
-.dot.teal{background:var(--teal)}.legend b.teal{color:var(--teal-t)}.tl.teal{color:var(--teal-t)}
-.pill.teal{background:color-mix(in srgb,var(--teal) 16%,var(--surface));color:var(--teal-t)}
-.thumb.teal{color:var(--teal-t);background:color-mix(in srgb,var(--teal) 14%,var(--surface))}
-.pt.t[aria-pressed="true"]{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 14%,var(--surface));color:var(--teal-t)}
-.btn.primary.teal{background:var(--teal);border-color:var(--teal);color:#06302c}
-.gentle{border:1.5px solid color-mix(in srgb,var(--teal) 45%,var(--line));background:color-mix(in srgb,var(--teal) 8%,var(--surface));border-radius:12px;padding:10px 12px;font-size:14px;color:var(--ink)}
-.gentle strong{display:block;color:var(--teal-t);margin-bottom:2px}
-.nudge{border:1.5px dashed var(--teal);border-radius:12px;padding:12px;background:var(--surface2);display:grid;gap:8px}
-.nudge h3{font-size:15px;font-weight:900;color:var(--teal-t)}
-.nudge .msg{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.7}
-.nudge .row2{display:flex;gap:8px;flex-wrap:wrap}
-.btn.teal{border-color:var(--teal);color:var(--teal-t)}
-
-.step input[type=time]{min-height:42px;padding:6px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);font-size:16px}
-
-/* ===== RWD ===== */
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-.main{width:100%;max-width:1480px;margin-inline:auto}
-.filters select,.dlg textarea.field{font-size:16px}
-.dlg{max-height:100%}
-.dlg .pill{white-space:normal}
-@media (min-width:901px){.app{min-height:100dvh}.side{height:100dvh}}
-@media (min-width:640px) and (max-width:1180px){
-  .mapview{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .mapcard,.legend,.formcard,.latest{grid-column:1/-1}
-  .formcard form{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px;align-items:start}
-  #formErr,#send,.formcard .fine{grid-column:1/-1}
-  #formErr{margin-top:0}
-}
-@media (max-width:900px){
-  .nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));overflow:visible}
-  .nav button{justify-content:center}
-  .main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
-  #toast{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
-}
-@media (max-width:560px){
-  .side{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
-  .main{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
-  .nav button{flex-direction:column;gap:2px;font-size:13px;padding:6px 2px;min-height:54px}
-  .logo small{font-size:10px}
-  .map-ctl{left:8px;top:8px;gap:8px}.map-ctl button{width:40px;height:40px}
-  .pickhint{font-size:12px;top:8px}.map-note{font-size:12px;padding:10px 12px}
-  .legend{padding:10px 14px;gap:6px 14px;font-size:13px}
-  .latest{padding:14px 14px 4px}.formcard{padding:14px}
-  .helpcard,.linkcard{flex-wrap:wrap}
-  #alertBar{flex-wrap:wrap}#alertBar .btn{width:100%}
-  .dlg{padding:16px;border-radius:14px}.dlg h2{font-size:18px}.alarm-go{font-size:18px}
-}
-@media (max-width:360px){.top-right{gap:4px}.who #who{display:none}.logo h1{font-size:20px}}
+@media (min-width:900px) and (max-width:1180px){#app{grid-template-columns:180px minmax(0,1fr) 340px}#alarmFab{right:360px}}
+#fbBtn{position:relative;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px}
+#fbBtn i{position:absolute;top:2px;right:0;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-style:normal;display:none;place-items:center;padding:0 4px}
+.carpin{width:38px;height:38px;border-radius:50%;background:#1d6bf3;border:3px solid #fff;display:grid;place-items:center;font-size:19px;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#carAlert{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 72px);transform:translateX(-50%);z-index:3200;width:min(420px,calc(100% - 20px));display:none}
+#carAlert.show{display:block}
+.ca{background:#fff;border:2px solid var(--red);border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px rgba(225,29,72,.35)}
+.ca-h{font-weight:800;color:var(--red);margin-bottom:6px}.ca-i{font-size:14px;padding:3px 0}.ca-i small{display:block;color:var(--mut);font-size:12px}
+.rep{background:#eff6ff;border-left:3px solid var(--blue);border-radius:6px;padding:7px 10px;margin-top:8px;font-size:13.5px;white-space:pre-wrap}
+.lk{display:inline-block;font-size:12px;color:#64748b;background:#f1f5f9;border-radius:6px;padding:1px 8px;margin-top:4px}
+@media (max-width:899px){#fbBtn{width:38px;height:38px}#bnav button{font-size:10.5px}}
 </style>
-
-<div class="app">
-  <aside class="side">
-    <div class="logo">
-      <svg width="58" height="52" viewBox="0 0 64 56" aria-hidden="true">
-        <rect x="5" y="22" width="46" height="24" rx="9" fill="#3b82f6"/>
-        <path d="M13 23l4.500-11h20l4.500 11z" fill="#cfe3ff"/>
-        <circle cx="16" cy="46" r="5.500" fill="#0a1d3a"/><circle cx="40" cy="46" r="5.500" fill="#0a1d3a"/>
-        <circle cx="13" cy="34" r="3" fill="#ffe08a"/><circle cx="43" cy="34" r="3" fill="#ffe08a"/>
-        <path d="M50 3a9.500 9.500 0 0 1 9.500 9.500C59.500 20 50 27 50 27s-9.500-7-9.500-14.500A9.500 9.500 0 0 1 50 3z" fill="#ef4444"/>
-        <circle cx="50" cy="12.500" r="3.500" fill="#fff"/>
-      </svg>
-      <div><h1>移車快報</h1><small>即時通報・守護交通・從你我做起</small></div>
-    </div>
-    <nav class="nav" id="nav" aria-label="主選單"></nav>
-    <section class="tip" aria-labelledby="tipT">
-      <h2 id="tipT"><span data-ic="bulb"></span>通報小提醒</h2>
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <div class="brand"><div class="lg">🚗</div><div><b>移車快報</b><small>即時通報・守護交通・從你我做起</small></div></div>
+    <nav id="sidenav">
+      <button data-nav="map">🗺️ 即時地圖</button>
+      <button data-nav="feed">📋 通報紀錄</button>
+      <button data-nav="r-occupy">🚧 占用勸導</button>
+      <button data-nav="r-store">⛔ 店家禁停</button>
+      <button data-nav="r-parking">🅿️ 回報車位</button>
+      <button data-nav="mycar">🚗 我的愛車</button>
+      <button data-nav="feedback">💬 聯絡創建者</button>
+      <button data-nav="help">❓ 使用說明</button>
+      <button data-nav="creator">🛡️ 創建者</button>
+    </nav>
+    <div class="tips">
+      <h4>💡 這停通報小提醒</h4>
       <ol>
-        <li>請如實回報，看到什麼就寫什麼，不要誤報或惡作劇。</li>
+        <li>本平台為民眾回報與資訊整合，不等同於正式檢舉。緊急危險請撥打 110。</li>
         <li>請勿拍攝車牌特寫或公開個資。</li>
-        <li>車位和開單狀況變動很快，通報超過一段時間會自動變成已過期。</li>
+        <li>共同維護交通，讓逢甲更順暢！</li>
       </ol>
-    </section>
-    <div class="tip-art" aria-hidden="true">
-      <p class="slogan">少一點違停<br>多一點順暢！</p>
-      <svg viewBox="0 0 264 190">
-        <rect x="0" y="150" width="264" height="40" fill="#0a2447"/>
-        <path d="M0 168h264" stroke="#2a4a7c" stroke-width="2" stroke-dasharray="14 12"/>
-        <g fill="#1f4f6b"><ellipse cx="34" cy="96" rx="16" ry="30"/><rect x="31" y="110" width="6" height="44"/><ellipse cx="236" cy="104" rx="14" ry="26"/><rect x="233" y="116" width="6" height="38"/></g>
-        <g transform="translate(62 84)">
-          <path d="M6 54c0-12 4-18 14-22l14-18c3-4 8-6 14-6h28c7 0 12 2 16 7l14 17c11 2 18 8 18 22v10H6z" fill="#8fb4e6"/>
-          <path d="M40 32l10-14c2-3 5-4 9-4h24c4 0 7 1 9 4l9 14z" fill="#d7e6fa"/>
-          <circle cx="40" cy="64" r="11" fill="#0a1d3a"/><circle cx="40" cy="64" r="5" fill="#cfe0f6"/>
-          <circle cx="116" cy="64" r="11" fill="#0a1d3a"/><circle cx="116" cy="64" r="5" fill="#cfe0f6"/>
-          <rect x="144" y="44" width="8" height="6" rx="2" fill="#ffe08a"/>
-        </g>
-      </svg>
     </div>
+    <div class="slogan">少一點違停<br>多一點順暢 ♥</div>
   </aside>
 
-  <div class="main">
-    <header class="top">
-      <label class="search">
-        <span data-ic="search"></span>
-        <span class="sr-only">搜尋地點</span>
-        <input id="q" type="search" placeholder="搜尋地點（例：逢甲大學、文華路、福星路）" autocomplete="off">
-      </label>
-      <div class="area"><span data-ic="pin"></span>台中市 西屯區 逢甲大學周邊</div>
-      <div class="top-right">
-        <button class="alarm" id="alarmTop" type="button"><span data-ic="siren"></span>開單警報</button>
-        <button class="iconbtn" id="snd" type="button" aria-pressed="true" aria-label="警報提示音"><span id="sndIc"></span></button>
-        <button class="iconbtn" id="bell" type="button" aria-label="進行中的警報與通報" aria-haspopup="true" aria-expanded="false"><span data-ic="bell"></span><span class="badge" id="badge" hidden>0</span></button>
-        <div class="who"><span class="avatar" data-ic="user"></span><span id="who">訪客</span></div>
-        <div class="pop" id="pop" hidden></div>
-      </div>
-    </header>
-    <div id="alertBar" role="status" hidden></div>
-    <div id="banner" role="status" hidden></div>
+  <header id="top">
+    <form id="search" autocomplete="off"><span>🔍</span><input id="q" placeholder="搜尋地點（例：逢甲大學、文華路、福星路）" enterkeyhint="search"></form>
+    <div class="chip">📍 台中市 西屯區 逢甲大學周邊</div>
+    <div class="sp"></div>
+    <button id="bell" aria-label="警報">🔔<i id="bellN"></i></button>
+    <button id="fbBtn" aria-label="聯絡創建者">💬<i id="fbN"></i></button>
+    <div id="acct"><div class="av">👤</div><span id="acctT">訪客</span></div>
+  </header>
 
-    <section id="v-map" class="mapview">
-      <div class="colA">
-        <div class="card mapcard">
-          <div class="mapbox">
-            <svg id="map" viewBox="0 0 1000 650" role="img" aria-label="逢甲周邊地圖，點一下可標記位置"></svg>
-            <div class="map-ctl">
-              <div class="grp"><button type="button" id="zin" aria-label="放大"><span data-ic="plus"></span></button><button type="button" id="zout" aria-label="縮小"><span data-ic="minus"></span></button></div>
-              <button type="button" id="zhome" class="solo" aria-label="回到逢甲周邊"><span data-ic="locate"></span></button>
-              <button type="button" id="tilesw" class="solo" aria-label="切換底圖來源" title="切換底圖來源"><span data-ic="map"></span></button>
-            </div>
-            <div class="pickhint" id="pickhint">點地圖，標記位置</div>
-            <span class="map-tag" id="mapAttr"></span>
-            <div class="map-note" id="mapNote" hidden>底圖圖磚在這個環境載入不了（頁面可能被限制連到外部地圖），目前顯示簡易示意圖，仍可點選位置與回報。需要完整街道地圖，請改用下載的檔案開啟，或按左側地圖按鈕換底圖來源。</div>
-          </div>
-        </div>
-        <div class="card legend" aria-label="圖例">
-          <span><i class="dot violet"></i><b class="violet">正在開單</b>（警報）</span>
-          <span><i class="dot teal"></i><b class="teal">占用提醒</b>（勸導中）</span>
-          <span><i class="dot green"></i><b class="green">有車位</b></span>
-          <span><i class="dot grey"></i><b class="grey">已過期／已結束</b></span>
-          <span><i class="dot red"></i><b class="red">禁停中</b>（店家公告）</span>
-          <span><i class="dot orange"></i><b class="orange">稍後禁停</b></span>
-          <span class="ln"><i style="background:#2f6df0"></i>收費停車格</span>
-          <span class="ln"><i style="background:#86efac;border:1px solid #13233d"></i>可停車（創建者標示）</span>
-          <span class="ln"><i style="background:#f5c400"></i>黃線禁停</span>
-          <span class="ln"><i style="background:#e0362f"></i>紅線禁停臨停</span>
-          <label><input type="checkbox" id="lyLegal" checked>顯示車線</label>
-          <span id="osmNote" style="flex-basis:100%;font-weight:400;color:var(--muted);font-size:13px"></span>
-        </div>
-        <section class="card latest" aria-labelledby="latestT">
-          <div class="sec-head"><h2 id="latestT"><span data-ic="list"></span>最新通報</h2><button class="linkbtn" id="toAll" type="button">查看全部</button></div>
-          <ul class="rows" id="latestList"></ul>
-        </section>
-      </div>
-      <div class="colB">
-        <section class="card formcard" aria-label="送出通報">
-          <div class="sec-head"><h2><span data-ic="parking"></span>回報與標示</h2></div>
-          <div class="opts modes" id="modes" role="group" aria-label="回報類型"></div>
-          <form id="form" novalidate>
-            <div class="step">
-              <h3 id="s1t">1. 選擇位置</h3>
-              <div class="addrbox"><span data-ic="pin"></span><input id="addr" type="text" maxlength="60" placeholder="先在地圖上點選位置" aria-label="位置描述"></div>
-              <button class="relocate" type="button" id="relocate"><span data-ic="locate"></span><span id="relocateT">在地圖上選位置</span></button>
-              <p class="pinstate" id="pinstate"></p>
-            </div>
-            <div class="step" id="step2"></div>
-            <div class="step">
-              <h3>3. 上傳照片 <em id="s3em">（選填）</em></h3>
-              <button type="button" class="drop" id="drop"><strong><span data-ic="camera"></span>點擊上傳或拖曳照片</strong>支援 JPG、PNG（最多 3 張）<br>上傳時會自動遮蔽車牌數字，只留英文字母<br><span id="dropHint">占用勸導：請拍整體路況，不要拍車牌特寫</span></button>
-              <input id="file" class="sr-only" type="file" accept="image/jpeg,image/png" multiple tabindex="-1" aria-label="選擇照片">
-              <div class="shots" id="shots"></div>
-            </div>
-            <div class="step">
-              <h3>4. 補充說明 <em>（選填）</em></h3>
-              <textarea id="note" class="field" maxlength="200" aria-label="補充說明"></textarea>
-              <p class="count" id="count">0/200</p>
-            </div>
-            <p id="formErr" class="formErr" role="alert"></p>
-            <button type="submit" class="btn primary" id="send"></button>
-            <p class="fine"><span data-ic="info"></span><span id="fineT"></span></p>
-          </form>
-        </section>
-        <section class="card helpcard">
-          <span class="ib" data-ic="shield"></span>
-          <div class="grow"><h3>需要立即協助？</h3><p>若有緊急危險或嚴重阻礙交通，請撥打 <span class="num">110</span> 報警。</p></div>
-          <a class="btn" href="tel:110"><span data-ic="phone"></span>撥打 110</a>
-        </section>
-        <section class="card linkcard">
-          <span class="ib" data-ic="link"></span>
-          <div class="grow"><h3>各縣市交通違規檢舉管道</h3><p>正式檢舉請到所在縣市警察局官方網站查詢，並依當地規定辦理。</p></div>
-          <a class="linkbtn" href="https://www.npa.gov.tw" target="_blank" rel="noopener" aria-label="前往內政部警政署網站（另開新分頁）"><span data-ic="chev"></span></a>
-        </section>
-      </div>
-    </section>
+  <main id="mapwrap">
+    <div id="map"></div>
+    <div id="pickbar"><span id="pickMsg"></span><button id="pkUndo">復原</button><button id="pkDone" class="ok">完成</button><button id="pkCancel">取消</button></div>
+    <div class="legend">
+      <span><i style="background:#0d9488"></i>占用勸導</span>
+      <span><i style="background:#e11d48"></i>禁停中</span>
+      <span><i style="background:#f59e0b"></i>稍後禁停</span>
+      <span><i style="background:#2563eb"></i>車位回報</span>
+      <span><i class="ln" style="background:#6366f1"></i>收費格</span>
+      <span><i class="ln" style="background:#22c55e"></i>可停車</span>
+      <span><i class="ln" style="background:#eab308"></i>黃線</span>
+      <span><i class="ln" style="background:#dc2626"></i>紅線</span>
+    </div>
+  </main>
 
-    <section id="v-records" class="page" hidden>
-      <div class="page-head"><h2>通報紀錄</h2><p>所有人送出的通報，新的在上面。</p></div>
-      <div class="filters">
-        <label class="sr-only" for="fKind">種類</label>
-        <select id="fKind"><option value="all">全部種類</option><option value="ticket">開單警報</option><option value="obstruct">占用勸導</option><option value="parking">車位</option><option value="nopark">店家禁停公告</option><option value="legal">車線標示</option></select>
-        <label class="sr-only" for="fStatus">狀態</label>
-        <select id="fStatus"><option value="all">全部狀態</option><option value="active">進行中</option><option value="ended">已結束／已處理</option><option value="expired">已過期</option></select>
-        <label class="sr-only" for="fRange">時間</label>
-        <select id="fRange"><option value="24">最近 24 小時</option><option value="168">最近 7 天</option><option value="all">全部</option></select>
-      </div>
-      <div class="card listcard"><ul class="rows" id="recList"></ul></div>
-    </section>
+  <section id="panel"><div class="grab"></div><div id="pb"></div></section>
 
-    <section id="v-review" class="page" hidden>
-      <div class="page-head"><h2>審核</h2><p>使用者申請新增的可停車地點，檢視照片後核准或退回。</p></div>
-      <div class="card listcard"><ul class="rows" id="revList"></ul></div>
-    </section>
-
-    <section id="v-help" class="page" hidden>
-      <div class="page-head"><h2>使用說明</h2></div>
-      <div class="card prose">
-        <h3>正在開單？按警鈴</h3>
-        <ol>
-          <li>按右上角（手機是右下角）的「開單警報」。</li>
-          <li>點選最接近的路段或地點，選「正在開單」或「正在拖吊」。</li>
-          <li>按「按下警鈴」。所有開著這個頁面的人會立刻看到紫色警報列，並聽到提示音。</li>
-          <li>警報會持續 45 分鐘；有人按「還在這裡」會延長，按「已離開」會結束。</li>
-        </ol>
-        <h3>占用勸導：善意提醒，不是檢舉</h3>
-        <ol>
-          <li>在「回報與標示」選「占用勸導」，點地圖標出位置；想標一整段路，可按「標記一段路」再點終點。</li>
-          <li>選占用情況（嚴重阻礙車道、占用人行道…），可上傳現場照片（自動遮蔽車牌數字，請拍整體路況，不要拍車牌特寫）。</li>
-          <li>送出後，大家會看到青綠色提醒。點開通報可複製「友善提醒小卡」文字，當面或貼在擋風玻璃上，請對方方便時移車。</li>
-          <li>有人提醒過可按「已勸導」，車移走了按「已改善」。這裡不會公開車牌，也不會轉交警方。</li>
-          <li>如果有人受傷、救護或消防受阻，請直接撥 110／119。</li>
-        </ol>
-        <h3>回報車位</h3>
-        <ol>
-          <li>在地圖點出有位置的地方。</li>
-          <li>選汽車或機車、大約有幾個位置、是否收費。</li>
-          <li>車位變動很快，30 分鐘後會自動變成已過期；有人按「還有位」會延長，按「已滿了」會結束。</li>
-        </ol>
-        <h3>店家通報禁停時段</h3>
-        <ol>
-          <li>在「回報與標示」選「店家禁停」，點地圖標出巷口或店門前。</li>
-          <li>填店名和「每天幾點開始禁止停車」，結束時間可不填。</li>
-          <li>到了時段地圖會變紅色「禁」，還沒到時段是橘色提醒。公告不會自動過期，只有發布者可以撤銷。</li>
-        </ol>
-        <h3>新增停車地點與標示車線</h3>
-        <ol>
-          <li>一般使用者選「申請新增停車地點」，在地圖點可停車路段的起點和終點，並附上現場照片（必填），送出後等創建者審核；通過後顯示為淺綠色標線。</li>
-          <li>創建者（需要權限）可直接編輯車線：收費停車格、可停車（淺綠）、黃線（禁止停車）、紅線（禁停含臨停），並在「審核」頁核准或退回申請。</li>
-          <li>這是民眾標示，不是官方資料，請以現場標線與告示為準。</li>
-        </ol>
-        <h3>其他</h3>
-        <ul>
-          <li>「複製分享文字」會產生一段文字，可以直接貼到 LINE 群組。</li>
-          <li>自己送出的通報可以刪除。</li>
-          <li>想關掉警報提示音，按上方的喇叭按鈕。瀏覽器要先點過頁面，才會發出聲音。</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="v-about" class="page" hidden>
-      <div class="page-head"><h2>關於我們</h2></div>
-      <div class="card prose">
-        <p>移車快報讓逢甲周邊的居民、學生和店家，即時告訴彼此哪裡有車位、哪裡正在開單。</p>
-        <h3>請注意</h3>
-        <ul>
-          <li>這裡是民眾互相通報的資訊，不是官方系統，也不會轉交給警方。</li>
-          <li>請如實回報。誤報或惡意洗版會讓大家失去信任，也可能讓人白跑一趟。</li>
-          <li>車位和開單狀況變動很快，到場請以現場為準。</li>
-          <li>地圖是示意圖，標記位置只是大概，請在位置描述補上巷口或門牌。</li>
-          <li>不蒐集車牌。請不要在照片和說明裡放車牌特寫、人臉、電話或住址。</li>
-          <li>有人受傷或發生火警請直接撥 119，需要警方到場請撥 110。</li>
-          <li>頁面版本：2026-10-17 中文地圖版（底圖：內政部國土測繪中心電子地圖）。</li>
-        </ul>
-      </div>
-    </section>
-  </div>
+  <nav id="bnav">
+    <button data-nav="map"><span>🗺️</span>地圖</button>
+    <button data-nav="feed"><span>📋</span>通報</button>
+    <button data-nav="r-occupy"><span>🚧</span>占用勸導</button>
+    <button data-nav="r-store"><span>⛔</span>店家禁停</button>
+    <button data-nav="r-parking"><span>🅿️</span>回報車位</button>
+    <button data-nav="mycar"><span>🚗</span>愛車</button>
+    <button data-nav="help"><span>❓</span>說明</button>
+  </nav>
 </div>
 
-<button class="fab" id="alarmFab" type="button"><span data-ic="siren"></span>開單警報</button>
-<div id="overlay"></div>
-<div id="toast" aria-live="polite"></div>
+<button id="alarmFab" aria-label="開單警報"><span>🚨</span>開單警報</button>
 
+<!-- alert modal -->
+<div class="modal" id="alertModal"><div class="box">
+  <div class="hd"><h2>🚨 開單／拖吊警報</h2><button class="x" data-close="alertModal">✕</button></div>
+  <div class="step"><b>1. 在哪個路段？ <em>（可自行選擇）</em></b><select id="aRoad" class="in"></select>
+    <input id="aName" class="in" maxlength="30" placeholder="路段名稱，例：文華路 100 號前" style="margin-top:8px;display:none">
+    <div class="row" style="margin-top:8px"><button class="btn sm" id="aGps">🎯 用我的位置</button><button class="btn sm" id="aPick">📍 在地圖上點選</button></div>
+    <div id="aLoc" class="sum"></div></div>
+  <div class="step"><b>2. 正在做什麼？</b>
+    <div class="big2"><button data-act2="開單" class="on"><span>📝</span>開單</button><button data-act2="拖吊"><span>🚛</span>拖吊</button></div>
+  </div>
+  <p class="hint" style="margin-top:0">按下警鈴後，系統會寄信通知<b>所有已訂閱的使用者</b>，並在地圖上提示 1 小時。</p>
+  <button class="btn red block" id="aSend">🔔 按下警鈴，通知所有人</button>
+  <div id="aMsg"></div>
+  <button class="btn ghost block" style="margin-top:10px" id="aOpenSub">📬 我也要收到警報信件（訂閱）</button>
+</div></div>
+
+<!-- subscribe modal -->
+<div class="modal" id="subModal"><div class="box">
+  <div class="hd"><h2>📬 訂閱開單警報信件</h2><button class="x" data-close="subModal">✕</button></div>
+  <p class="hint" style="margin-top:0">訂閱後，只要有人按下開單警報，您就會收到通知信。我們會先寄一封確認信，點信中連結後才會生效；每封警報信都有取消訂閱連結。信箱只用於寄送警報，不會公開。</p>
+  <input id="sMail" class="in" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email">
+  <button class="btn pri block" style="margin-top:10px" id="sSend">訂閱</button>
+  <div id="sMsg"></div>
+</div></div>
+
+<!-- mask modal -->
+<div class="modal" id="maskModal"><div class="box wide">
+  <div class="hd"><h2>🛡️ 遮蔽車牌</h2><button class="x" id="mkCancel">✕</button></div>
+  <p class="hint" style="margin-top:0">在照片上<b>拖曳框選車牌</b>（可框多個）。系統會把數字蓋黑，只保留英文字母，處理後才會上傳。</p>
+  <div class="seg"><button id="mkL" class="on">英文在左 (ABC-1234)</button><button id="mkR">英文在右 (1234-AB)</button></div>
+  <div id="mkAuto" class="hint"></div>
+  <div class="cwrap"><canvas id="maskCv"></canvas></div>
+  <div class="row"><button class="btn" id="mkUndo">復原一個框</button><button class="btn pri" id="mkDone" style="flex:1">完成遮蔽</button></div>
+</div></div>
+
+<div id="carAlert"></div>
+<div id="lb"><img alt=""></div>
+<div id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-(function () {
-  'use strict';
+(()=>{'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isMobile=()=>matchMedia('(max-width:899px)').matches;
 
-  /* ---------- constants ---------- */
-  var ICONS = {
-    search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
-    pin: '<path d="M12 21s-7-6.200-7-11.500a7 7 0 0 1 14 0C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/>',
-    bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.900 1.900 0 0 0 3.400 0"/>',
-    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
-    map: '<path d="M3 6.500 9 4l6 2.500L21 4v13.500L15 20l-6-2.500L3 20z"/><path d="M9 4v13.500M15 6.500V20"/>',
-    list: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6M9 15h6"/>',
-    help: '<circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .900-1 1.700M12 17h.01"/>',
-    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
-    alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.500h.01"/>',
-    car: '<path d="M5 16v-5l1.800-4.500A2 2 0 0 1 8.700 5h6.600a2 2 0 0 1 1.900 1.500L19 11v5"/><path d="M3 16h18v3H3zM7.500 13h.01M16.500 13h.01"/>',
-    camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/>',
-    send: '<path d="m21 3-9.500 18-2.300-7.700L1.500 11z"/><path d="m21 3-11.800 10.300"/>',
-    shield: '<path d="M12 3 4.500 6v5.500c0 4.500 3 8 7.500 9.500 4.500-1.500 7.500-5 7.500-9.500V6z"/><path d="m9 12 2 2 4-4"/>',
-    phone: '<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
-    link: '<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/>',
-    chev: '<path d="m9 6 6 6-6 6"/>',
-    close: '<path d="M6 6l12 12M18 6 6 18"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>',
-    minus: '<path d="M5 12h14"/>',
-    locate: '<path d="m4 11 16-7-7 16-2-7z"/>',
-    bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.6.500 1 1.200 1 2.100h5c0-.9.400-1.600 1-2.100A6 6 0 0 0 12 3z"/>',
-    image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.800"/><path d="m21 16-5-5-9 9"/>',
-    siren: '<path d="M7 18v-6a5 5 0 0 1 10 0v6"/><path d="M5 21h14M12 3v2M4.500 6.500l1.400 1.400M19.500 6.500l-1.400 1.400"/>',
-    parking: '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M9.500 17V8h3a2.500 2.500 0 0 1 0 5h-3"/>',
-    vol: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/>',
-    mute: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="m17 9 5 6M22 9l-5 6"/>'
-  };
-  function icon(name, size) {
-    var sp = document.createElement('span');
-    sp.style.display = 'inline-flex';
-    sp.innerHTML = '<svg class="ic" viewBox="0 0 24 24" width="' + (size || 20) + '" height="' + (size || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || '') + '</svg>';
-    return sp;
-  }
+/* ---------- 設定 ---------- */
+const CENTER=[24.1790,120.6470];
+const DEMO_PW='creator2026';           // 僅「無後端示範模式」使用；正式上線請走後端 CREATOR_PASSWORD
+const TTL={parking:3*3600e3,occupy:12*3600e3,alert:3600e3};   // 通報自動過期時間
+const KIND={
+  occupy:{name:'占用勸導',color:'#0d9488',icon:'🚧',hint:'車輛占用人行道、騎樓等，供勸導使用。'},
+  store:{name:'店家禁停',color:'#e11d48',icon:'⛔',hint:'店家於特定時段禁止停車。禁停時段內顯示紅色，未到時段顯示黃色「稍後禁停」。'},
+  parking:{name:'回報車位',color:'#2563eb',icon:'🅿️',hint:'回報目前仍有的空位，需附照片；送出後由創建者審核才會公開。'}
+};
+const OCCUPY_TYPES=['阻礙人行道','占用騎樓','占用機車格','占用無障礙車位','占用公車站牌','占用路口轉角','堵住出入口','其他'];
+const LINE_TYPES={paid:{name:'收費停車格',color:'#6366f1'},free:{name:'可停車',color:'#22c55e'},yellow:{name:'黃線',color:'#eab308'},red:{name:'紅線',color:'#dc2626'}};
+/* 路段中心座標為「約略位置」，請依實際情況微調 */
+const ROADS=[
+ {n:'文華路',c:[24.1796,120.6459]},{n:'逢甲路',c:[24.1778,120.6455]},{n:'福星路',c:[24.1765,120.6475]},
+ {n:'福星北二路',c:[24.1812,120.6468]},{n:'西屯路二段',c:[24.1790,120.6420]},{n:'西屯路三段',c:[24.1830,120.6400]},
+ {n:'河南路三段',c:[24.1805,120.6500]},{n:'青海路二段',c:[24.1850,120.6480]},{n:'中工三路',c:[24.1840,120.6520]},{n:'福科路',c:[24.1880,120.6470]},
+ {n:'其他路段（逢甲周邊）',c:CENTER}
+];
 
-  var KINDS = ['parking', 'ticket', 'nopark', 'legal', 'obstruct'];
-  var OBS = {
-    lane: ['嚴重阻礙車道', '車輛占住車道，其他車輛需要閃避或無法通過，容易發生危險。'],
-    side: ['占用人行道', '行人被迫走到車道上，對長輩、孩童和推嬰兒車的人特別危險。'],
-    arcade: ['占用騎樓', '騎樓是行人通行的路，停車會讓人無法安全通過。'],
-    access: ['擋住無障礙／出入口', '輪椅、嬰兒車或住戶、店家的出入口被擋住，進出很困難。'],
-    safety: ['擋住消防栓／轉角', '消防栓或路口轉角被擋，緊急時救援車輛可能過不去。'],
-    other: ['其他占用', '這個位置的停放影響到大家的通行。']
-  };
-  var LTYPES = { paid: ['收費停車格', '#2f6df0'], white: ['可停車（淺綠線）', '#86efac'], yellow: ['黃線（禁止停車）', '#f5c400'], red: ['紅線（禁停含臨停）', '#e0362f'] };
-  function mins(t) { var a = String(t || '').split(':'); return a.length === 2 ? Number(a[0]) * 60 + Number(a[1]) : NaN; }
-  function inWindow(r) {
-    var f = mins(r.from), t = r.to ? mins(r.to) : 1440, d = new Date(), n = d.getHours() * 60 + d.getMinutes();
-    if (isNaN(f) || isNaN(t)) return false;
-    return f <= t ? (n >= f && n < t) : (n >= f || n < t);
-  }
-  function isLong(r) { return r.kind === 'nopark' || r.kind === 'legal'; }
-  function mapVis(r) { return r.kind !== 'legal' || r.review === 'approved' || (r.review === '' && r.ltype !== 'white'); }
-  function vis(r) { return mapVis(r) || ((r.review === 'pending' || r.review === 'rejected') && (canEdit || (uid && r.createdBy === uid))); }
-  function setReview(r, v) {
-    if (db) return db.doc('reports/' + r.id).update({ review: v, updatedAt: Date.now() });
-    r.review = v; renderAll(); return Promise.resolve();
-  }
-  function nudgeText(r) {
-    var o = OBS[r.otype] || OBS.other;
-    return '您好～打擾了！您的車停放的位置（' + r.address.replace(/ (附近|周邊)$/, '') + '）目前' + o[0] + '。' + o[1] + '\n方便的話，麻煩您移動一下車輛，謝謝您的體諒 🙏';
-  }
-  function kindIcon(r) { return r.kind === 'ticket' ? 'siren' : (r.kind === 'nopark' || r.kind === 'obstruct') ? 'alert' : 'parking'; }
-  function newDraft(k) { return { kind: k, pin: null, pin2: null, vehicles: {}, slots: '', fee: '', photos: [], addrTouched: false, shop: '', from: '', to: '', ltype: '', otype: '', seg: false }; }
-  function lineEl(x1, y1, x2, y2, lt, sw) {
-    var col = (LTYPES[lt] || LTYPES.white)[1], g = sv('g', {});
-    var a = { x1: x1, y1: y1, x2: x2, y2: y2, 'stroke-linecap': 'round' };
-    g.append(sv('line', Object.assign({}, a, { stroke: '#13233d', 'stroke-opacity': 0.6, 'stroke-width': sw + 3 })));
-    g.append(sv('line', Object.assign({}, a, { stroke: col, 'stroke-width': sw, 'stroke-dasharray': lt === 'paid' ? (sw * 1.6) + ' ' + (sw * 0.9) : 'none' })));
-    return g;
-  }
-  var VEH = { car: '汽車', moto: '機車' };
-  var SLOTS = []; for (var si = 1; si <= 10; si++) SLOTS.push([String(si), si + ' 個']); SLOTS.push(['10+', '10 個以上']);
-  var SLOTS_ALL = SLOTS.concat([['2-3', '2–3 個'], ['4+', '4 個以上']]);
-  var FEES = [['free', '免費'], ['paid', '收費'], ['unknown', '不確定']];
-    var TTL = { parking: 30 * 60000, ticket: 45 * 60000, obstruct: 90 * 60000 };
-  var MAP_W = 1000, MAP_H = 650;
-  /* Real basemap: raster tiles drawn inside the SVG (OpenStreetMap data, no API key needed).
-     Map units are linear in Web-Mercator pixels, so pins, zoom and pan keep working as before.
-     If a tile fails to load it is retried from the next source; the button on the map switches sources. */
-  var TILE_SOURCES = [
-    { name: '國土測繪中心電子地圖（中文）', url: 'https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', subs: [''], attr: '圖磚 © 內政部國土測繪中心' },
-    { name: 'OSM 法國站', url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', subs: ['a', 'b', 'c'], attr: '© OpenStreetMap 貢獻者・圖磚 OSM France' },
-    { name: 'OpenStreetMap 官方', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', subs: [''], attr: '© OpenStreetMap 貢獻者' }
-  ];
-  var tileIdx = 0;
-  try { var savedTile = Number(localStorage.getItem('ycb-tiles-v3')); if (savedTile >= 0 && savedTile < TILE_SOURCES.length) tileIdx = savedTile; } catch (e) {}
-  var Z0 = 17, U = 0.9;                       /* 1 pixel at zoom 17 = 0.9 map units (map is about 1.2 km wide) */
-  var CENTER = { lat: 24.1795, lng: 120.6480 };
-  var WORLD = 256 * Math.pow(2, Z0);
-  function lngToWx(lng) { return (lng + 180) / 360 * WORLD; }
-  function latToWy(lat) { var sn = Math.sin(lat * Math.PI / 180); return (0.5 - Math.log((1 + sn) / (1 - sn)) / (4 * Math.PI)) * WORLD; }
-  var ORG = { x: lngToWx(CENTER.lng) - MAP_W / U / 2, y: latToWy(CENTER.lat) - MAP_H / U / 2 };
-  function geoToMap(lat, lng) { return { x: (lngToWx(lng) - ORG.x) * U, y: (latToWy(lat) - ORG.y) * U }; }
-  function mapToGeo(x, y) {
-    var wx = x / U + ORG.x, wy = y / U + ORG.y;
-    var n = Math.PI - 2 * Math.PI * wy / WORLD;
-    return { lat: 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))), lng: wx / WORLD * 360 - 180 };
-  }
-  /* quick-pick places for the siren dialog and search (approximate points; r = snap radius in map units) */
-  var PLACES = [
-    { n: '逢甲夜市', lat: 24.1788, lng: 120.6464, r: 60 },
-    { n: '逢甲大學', lat: 24.1796, lng: 120.6480, r: 70 },
-    { n: '逢甲大學水湳校區', lat: 24.1803, lng: 120.6510, r: 50 }
-  ];
-  PLACES.forEach(function (p) { var m = geoToMap(p.lat, p.lng); p.x = Math.round(m.x); p.y = Math.round(m.y); });
-  var ROADS = ['文華路', '逢大路', '福星路', '逢甲路', '西屯路三段', '河南路三段'];
-  var SPOTS = PLACES.map(function (p) { return { n: p.n, x: p.x, y: p.y, addr: p.n + ' 周邊' }; });
+/* ---------- 狀態 ---------- */
+const S={reports:[],lines:[],alerts:[],server:false,token:sessionStorage.getItem('mcb_tok')||'',view:'feed',ctab:'pending',fb:[],rdraft:{},fbDraft:{cat:'idea',text:'',contact:''}};
+let form=null,pick=null,toastT;
+const isCreator=()=>!!S.token;
 
-  /* ---------- state ---------- */
-  var db = null, uid = null, canEdit = false, canWrite = null, localMode = false, loading = true;
-  var reports = [], confirms = {}, localPhotos = {}, photoCache = {};
-  var view = 'map', search = '', selectedId = null, detailSig = '';
-  var draft = newDraft('parking');
-  var lastSubmit = 0, lastAlarm = 0, seenFirst = false;
-  var mv = { z: 1, cx: MAP_W / 2, cy: MAP_H / 2 };
-  var rf = { kind: 'all', status: 'all', range: '24' };
-  var soundOn = true;
-  try { soundOn = localStorage.getItem('ycb-sound') !== '0'; } catch (e) {}
-  var reduceMotion = false;
-  try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+/* ---------- 資料層（有後端用後端，否則 localStorage 示範） ---------- */
+const LSKEY='mcb_data_v1';
+const lsLoad=()=>{try{return JSON.parse(localStorage.getItem(LSKEY))}catch{return null}};
+function lsSave(){try{localStorage.setItem(LSKEY,JSON.stringify({reports:S.reports,lines:S.lines,alerts:S.alerts}));return true}catch{toast('瀏覽器儲存空間不足，請減少照片');return false}}
+async function api(path,opt={}){
+  const h={'Content-Type':'application/json'};if(S.token)h.Authorization='Bearer '+S.token;
+  const r=await fetch(path,{...opt,headers:h});const j=await r.json().catch(()=>({}));
+  if(!r.ok){if(r.status===401&&S.token&&S.server){logout(true)}throw new Error(j.error||('HTTP '+r.status))}
+  return j;
+}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const MY_ID=(()=>{try{let i=localStorage.getItem('mcb_uid');if(!i){i=uid();localStorage.setItem('mcb_uid',i)}return i}catch{return uid()}})();
+function seed(){
+  const t=Date.now();
+  return{reports:[
+   {id:'d1',demo:1,byCreator:1,kind:'occupy',status:'approved',createdAt:t-5*60e3,subtype:'阻礙人行道',place:'文華路 100 號附近',geom:{type:'line',coords:[[24.1797,120.6448],[24.1795,120.6458]]},photos:[],note:'（示範資料）機車停滿人行道'},
+   {id:'d2',demo:1,byCreator:1,kind:'occupy',status:'approved',createdAt:t-50*60e3,subtype:'占用騎樓',place:'逢甲路 20 巷口',geom:{type:'point',coords:[[24.1779,120.6462]]},photos:[],note:'（示範資料）'},
+   {id:'d3',demo:1,byCreator:1,kind:'store',status:'approved',createdAt:t-86400e3,store:'示範夜市小吃',start:'17:00',end:'23:30',place:'福星路 427 號前',geom:{type:'line',coords:[[24.1768,120.6466],[24.1764,120.6482]]},photos:[],note:'（示範資料）店門前請勿停車'},
+   {id:'d4',demo:1,byCreator:1,kind:'store',status:'approved',createdAt:t-86400e3,store:'示範早餐店',start:'06:00',end:'10:30',place:'文華路 88 號',geom:{type:'point',coords:[[24.1801,120.6466]]},photos:[],note:'（示範資料）'},
+   {id:'d5',demo:1,byCreator:1,kind:'parking',status:'approved',createdAt:t-20*60e3,vehicles:['moto'],slots:6,fee:'free',feeNote:'',place:'逢甲路旁空地',geom:{type:'point',coords:[[24.1773,120.6440]]},photos:[],note:'（示範資料）'},
+   {id:'d6',demo:1,byCreator:1,kind:'parking',status:'pending',createdAt:t-8*60e3,vehicles:['car'],slots:2,fee:'paid',feeNote:'每小時 30 元',place:'西屯路二段巷內',geom:{type:'point',coords:[[24.1786,120.6428]]},photos:[],note:'（示範資料）等待創建者審核'}
+  ],lines:[
+   {id:'l1',type:'red',name:'文華路 紅線',coords:[[24.1803,120.6449],[24.1800,120.6462]]},
+   {id:'l2',type:'yellow',name:'逢甲路 黃線',coords:[[24.1782,120.6447],[24.1777,120.6460]]},
+   {id:'l3',type:'paid',name:'福星路 收費格',coords:[[24.1760,120.6478],[24.1757,120.6492]]},
+   {id:'l4',type:'free',name:'中工三路 可停車',coords:[[24.1838,120.6511],[24.1841,120.6530]]}
+  ],alerts:[]};
+}
+async function loadAll(){
+  try{
+    const d=await api('/api/data');
+    if(!Array.isArray(d.reports))throw new Error('x');
+    S.server=true;S.reports=d.reports;S.lines=d.lines||[];S.alerts=d.alerts||[];
+  }catch(e){
+    if(S.server)return;           // 後端暫時連不上，沿用舊資料
+    const d=lsLoad()||seed();S.reports=d.reports;S.lines=d.lines;S.alerts=d.alerts||[];if(!lsLoad())lsSave();
+  }
+}
+const ops={
+ async addReport(r){
+   r.owner=MY_ID;r.byCreator=isCreator();
+   if(S.server){const j=await api('/api/reports',{method:'POST',body:JSON.stringify(r)});S.reports.push(j.report);return j.report}
+   r.id=uid();r.createdAt=Date.now();r.status=(r.kind==='parking'&&!isCreator())?'pending':'approved';S.reports.push(r);
+   if(!lsSave()){S.reports.pop();throw new Error('儲存失敗')}return r;
+ },
+ async updReport(id,p){
+   const r=S.reports.find(x=>x.id===id);if(!r)throw new Error('找不到這則訊息');
+   if(S.server){const j=await api('/api/reports/'+id,{method:'PATCH',body:JSON.stringify({...p,edit:true,owner:MY_ID})});Object.assign(r,j.report||p)}
+   else Object.assign(r,p);
+   r.updatedAt=Date.now();if(!isCreator()&&r.kind==='parking')r.status='pending';if(!S.server)lsSave();
+ },
+ async review(id,status){
+   if(S.server){await api('/api/reports/'+id,{method:'PATCH',body:JSON.stringify({status})})}
+   const r=S.reports.find(x=>x.id===id);if(r)r.status=status;if(!S.server)lsSave();
+ },
+ async delReport(id){
+   if(S.server)await api('/api/reports/'+id,{method:'DELETE'});
+   S.reports=S.reports.filter(x=>x.id!==id);if(!S.server)lsSave();
+ },
+ async addLine(l){
+   if(S.server){const j=await api('/api/lines',{method:'POST',body:JSON.stringify(l)});S.lines.push(j.line)}
+   else{l.id=uid();S.lines.push(l);lsSave()}
+ },
+ async updLine(id,p){
+   if(S.server)await api('/api/lines/'+id,{method:'PATCH',body:JSON.stringify(p)});
+   const l=S.lines.find(x=>x.id===id);if(l)Object.assign(l,p);if(!S.server)lsSave();
+ },
+ async delLine(id){
+   if(S.server)await api('/api/lines/'+id,{method:'DELETE'});
+   S.lines=S.lines.filter(x=>x.id!==id);if(!S.server)lsSave();
+ },
+ async alert(a){
+   if(S.server){const j=await api('/api/alerts',{method:'POST',body:JSON.stringify(a)});if(!S.alerts.find(a=>a.id===j.alert.id))S.alerts.push(j.alert);return j}
+   const al={id:uid(),road:a.road,action:a.action,createdAt:Date.now(),coords:a.coords,owner:MY_ID};S.alerts.push(al);lsSave();return{ok:true,sent:false,alert:al};
+ }
+};
 
-  /* ---------- helpers ---------- */
-  var $ = function (id) { return document.getElementById(id); };
-  var str = function (v, n) { return String(v == null ? '' : v).slice(0, n); };
-  var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+/* ---------- 小工具 ---------- */
+function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>t.style.display='none',ms)}
+function ago(t){const s=(Date.now()-t)/1000;if(s<60)return'剛剛';if(s<3600)return Math.floor(s/60)+' 分鐘前';if(s<86400)return Math.floor(s/3600)+' 小時前';return new Date(t).toLocaleDateString('zh-TW')}
+const toMin=s=>{const [h,m]=String(s).split(':').map(Number);return h*60+m};
+function storeActive(r,now=new Date()){const m=now.getHours()*60+now.getMinutes(),s=toMin(r.start),e=toMin(r.end);if(s===e)return true;return s<e?(m>=s&&m<e):(m>=s||m<e)}
+function lineLen(c){let d=0;for(let i=1;i<c.length;i++)d+=L.latLng(c[i-1]).distanceTo(L.latLng(c[i]));return Math.round(d)}
+const vname=v=>v==='car'?'汽車':'機車';
+const slotsText=n=>n>10?'10 個以上':n+' 位';
+const feeText=r=>r.fee==='paid'?'💲 收費'+(r.feeNote?'：'+esc(r.feeNote):''):r.fee==='free'?'🆓 免費':'❓ 收費不確定';
+function titleOf(r){return r.kind==='occupy'?r.subtype:r.kind==='store'?r.store:'車位・'+r.vehicles.map(vname).join('/')+'・剩約 '+slotsText(r.slots)}
+function expired(r){const t=TTL[r.kind];return !!t&&Date.now()-(r.updatedAt||r.createdAt)>t}
+/* 創建者設置（含示範資料）鎖定，只有創建者能改；使用者新增的可由使用者編輯 */
+const COMMUNITY_EDIT=true;   // true=任何使用者都能修改使用者新增的訊息；false=只有原作者（本機 owner）
+const isLocked=r=>!!(r.byCreator||r.demo);
+const canEdit=r=>isCreator()||(!isLocked(r)&&(COMMUNITY_EDIT||r.owner===MY_ID));
+const visibleReports=()=>S.reports.filter(r=>(r.status==='approved'||(r.status==='pending'&&isCreator()))&&(!expired(r)||isCreator()));
+const activeAlerts=()=>S.alerts.filter(a=>Date.now()-a.createdAt<TTL.alert);
+function midpoint(c){return c[Math.floor((c.length-1)/2)]}
+function openLightbox(src){const lb=$('#lb');lb.querySelector('img').src=src;lb.style.display='flex'}
+$('#lb').onclick=()=>$('#lb').style.display='none';
+document.addEventListener('click',e=>{const i=e.target.closest('img.zoom');if(i)openLightbox(i.src)});
 
-  function h(tag, attrs) {
-    var el = document.createElement(tag);
-    attrs = attrs || {};
-    Object.keys(attrs).forEach(function (k) {
-      var v = attrs[k];
-      if (v == null || v === false) return;
-      if (k === 'class') el.className = v;
-      else if (k.indexOf('on') === 0) el.addEventListener(k.slice(2), v);
-      else el.setAttribute(k, v === true ? '' : v);
-    });
-    var add = function (c) {
-      if (c == null || c === false) return;
-      if (Array.isArray(c)) { c.forEach(add); return; }
-      el.append(c.nodeType ? c : document.createTextNode(String(c)));
-    };
-    for (var i = 2; i < arguments.length; i++) add(arguments[i]);
-    return el;
-  }
-  var NS = 'http://www.w3.org/2000/svg';
-  function sv(tag, attrs, text) {
-    var el = document.createElementNS(NS, tag);
-    Object.keys(attrs || {}).forEach(function (k) { el.setAttribute(k, attrs[k]); });
-    if (text != null) el.textContent = text;
-    return el;
-  }
+/* ---------- 地圖 ---------- */
+const map=L.map('map',{zoomControl:false,center:CENTER,zoom:17,maxZoom:19,minZoom:11,tap:true});
+L.control.zoom({position:'topleft'}).addTo(map);
+map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank">Leaflet</a>');
+const NL='© <a href="https://maps.nlsc.gov.tw/" target="_blank" rel="noopener">內政部國土測繪中心</a>';
+const emap=L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}',{maxZoom:19,attribution:NL+' 電子地圖'}).addTo(map);
+const ortho=L.tileLayer('https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}',{maxZoom:19,attribution:NL+' 正射影像'});
+L.control.layers({'電子地圖':emap,'正射影像':ortho},null,{position:'topright'}).addTo(map);
+const LY={lines:L.layerGroup().addTo(map),reports:L.layerGroup().addTo(map),alerts:L.layerGroup().addTo(map),preview:L.layerGroup().addTo(map),pick:L.layerGroup().addTo(map),me:L.layerGroup().addTo(map),car:L.layerGroup().addTo(map)};
+let MK={};   // id -> marker
+const pinIcon=(color,txt,pending)=>L.divIcon({className:'',html:`<div class="pin ${pending?'pending':''}" style="background:${color}"><span>${txt}</span></div>`,iconSize:[30,30],iconAnchor:[15,36],popupAnchor:[0,-34]});
 
-  function norm(id, d) {
-    d = d || {};
-    if (KINDS.indexOf(d.kind) < 0) return null;
-    var kind = d.kind;
-    var thumb = typeof d.thumb === 'string' && d.thumb.indexOf('data:image/jpeg;base64,') === 0 && d.thumb.length < 30000 ? d.thumb : '';
-    return {
-      id: id,
-      kind: kind,
-      vehicles: Array.isArray(d.vehicles) ? d.vehicles.filter(function (v) { return VEH[v]; }).slice(0, 2) : [],
-      slots: SLOTS_ALL.map(function (a) { return a[0]; }).indexOf(d.slots) >= 0 ? d.slots : '',
-      fee: ['free', 'paid', 'unknown'].indexOf(d.fee) >= 0 ? d.fee : '',
-      tkind: d.tkind === 'tow' ? 'tow' : 'ticket',
-      shop: str(d.shop, 30),
-      from: /^\d\d:\d\d$/.test(d.from) ? d.from : '',
-      to: /^\d\d:\d\d$/.test(d.to) ? d.to : '',
-      ltype: LTYPES[d.ltype] ? d.ltype : '',
-      review: ['pending', 'approved', 'rejected'].indexOf(d.review) >= 0 ? d.review : '',
-      otype: OBS[d.otype] ? d.otype : '',
-      x2: clamp(Number(d.x2) || 0, 0, MAP_W),
-      y2: clamp(Number(d.y2) || 0, 0, MAP_H),
-      hasLine: d.x2 != null && d.y2 != null,
-      address: str(d.address, 60) || '未註明位置',
-      x: clamp(Number(d.x) || 0, 0, MAP_W),
-      y: clamp(Number(d.y) || 0, 0, MAP_H),
-      hasPin: d.x != null && d.y != null,
-      note: str(d.note, 200),
-      thumb: thumb,
-      photoCount: clamp(Number(d.photoCount) || 0, 0, 3),
-      status: d.status === 'done' ? 'done' : d.status === 'handling' ? 'handling' : 'open',
-      createdAt: Number(d.createdAt) || 0,
-      createdBy: str(d.createdBy, 80)
-    };
-  }
-  function lastSeen(r) {
-    var t = r.createdAt, c = confirms[r.id];
-    if (c) Object.keys(c).forEach(function (k) { if (c[k] > t) t = c[k]; });
-    return t;
-  }
-  function stateOf(r) {
-    if (r.status === 'done') return 'ended';
-    if (isLong(r)) return 'active';
-    if (Date.now() - lastSeen(r) > TTL[r.kind]) return 'expired';
-    return 'active';
-  }
-  function toneOf(r) {
-    var st = stateOf(r);
-    if (r.kind === 'legal' && r.review === 'pending') return 'orange';
-    if (r.kind === 'legal' && r.review === 'rejected') return 'grey';
-    if (r.kind === 'legal') return st === 'active' ? 'blue' : 'grey';
-    if (r.kind === 'nopark') return st !== 'active' ? 'grey' : inWindow(r) ? 'red' : 'orange';
-    if (r.kind === 'ticket') return st === 'active' ? 'violet' : 'grey';
-    if (r.kind === 'obstruct') return st === 'active' ? 'teal' : 'grey';
-    if (r.kind === 'parking') return st === 'active' ? 'green' : 'grey';
-    return 'grey';
-  }
-  function toneLabel(r) {
-    if (r.kind === 'legal') return (r.review === 'pending' ? '申請新增：' : r.review === 'rejected' ? '未通過：' : '') + (LTYPES[r.ltype] ? LTYPES[r.ltype][0] : '車道線');
-    if (r.kind === 'nopark') return r.status === 'done' ? '已撤銷' : inWindow(r) ? '禁止停車中' : '稍後禁停';
-    var st = stateOf(r);
-    if (r.kind === 'obstruct') return st === 'active' ? (OBS[r.otype] || OBS.other)[0] : st === 'ended' ? '已改善' : '已過期';
-    if (st === 'active') return r.kind === 'parking' ? '有車位' : (r.tkind === 'tow' ? '正在拖吊' : '正在開單');
-    if (st === 'ended') return r.kind === 'parking' ? '已滿' : '已離開';
-    return '已過期';
-  }
-  function pillLabel(r) {
-    if (r.kind === 'legal') return r.review === 'pending' ? '審核中' : r.review === 'rejected' ? '未通過' : '標示';
-    if (r.kind === 'nopark') return r.status === 'done' ? '已撤銷' : inWindow(r) ? '禁停中' : '未到時段';
-    var st = stateOf(r);
-    if (r.kind === 'obstruct') return st === 'active' ? (r.status === 'handling' ? '已勸導' : '待提醒') : st === 'ended' ? '已改善' : '已過期';
-    if (st === 'active') return r.kind === 'parking' ? '有位置' : '進行中';
-    if (st === 'ended') return r.kind === 'parking' ? '已滿' : '已離開';
-    return '已過期';
-  }
-  function isLive(r) {
-    if (r.kind === 'legal') return false;
-    if (r.kind === 'nopark') return r.status !== 'done' && inWindow(r);
-    var st = stateOf(r);
-    return st === 'active';
-  }
-  function summary(r) {
-    if (r.kind === 'legal') return [LTYPES[r.ltype] ? LTYPES[r.ltype][0] : '車道線'];
-    if (r.kind === 'nopark') return [(r.shop ? r.shop + '・' : '') + '每日 ' + r.from + (r.to ? '–' + r.to : ' 起') + ' 禁止停車'];
-    if (r.kind === 'parking') {
-      var out = [];
-      if (r.vehicles.length) out.push(r.vehicles.map(function (v) { return VEH[v]; }).join('、'));
-      SLOTS_ALL.forEach(function (s) { if (s[0] === r.slots) out.push('約 ' + s[1] + '空位'); });
-      FEES.forEach(function (f) { if (f[0] === r.fee) out.push(f[1] === '不確定' ? '收費不明' : f[1]); });
-      return out;
-    }
-    if (r.kind === 'obstruct') return [(OBS[r.otype] || OBS.other)[0]];
-    return [r.tkind === 'tow' ? '拖吊' : '開單'];
-  }
-  var KIND_NAME = { parking: '車位通報', ticket: '開單警報', nopark: '店家禁停公告', legal: '車線標示', obstruct: '占用勸導' };
-  var CONFIRM_LABEL = { parking: '還有位', ticket: '還在這裡', nopark: '仍有效', legal: '位置正確', obstruct: '還在這裡' };
+function popupHtml(r){
+  const k=KIND[r.kind];let color=k.color,tag=k.name,body='';
+  if(r.kind==='store'){const a=storeActive(r);color=a?'#e11d48':'#d97706';tag=a?'禁停中':'稍後禁停';body=`<b>${esc(r.store)}</b><br>禁停時段 ${esc(r.start)} – ${esc(r.end)}${a?'（至 '+esc(r.end)+'）':'（'+esc(r.start)+' 起）'}`}
+  else if(r.kind==='occupy'){body=`<b>${esc(r.subtype)}</b>`}
+  else{body=`<b>${r.vehicles.map(vname).join('、')}</b>・約剩 <b>${slotsText(r.slots)}</b><br>${feeText(r)}`;if(r.status==='pending')tag+='（待審核）'}
+  let h=`<span class="pp-tag" style="background:${color}">${esc(tag)}</span><br>${body}`;
+  if(r.place)h+=`<br>📍 ${esc(r.place)}`;
+  if(r.note)h+=`<br><span style="color:#475569">${esc(r.note)}</span>`;
+  if(r.photos?.length)h+=`<div class="ph" style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">${r.photos.map(p=>`<img class="zoom" src="${p}" alt="">`).join('')}</div>`;
+  h+=`<div style="font-size:12px;color:#64748b;margin-top:6px">${ago(r.createdAt)}${r.updatedAt?'・已編輯':''}${expired(r)?'・已逾時':''}</div>`;
+  if(isLocked(r)&&!isCreator())h+=`<div class="lk">🔒 創建者設置，僅創建者可修改</div>`;
+  else if(canEdit(r)||isCreator())h+=`<div class="row" style="margin-top:6px">${isCreator()&&r.status==='pending'?`<button class="btn ok sm" data-rv="${r.id}">核准</button>`:''}<button class="btn sm" data-er="${r.id}">✏️ 編輯</button><button class="btn red sm" data-dr="${r.id}">刪除</button></div>`;
+  return h;
+}
+function reportStyle(r){
+  if(r.kind==='store'){const a=storeActive(r);return{color:a?'#e11d48':'#f59e0b',txt:'⛔'}}
+  if(r.kind==='occupy')return{color:KIND.occupy.color,txt:'!'};
+  return{color:KIND.parking.color,txt:'P'};
+}
+function drawReport(r){
+  const st=reportStyle(r),pending=r.status==='pending',c=r.geom.coords;let at;
+  if(r.geom.type==='line'){
+    L.polyline(c,{color:st.color,weight:8,opacity:pending?.4:.85,lineCap:'round'}).addTo(LY.reports).on('click',()=>MK[r.id]&&MK[r.id].openPopup());
+    at=midpoint(c);
+  }else at=c[0];
+  const m=L.marker(at,{icon:pinIcon(st.color,st.txt,pending),zIndexOffset:500}).bindPopup(()=>popupHtml(r),{maxWidth:280}).addTo(LY.reports);
+  MK[r.id]=m;
+}
+function drawLine(l){
+  const t=LINE_TYPES[l.type]||LINE_TYPES.yellow;
+  const pl=L.polyline(l.coords,{color:t.color,weight:5,opacity:.95,lineCap:'butt'}).addTo(LY.lines);
+  pl.bindPopup(`<span class="pp-tag" style="background:${t.color}">${esc(t.name)}</span><br><b>${esc(l.name||'')}</b>${l.note?'<br>'+esc(l.note):''}`);
+}
+function drawAlert(a){
+  const m=L.marker(a.coords||CENTER,{icon:L.divIcon({className:'',html:`<div class="apin">${a.action==='拖吊'?'🚛':'📝'}</div>`,iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:900})
+   .bindPopup(`<span class="pp-tag" style="background:#e11d48">開單警報</span><br><b>${esc(a.road)}</b> 正在<b>${esc(a.action)}</b><br><span style="font-size:12px;color:#64748b">${ago(a.createdAt)}（位置為路段約略位置）</span>`).addTo(LY.alerts);
+  MK['a'+a.id]=m;
+}
+function renderMap(){
+  MK={};Object.values({a:LY.lines,b:LY.reports,c:LY.alerts}).forEach(g=>g.clearLayers());
+  S.lines.forEach(drawLine);
+  visibleReports().filter(r=>!expired(r)||isCreator()).forEach(drawReport);
+  activeAlerts().forEach(drawAlert);
+  const n=activeAlerts().length,b=$('#bellN');b.style.display=n?'grid':'none';b.textContent=n;
+  renderCar();checkNearby();
+}
+function focusItem(key){
+  const m=MK[key];if(!m)return;
+  if(isMobile())closePanel();
+  const ll=m.getLatLng();map.flyTo(ll,Math.max(map.getZoom(),18),{duration:.6});setTimeout(()=>m.openPopup(),650);
+}
+map.on('popupopen',e=>{
+  const n=e.popup.getElement();if(!n)return;
+  n.querySelectorAll('[data-dr]').forEach(b=>b.onclick=async()=>{if(!confirm('確定刪除這則通報？'))return;try{await ops.delReport(b.dataset.dr);map.closePopup();refresh();toast('已刪除')}catch(er){toast(er.message)}});
+  n.querySelectorAll('[data-er]').forEach(b=>b.onclick=()=>openEdit(b.dataset.er));
+  n.querySelectorAll('[data-rv]').forEach(b=>b.onclick=async()=>{try{await ops.review(b.dataset.rv,'approved');map.closePopup();refresh();toast('已核准公開')}catch(er){toast(er.message)}});
+});
+$('#locate')?.remove();
+const LocCtl=L.Control.extend({options:{position:'topleft'},onAdd(){const b=L.DomUtil.create('div','leaflet-bar');const a=L.DomUtil.create('a','',b);a.href='#';a.title='我的位置';a.innerHTML='📍';a.style.cssText='font-size:16px;line-height:30px;text-align:center;width:30px;height:30px;display:block;background:#fff';
+  L.DomEvent.on(a,'click',e=>{L.DomEvent.preventDefault(e);locateMe(p=>map.flyTo(p,18))});return b}});
+map.addControl(new LocCtl());
+function locateMe(cb){
+  if(!navigator.geolocation){toast('此瀏覽器不支援定位');return}
+  navigator.geolocation.getCurrentPosition(p=>{const ll=[p.coords.latitude,p.coords.longitude];LY.me.clearLayers();L.marker(ll,{icon:L.divIcon({className:'',html:'<div class="dot"></div>',iconSize:[14,14]})}).addTo(LY.me);cb&&cb(ll,p.coords.accuracy)},
+   ()=>toast('無法取得定位，請確認已允許定位權限（需 HTTPS）'),{enableHighAccuracy:true,timeout:10000});
+}
 
-  function rel(t) {
-    var m = Math.floor((Date.now() - t) / 60000);
-    if (m < 1) return '剛剛';
-    if (m < 60) return m + ' 分鐘前';
-    var hr = Math.floor(m / 60);
-    if (hr < 24) return hr + ' 小時前';
-    return new Date(t).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-  }
-  function abs(t) { return new Date(t).toLocaleString('zh-TW', { hour12: false }); }
-  function confirmCount(r) { return Object.keys(confirms[r.id] || {}).length; }
+/* ---------- 在地圖上選位置 / 畫線 ---------- */
+function pickGeometry(mode,minPts=2){
+  return new Promise(res=>{
+    pick={mode,pts:[],res,minPts};LY.pick.clearLayers();
+    $('#map').classList.add('picking');document.body.classList.add('picking-mode');
+    if(isMobile())closePanel();
+    $('#pickbar').classList.add('show');pickUi();
+  });
+}
+function pickUi(){
+  const n=pick.pts.length;
+  $('#pickMsg').textContent=pick.mode==='point'?(n?'已標記，可再點地圖更改':'👆 點選地圖上的位置'):`👆 依序點選路段（已 ${n} 點${n>1?'・約 '+lineLen(pick.pts)+' m':''}）`;
+  $('#pkUndo').style.display=pick.mode==='line'?'':'none';
+  $('#pkDone').disabled=n<(pick.mode==='point'?1:pick.minPts);
+  LY.pick.clearLayers();
+  if(n>1)L.polyline(pick.pts,{color:'#0f172a',weight:5}).addTo(LY.pick);
+  pick.pts.forEach(p=>L.marker(p,{icon:L.divIcon({className:'',html:'<div class="vt"></div>',iconSize:[12,12]}),interactive:false}).addTo(LY.pick));
+}
+function pickEnd(result){
+  const r=pick.res;pick=null;LY.pick.clearLayers();$('#map').classList.remove('picking');document.body.classList.remove('picking-mode');
+  $('#pickbar').classList.remove('show');r(result);
+}
+map.on('click',e=>{
+  if(!pick)return;const p=[+e.latlng.lat.toFixed(6),+e.latlng.lng.toFixed(6)];
+  if(pick.mode==='point')pick.pts=[p];else pick.pts.push(p);pickUi();
+});
+$('#pkUndo').onclick=()=>{pick.pts.pop();pickUi()};
+$('#pkCancel').onclick=()=>pickEnd(null);
+$('#pkDone').onclick=()=>{const g={type:pick.mode,coords:pick.pts.slice()};pickEnd(g)};
 
-  var toastTimer;
-  function toast(msg) {
-    var box = $('toast');
-    box.replaceChildren(h('span', {}, msg));
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { box.replaceChildren(); }, 3000);
-  }
-  function banner(msg) {
-    var b = $('banner');
-    if (!msg) { b.hidden = true; return; }
-    b.textContent = msg;
-    b.hidden = false;
-  }
-  function errText(ex) {
-    var c = ex && ex.code;
-    if (c === 'quota_exceeded') return '資料庫已滿，請等舊通報清除後再試';
-    if (c === 'invalid_argument') return '目前的權限無法寫入，可能是檢視模式';
-    if (c === 'resource_exhausted') return '操作太頻繁，請稍候再試';
-    if (c === 'revoked') return '存取權已變更，請重新開啟頁面';
-    return '操作失敗，請稍後再試';
-  }
-  function guard(fn) {
-    return function () { return Promise.resolve().then(fn).catch(function (ex) { toast(errText(ex)); }); };
-  }
-  function matches(r) {
-    if (!search) return true;
-    var q = search.toLowerCase();
-    return r.address.toLowerCase().indexOf(q) >= 0 || summary(r).join(' ').indexOf(search) >= 0 || toneLabel(r).indexOf(search) >= 0 || r.note.toLowerCase().indexOf(q) >= 0;
-  }
+/* ---------- 面板 ---------- */
+function openPanel(){document.body.classList.add('sheet-open')}
+function closePanel(){document.body.classList.remove('sheet-open');syncNav()}
+function setView(v,opt){
+  if(v==='map'){S.view='feed';if(isMobile()){closePanel();syncNav('map');return}}
+  else S.view=v;
+  if(v==='report'&&(!form||opt?.fresh))newForm(opt?.kind);
+  if(v!=='report')clearPreview();
+  openPanel();renderPanel();syncNav(v==='map'?'feed':v);
+}
+function syncNav(v){
+  let cur=v||(document.body.classList.contains('sheet-open')?S.view:'map');
+  if(cur==='report')cur=form?'r-'+form.kind:'report';
+  $$('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===cur));
+}
+$$('[data-nav]').forEach(b=>b.onclick=()=>{
+  const v=b.dataset.nav;
+  if(v.startsWith('r-'))openReport(v.slice(2));
+  else setView(v);
+});
+function openReport(kind){setView('report',{fresh:!form||form.kind!==kind||!!form.editId,kind})}
+$('#bell').onclick=()=>{setView('feed')};
+$('#acct').onclick=()=>setView('creator');
+document.querySelector('.grab').onclick=closePanel;
+function renderPanel(){
+  const el=$('#panel'),sc=el.scrollTop;
+  const pb=$('#pb');
+  pb.innerHTML=S.view==='report'?viewReport():S.view==='help'?viewHelp():S.view==='creator'?viewCreator():S.view==='mycar'?viewCar():S.view==='feedback'?viewFeedback():viewFeed();
+  if(S.view==='feedback')fbMarkSeen();
+  el.scrollTop=sc;
+  $('#acctT').textContent=isCreator()?'創建者':'訪客';
+}
 
-  /* ---------- sound ---------- */
-  var audioCtx = null;
-  function ensureAudio() {
-    try {
-      if (!audioCtx) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    } catch (e) {}
-  }
-  function siren() {
-    if (!soundOn || !audioCtx || audioCtx.state !== 'running') return;
-    try {
-      var t0 = audioCtx.currentTime;
-      [[880, 0], [660, 0.22], [880, 0.44], [660, 0.66]].forEach(function (n) {
-        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = 'square'; o.frequency.value = n[0];
-        g.gain.setValueAtTime(0.0001, t0 + n[1]);
-        g.gain.exponentialRampToValueAtTime(0.09, t0 + n[1] + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, t0 + n[1] + 0.2);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(t0 + n[1]); o.stop(t0 + n[1] + 0.22);
-      });
-    } catch (e) {}
-  }
-  function renderSound() {
-    var b = $('snd');
-    b.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-    b.setAttribute('title', soundOn ? '警報提示音：開' : '警報提示音：關');
-    $('sndIc').replaceChildren(icon(soundOn ? 'vol' : 'mute', 22));
-  }
-  function onNewAlert(r) {
-    toast('開單警報：' + r.address);
-    siren();
-    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
-    var bar = $('alertBar');
-    bar.classList.remove('flash');
-    void bar.offsetWidth;
-    bar.classList.add('flash');
-  }
+/* ---- 最新通報 ---- */
+function feedRows(){
+  const rows=[];
+  activeAlerts().forEach(a=>rows.push({t:a.createdAt,key:'a'+a.id,th:a.action==='拖吊'?'🚛':'📝',tag:'🚨 開單警報',tc:'#e11d48',title:a.road+' 正在'+a.action,sub:ago(a.createdAt),pill:'警報中',pc:'r'}));
+  visibleReports().forEach(r=>{
+    let pill,pc;
+    if(r.status==='pending'){pill='待審核';pc='n'}
+    else if(r.kind==='store'){const a=storeActive(r);pill=a?'禁停中':'稍後禁停';pc=a?'r':'y'}
+    else if(r.kind==='parking'){pill='剩 '+slotsText(r.slots);pc='b'}
+    else{pill='待勸導';pc='t'}
+    const k=KIND[r.kind];
+    rows.push({t:r.createdAt,key:r.id,th:r.photos?.[0]?`<img src="${r.photos[0]}" alt="">`:k.icon,tag:k.icon+' '+k.name,tc:k.color,title:titleOf(r),sub:(r.place?esc(r.place)+'・':'')+ago(r.createdAt)+(r.photos?.length?'・'+r.photos.length+' 張照片':''),pill,pc,old:expired(r)});
+  });
+  return rows.sort((a,b)=>b.t-a.t);
+}
+function viewFeed(){
+  const rows=feedRows();
+  return `
+  <div class="card"><b style="font-size:14px">我要回報</b><div class="kinds" style="margin-top:8px">${['occupy','store','parking'].map(k=>`<button class="kind" style="--c:${KIND[k].color};border-color:${KIND[k].color}" data-act="newreport" data-v="${k}"><i>${KIND[k].icon}</i>${KIND[k].name}</button>`).join('')}</div></div>
+  ${carCard()}<div class="card" style="margin-top:14px"><div class="hd"><h3>最新通報</h3><span class="hint">${S.server?'即時連線':'示範模式（資料只存在本機）'}</span></div>
+   <div class="feed">${rows.length?rows.map(r=>`<button class="fi" data-focus="${r.key}" style="${r.old?'opacity:.55':''}"><div class="th">${r.th}</div><div class="tx"><div class="tg" style="color:${r.tc}">${r.tag}</div><div class="tt">${esc(r.title)}</div><div class="sb">${r.sub}</div></div><span class="pill ${r.pc}">${r.pill}</span></button>`).join(''):'<div class="empty">目前沒有通報</div>'}</div></div>
+  <div class="card" style="margin-top:14px"><b style="font-size:14px">📬 開單警報信件</b><p class="hint">訂閱後，只要有人按下開單警報，您就會收到通知信。</p><button class="btn pri block" data-act="opensub">訂閱警報信件</button></div>
+  <div class="card" style="margin-top:14px"><b style="font-size:14px">💬 聯絡創建者</b><p class="hint">發現問題、資料不準或想要新功能？直接告訴創建者。</p><button class="btn pri block" data-act="go" data-v="feedback">留言給創建者</button></div>
+  <div class="sos" style="margin-top:14px"><div><b>🛡️ 需要立即協助？</b><br>若有緊急危險或嚴重阻礙交通，請撥打 110 報警。</div><a class="btn pri" href="tel:110" style="text-decoration:none">📞 撥打 110</a></div>
+  <div class="legendm card" style="margin-top:14px"><b style="font-size:14px">圖例</b><div class="hint" style="line-height:2">
+   <span class="pill t">占用勸導</span> <span class="pill r">禁停中</span> <span class="pill y">稍後禁停</span> <span class="pill b">車位回報</span><br>
+   <span class="sw" style="background:#6366f1"></span>收費停車格 <span class="sw" style="background:#22c55e"></span>可停車 <span class="sw" style="background:#eab308"></span>黃線 <span class="sw" style="background:#dc2626"></span>紅線</div></div>`;
+}
 
-  /* ---------- data layer ---------- */
-  function createReport(data, imgs) {
-    if (db) {
-      var ref = db.collection('reports').doc();
-      var p = imgs.length ? db.doc('photos/' + ref.id).set({ rid: ref.id, imgs: imgs }) : Promise.resolve();
-      return p.then(function () { return ref.set(data); });
-    }
-    var id = 'L' + Date.now();
-    localPhotos[id] = imgs;
-    reports.unshift(norm(id, data));
-    renderAll();
-    return Promise.resolve();
+/* ---- 回報表單 ---- */
+function newForm(kind){clearPreview();form={kind:kind||'occupy',gm:'point',geom:null,photos:[],v:{subtype:OCCUPY_TYPES[0],vehicles:['car'],slots:3,fee:'unknown'}}}
+function clearPreview(){LY.preview.clearLayers()}
+function drawPreview(){
+  clearPreview();if(!form?.geom)return;const c=form.geom.coords,col=KIND[form.kind].color;
+  if(form.geom.type==='line')L.polyline(c,{color:col,weight:8,opacity:.6,lineCap:'round'}).addTo(LY.preview);
+  c.forEach(p=>L.marker(p,{icon:L.divIcon({className:'',html:'<div class="vt"></div>',iconSize:[12,12]}),interactive:false}).addTo(LY.preview));
+}
+function geomSummary(){
+  const g=form.geom;if(!g)return `<div class="sum">尚未選擇位置</div>`;
+  return g.type==='point'?`<div class="sum ok">✅ 已選取地點（${g.coords[0][0].toFixed(5)}, ${g.coords[0][1].toFixed(5)}）</div>`
+    :`<div class="sum ok">✅ 已標記路段：${g.coords.length} 個點・約 ${lineLen(g.coords)} 公尺</div>`;
+}
+const val=(k,d='')=>esc(form.v[k]??d);
+function viewReport(){
+  const f=form,k=KIND[f.kind];let fields='';
+  if(f.kind==='occupy'){
+    fields=`<div class="step"><b>2. 占用情況</b><div class="chips">${OCCUPY_TYPES.map(t=>`<button class="chipb ${f.v.subtype===t?'on':''}" style="--c:${k.color}" data-act="occ" data-v="${t}">${t}</button>`).join('')}</div></div>`;
+  }else if(f.kind==='store'){
+    fields=`<div class="step"><b>2. 店家資訊</b>
+      <label class="hint">店名（必填）</label><input class="in" data-f="store" maxlength="30" placeholder="例：逢甲大雞排" value="${val('store')}">
+      <div class="two" style="margin-top:10px"><div><label>幾點開始禁停（必填）</label><input class="in" type="time" data-f="start" value="${val('start')}"></div><div><label>到幾點結束（必填）</label><input class="in" type="time" data-f="end" value="${val('end')}"></div></div>
+      <p class="hint">時段每天重複；若跨午夜（例如 22:00–02:00）也可正常判斷。</p></div>`;
+  }else{
+    fields=`<div class="step"><b>2. 車位資訊</b>
+      <label class="hint">可停車種（必填，可複選）</label>
+      <div class="chips" style="margin-bottom:10px">${['car','moto'].map(v=>`<button class="chipb ${f.v.vehicles.includes(v)?'on':''}" style="--c:${k.color}" data-act="veh" data-v="${v}">${v==='car'?'🚗 汽車':'🛵 機車'}</button>`).join('')}</div>
+      <label class="hint">大約剩幾個位子（1–10 個，或 10 個以上）</label>
+      <div class="nums" style="margin-bottom:10px">${Array.from({length:10},(_,i)=>i+1).map(n=>`<button class="chipb ${f.v.slots===n?'on':''}" style="--c:${k.color}" data-act="slots" data-v="${n}">${n}</button>`).join('')}</div>
+      <button class="chipb ${f.v.slots===11?'on':''}" style="--c:${k.color};width:100%;margin-bottom:10px" data-act="slots" data-v="11">10 個以上</button>
+      <label class="hint">是否收費</label>
+      <div class="chips"><button class="chipb ${f.v.fee==='free'?'on':''}" style="--c:${k.color}" data-act="fee" data-v="free">🆓 免費</button><button class="chipb ${f.v.fee==='paid'?'on':''}" style="--c:${k.color}" data-act="fee" data-v="paid">💲 收費</button><button class="chipb ${f.v.fee==='unknown'?'on':''}" style="--c:${k.color}" data-act="fee" data-v="unknown">❓ 不確定</button></div>
+      ${f.v.fee==='paid'?`<input class="in" style="margin-top:8px" data-f="feeNote" maxlength="30" placeholder="收費說明（選填）例：每小時 30 元" value="${val('feeNote')}">`:''}</div>`;
   }
-  function setStatus(r, st) {
-    if (db) return db.doc('reports/' + r.id).update({ status: st, updatedAt: Date.now() });
-    r.status = st; renderAll();
-    return Promise.resolve();
-  }
-  function removeReport(r) {
-    if (db) {
-      var jobs = [db.doc('reports/' + r.id).delete()];
-      if (r.photoCount) jobs.push(db.doc('photos/' + r.id).delete());
-      if (uid) jobs.push(db.doc('confirms/' + r.id + '_' + uid).delete());
-      return Promise.all(jobs);
-    }
-    reports = reports.filter(function (x) { return x !== r; });
-    delete localPhotos[r.id];
-    renderAll();
-    return Promise.resolve();
-  }
-  function toggleConfirm(r) {
-    var set = confirms[r.id] || (confirms[r.id] = {});
-    if (!db) {
-      if (set[uid]) delete set[uid]; else set[uid] = Date.now();
-      renderAll();
-      return Promise.resolve();
-    }
-    var ref = db.doc('confirms/' + r.id + '_' + uid);
-    return set[uid] ? ref.delete() : ref.set({ rid: r.id, uid: uid, at: Date.now() });
-  }
-  function loadPhotos(r) {
-    if (photoCache[r.id]) return Promise.resolve(photoCache[r.id]);
-    if (!db) return Promise.resolve(localPhotos[r.id] || []);
-    return db.doc('photos/' + r.id).get().then(function (snap) {
-      var d = snap.exists ? snap.data() : null;
-      var imgs = d && Array.isArray(d.imgs) ? d.imgs.filter(function (u) {
-        return typeof u === 'string' && u.indexOf('data:image/jpeg;base64,') === 0 && u.length < 90000;
-      }).slice(0, 3) : [];
-      photoCache[r.id] = imgs;
-      return imgs;
-    });
-  }
+  const need=f.kind==='parking';
+  const photoHint=f.kind==='occupy'?'<p class="hint warn">⚠️ 請拍整體路況，不要拍特寫</p>':f.kind==='parking'?'<p class="hint warn">⚠️ 必須上傳照片，請拍整體車位狀況，不要拍車牌特寫</p>':'<p class="hint">請拍整體路況，不要拍特寫</p>';
+  return `
+  <div class="card">
+   <div class="hd"><h2 style="color:${k.color}">${f.editId?'✏️ 編輯・':''}${k.icon} ${k.name}</h2><button class="x" data-act="close" aria-label="關閉">✕</button></div>
+   <p class="hint" style="margin:-4px 0 14px">${k.hint}</p>
+   <div class="step"><b>1. 選擇位置</b>
+    <div class="seg"><button class="${f.gm==='point'?'on':''}" data-act="gm" data-v="point">單一地點</button><button class="${f.gm==='line'?'on':''}" data-act="gm" data-v="line">一段路</button></div>
+    <div class="row"><button class="btn pri" data-act="pick">📍 在地圖上${f.gm==='line'?'標記路段':'選擇'}</button>${f.gm==='point'?'<button class="btn ghost" data-act="gps">🎯 目前位置</button>':''}</div>
+    <div id="geomSum">${geomSummary()}</div>
+    <input class="in" data-f="place" maxlength="40" placeholder="地點描述（選填）例：文華路 100 號前" value="${val('place')}"></div>
+   ${fields}
+   <div class="step"><b>3. 上傳照片 <em>${need?'（必填，最多 3 張）':'（選填，最多 3 張）'}</em></b>
+    ${photoHint}
+    <button class="drop" data-act="addphoto" style="margin-top:8px">📷 點擊拍照／選擇照片<br><small>上傳前會先遮蔽車牌號碼，僅保留英文字母</small></button>
+    <input type="file" id="fileIn" accept="image/*" multiple hidden>
+    <div class="thumbs">${f.photos.map((p,i)=>`<div><img src="${p}" alt=""><button data-act="rmph" data-v="${i}" aria-label="移除">✕</button></div>`).join('')}</div></div>
+   <div class="step"><b>4. 補充說明 <em>（選填）</em></b>
+    <textarea class="in" data-f="note" id="noteTa" maxlength="200" placeholder="${f.kind==='store'?'使用說明，例：店門口 2 公尺內請勿停車':'例如：車輛停放於…，影響行人通行'}">${val('note')}</textarea><div class="cnt"><span id="noteC">${(f.v.note||'').length}</span>/200</div></div>
+   <button class="btn pri block" data-act="submit" id="subBtn">${f.editId?'💾 儲存修改':'📨 送出通報'}</button>${f.editId?`<button class="btn red block" style="margin-top:8px" data-act="delmine" data-v="${f.editId}">🗑 刪除這則訊息</button>`:''}
+   <p class="hint">${f.editId?(f.kind==='parking'&&!isCreator()?'儲存後車位資訊會重新交由創建者審核。':'儲存後會立即更新在地圖上。'):f.kind==='parking'?'送出後需經創建者審核才會顯示在地圖上。':'您的通報將同步顯示在地圖上，並協助相關單位處理。'}</p>
+  </div>`;
+}
 
-  /* ---------- map ---------- */
-  var mapSvg, gMarkers, gDraft, gLegal, gOsm, osmLines = [], showLegal = true;
+/* ---- 說明 ---- */
+function viewHelp(){return `<div class="card help"><div class="hd"><h2>使用說明</h2><button class="x" data-act="close">✕</button></div>
+ <h3>🚧 占用勸導（藍綠色）</h3><p>標記占用人行道、騎樓等位置，可單點或一段路。請拍整體路況，不要拍特寫，系統會把車牌數字遮蔽，只保留英文字母。</p>
+ <h3>⛔ 店家禁停（紅／黃）</h3><p>填寫店名與每日禁停時段。到禁停時段顯示<b style="color:#e11d48">紅色</b>，未到時段顯示黃色「稍後禁停」。</p>
+ <h3>🅿️ 回報車位（藍色）</h3><p>回報可停車種、剩餘數量（1–10 個或 10 個以上）與是否收費（免費／收費／不確定），需附照片；由創建者審核後公開。車位通報 3 小時後自動過期。</p>
+ <h3>🚨 開單警報</h3><p>點右下角紅色按鈕，可從清單選路段、自行輸入路段名稱，或用「我的位置／地圖點選」標出實際位置，再選「開單／拖吊」，按下警鈴後，系統會寄信通知<b>所有已訂閱的使用者</b>，並在地圖上提示 1 小時。想收到警報信件，請先訂閱（需點確認信）。</p>
+ <h3>🚗 我的愛車</h3><p>記錄停車位置（只存在你的裝置）。之後附近出現<b>占用勸導</b>或<b>開單／拖吊警報</b>，會跳出提醒；範圍可選 100–500 公尺。請保持頁面開啟，關閉時可搭配信件訂閱。</p>
+ <h3>✏️ 誰能修改訊息？</h3><p>帶有 🔒 的是創建者設置，只有創建者能改；使用者自己新增的訊息，可在地圖彈窗按「編輯」或「刪除」。</p>
+ <h3>💬 聯絡創建者</h3><p>點上方 💬 留言，創建者會即時收到並可回覆，回覆會顯示在「我的留言」。</p>
+ <h3>🛡️ 創建者</h3><p>需輸入認證密碼。可審核車位、編輯車線、修改／刪除任何通報、查看並回覆使用者回饋。</p>
+ <h3>車線顏色</h3><ul><li><span class="sw" style="background:#6366f1"></span>收費停車格</li><li><span class="sw" style="background:#22c55e"></span>可停車</li><li><span class="sw" style="background:#eab308"></span>黃線</li><li><span class="sw" style="background:#dc2626"></span>紅線</li></ul>
+ <h3>⚠️ 注意</h3><p>本平台為民眾回報與資訊整合，不等同正式檢舉。緊急危險請撥打 110。地圖圖資來源：內政部國土測繪中心。</p></div>`}
 
-  function nearestName(x, y) {
-    var best = null, bd = 1e9;
-    PLACES.forEach(function (pl) {
-      var d = Math.hypot(x - pl.x, y - pl.y) - pl.r;
-      if (d < bd) { bd = d; best = pl.n; }
-    });
-    return bd < 0 ? best : null;
+/* ---- 創建者 ---- */
+function viewCreator(){
+  if(!isCreator())return `<div class="card"><div class="hd"><h2>🛡️ 創建者登入</h2><button class="x" data-act="close">✕</button></div>
+   <p class="hint" style="margin-top:0">創建者功能需通過認證。</p>
+   <input id="cpw" class="in" type="password" placeholder="認證密碼" autocomplete="current-password">
+   <button class="btn pri block" style="margin-top:10px" data-act="login">登入</button><div id="cmsg"></div>
+   ${S.server?'':'<p class="hint">目前為無後端示範模式，示範密碼：<b>creator2026</b>。正式上線請啟動後端並設定 CREATOR_PASSWORD。</p>'}</div>`;
+  const pend=S.reports.filter(r=>r.status==='pending');
+  const tabs=`<div class="tabs"><button class="${S.ctab==='pending'?'on':''}" data-act="ctab" data-v="pending">待審核車位${pend.length?'（'+pend.length+'）':''}</button><button class="${S.ctab==='lines'?'on':''}" data-act="ctab" data-v="lines">車線編輯</button><button class="${S.ctab==='all'?'on':''}" data-act="ctab" data-v="all">全部通報</button><button class="${S.ctab==='fb'?'on':''}" data-act="ctab" data-v="fb">💬 回饋${fbN()?'（'+fbN()+'）':''}</button></div>`;
+  let body='';
+  if(S.ctab==='pending'){
+    body=pend.length?pend.map(r=>`<div class="pc"><b>🅿️ ${esc(titleOf(r))}</b><div class="meta">${feeText(r)}・${ago(r.createdAt)}${r.place?'・📍'+esc(r.place):''}</div>
+      ${r.photos?.length?`<div class="ph">${r.photos.map(p=>`<img class="zoom" src="${p}" alt="">`).join('')}</div>`:'<div class="meta">（無照片）</div>'}
+      ${r.note?`<div class="meta">${esc(r.note)}</div>`:''}
+      <div class="row"><button class="btn ok sm" data-act="approve" data-v="${r.id}">✅ 核准</button><button class="btn red sm" data-act="reject" data-v="${r.id}">退回</button><button class="btn sm" data-focus="${r.id}">📍 查看</button></div></div>`).join(''):'<div class="empty">沒有待審核的車位 🎉</div>';
+  }else if(S.ctab==='lines'){
+    body=`<div class="pc"><b>➕ 新增車線</b>
+      <div class="two" style="margin-top:8px"><div><label>線型</label><select class="in" id="lnType">${Object.entries(LINE_TYPES).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('')}</select></div><div><label>名稱／備註</label><input id="lnName" class="in" maxlength="30" placeholder="例：文華路東側"></div></div>
+      <button class="btn pri block" style="margin-top:10px" data-act="drawline">✏️ 在地圖上畫線並儲存</button></div>
+      <b style="font-size:14px">現有車線（${S.lines.length}）</b>
+      ${S.lines.map(l=>{const t=LINE_TYPES[l.type];return `<div class="lrow"><i style="background:${t.color}"></i><span>${esc(l.name||t.name)}</span><select data-act="lntype" data-v="${l.id}">${Object.entries(LINE_TYPES).map(([k,x])=>`<option value="${k}" ${k===l.type?'selected':''}>${x.name}</option>`).join('')}</select><button class="btn sm" data-lnfocus="${l.id}">📍</button><button class="btn red sm" data-act="lndel" data-v="${l.id}">🗑</button></div>`}).join('')||'<div class="empty">尚無車線</div>'}`;
+  }else{
+    body=S.ctab==='fb'?fbCreatorBody():S.reports.slice().sort((a,b)=>b.createdAt-a.createdAt).map(r=>`<div class="lrow"><span>${KIND[r.kind].icon} ${esc(titleOf(r))}${r.status==='pending'?'（待審）':''}・${ago(r.createdAt)}</span><button class="btn sm" data-focus="${r.id}">📍</button><button class="btn sm" data-act="redit" data-v="${r.id}">✏️</button><button class="btn red sm" data-act="rdel" data-v="${r.id}">🗑</button></div>`).join('')||'<div class="empty">沒有通報</div>';
   }
-  /* street / lane name for a spot, from OpenStreetMap's Nominatim (needs network; silently skipped if it fails) */
-  function lookupAddress(x, y) {
-    var g = mapToGeo(x, y);
-    var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&accept-language=zh-TW&lat=' + g.lat.toFixed(6) + '&lon=' + g.lng.toFixed(6);
-    return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-      var a = d && d.address;
-      if (!a) return '';
-      var name = a.road || a.pedestrian || a.footway || a.path || a.neighbourhood || a.suburb || '';
-      return name ? name + ' 附近' : '';
-    }).catch(function () { return ''; });
-  }
-  var roadCache = {};
-  function roadPoint(name) {
-    if (roadCache[name]) return Promise.resolve(roadCache[name]);
-    var p0 = mapToGeo(0, MAP_H), p1 = mapToGeo(MAP_W, 0), fb = { x: MAP_W / 2, y: MAP_H / 2 };
-    var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&bounded=1&accept-language=zh-TW&q=' + encodeURIComponent('台中市西屯區 ' + name) + '&viewbox=' + [p0.lng, p1.lat, p1.lng, p0.lat].map(function (v) { return v.toFixed(5); }).join(',');
-    return Promise.race([fetch(url).then(function (r) { return r.json(); }), new Promise(function (res) { setTimeout(function () { res(null); }, 4000); })]).then(function (l) {
-      var d = l && l[0]; if (!d) return fb;
-      var m = geoToMap(Number(d.lat), Number(d.lon));
-      return (roadCache[name] = { x: Math.round(clamp(m.x, 0, MAP_W)), y: Math.round(clamp(m.y, 0, MAP_H)) });
-    }).catch(function () { return fb; });
-  }
-  function geoSearch(text) {
-    var p0 = mapToGeo(0, MAP_H), p1 = mapToGeo(MAP_W, 0);
-    var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&bounded=1&accept-language=zh-TW&q=' + encodeURIComponent(text) +
-      '&viewbox=' + [p0.lng, p1.lat, p1.lng, p0.lat].map(function (v) { return v.toFixed(5); }).join(',');
-    fetch(url).then(function (r) { return r.json(); }).then(function (list) {
-      var d = list && list[0];
-      if (!d) { toast('這個地圖範圍內找不到「' + text + '」'); return; }
-      var m = geoToMap(Number(d.lat), Number(d.lon));
-      showView('map');
-      focusOn(clamp(m.x, 0, MAP_W), clamp(m.y, 0, MAP_H), 3);
-      toast(String(d.name || d.display_name || text).split(',')[0]);
-    }).catch(function () { toast('搜尋失敗，請確認網路連線'); });
-  }
+  return `<div class="card"><div class="hd"><h2>🛡️ 創建者後台</h2><div><button class="btn sm" data-act="logout">登出</button> <button class="x" data-act="close">✕</button></div></div>${tabs}${body}</div>`;
+}
+function logout(silent){S.token='';sessionStorage.removeItem('mcb_tok');if(!silent)toast('已登出');renderMap();if(S.view==='creator')renderPanel();$('#acctT').textContent='訪客';S.fbKnown=null;loadFb()}
 
-  /* ---------- basemap tiles ---------- */
-  var gTiles, tileLayers = {}, tileSeen = {}, tileOk = 0, tileBad = 0;
-  function tileSrc(z, x, y, idx) {
-    var n = Math.pow(2, z), src = TILE_SOURCES[idx];
-    x = ((x % n) + n) % n;
-    return src.url.replace('{s}', src.subs[(x + y) % src.subs.length]).replace('{z}', z).replace('{x}', x).replace('{y}', y);
-  }
-  function noteTiles() {
-    var el = $('mapNote');
-    if (el) el.hidden = !(tileBad >= 4 && tileOk === 0);
-  }
-  function addTile(z, tx, ty, size, f) {
-    var key = z + '/' + tx + '/' + ty;
-    if (tileSeen[key]) return;
-    tileSeen[key] = 1;
-    var img = sv('image', {
-      x: (tx * 256 / f - ORG.x) * U, y: (ty * 256 / f - ORG.y) * U,
-      width: size + 0.6, height: size + 0.6, preserveAspectRatio: 'none', 'data-tile': key
-    });
-    var tried = 0;
-    img.setAttribute('href', tileSrc(z, tx, ty, tileIdx));
-    img.addEventListener('load', function () { tileOk++; noteTiles(); });
-    img.addEventListener('error', function () {
-      tried++;
-      if (tried < TILE_SOURCES.length) img.setAttribute('href', tileSrc(z, tx, ty, (tileIdx + tried) % TILE_SOURCES.length));
-      else { tileBad++; noteTiles(); }
-    });
-    tileLayers[z].append(img);
-  }
-  function updateTiles() {
-    if (!gTiles) return;
-    var w = MAP_W / mv.z, hh = MAP_H / mv.z, x0 = mv.cx - w / 2, y0 = mv.cy - hh / 2;
-    var zs = [Z0];
-    if (mv.z >= 1.5) zs.push(Z0 + 1);
-    if (mv.z >= 3) zs.push(Z0 + 2);
-    if (mv.z >= 6) zs.push(Z0 + 3);
-    zs.forEach(function (z) {
-      var f = Math.pow(2, z - Z0), size = 256 / f * U;
-      var tx0 = Math.floor((x0 / U + ORG.x) * f / 256), tx1 = Math.floor(((x0 + w) / U + ORG.x) * f / 256);
-      var ty0 = Math.floor((y0 / U + ORG.y) * f / 256), ty1 = Math.floor(((y0 + hh) / U + ORG.y) * f / 256);
-      if (!tileLayers[z]) { tileLayers[z] = sv('g', {}); gTiles.append(tileLayers[z]); }
-      for (var ty = ty0; ty <= ty1; ty++) for (var tx = tx0; tx <= tx1; tx++) addTile(z, tx, ty, size, f);
-    });
-  }
-  function setTileSource(i) {
-    tileIdx = i;
-    try { localStorage.setItem('ycb-tiles-v3', String(i)); } catch (e) {}
-    Object.keys(tileLayers).forEach(function (z) { tileLayers[z].remove(); });
-    tileLayers = {}; tileSeen = {}; tileOk = 0; tileBad = 0;
-    noteTiles();
-    $('mapAttr').textContent = TILE_SOURCES[i].attr;
-    updateTiles();
-  }
-
-  function buildMap() {
-    mapSvg = $('map');
-    gTiles = sv('g', {});
-    gTiles.append(sv('rect', { x: 0, y: 0, width: MAP_W, height: MAP_H, fill: 'var(--map-bg)' }));
-    for (var gx = 0; gx <= MAP_W; gx += 100) gTiles.append(sv('line', { x1: gx, y1: 0, x2: gx, y2: MAP_H, stroke: 'var(--map-grid)', 'stroke-width': 2 }));
-    for (var gy = 0; gy <= MAP_H; gy += 100) gTiles.append(sv('line', { x1: 0, y1: gy, x2: MAP_W, y2: gy, stroke: 'var(--map-grid)', 'stroke-width': 2 }));
-    PLACES.forEach(function (pl) {
-      gTiles.append(sv('circle', { cx: pl.x, cy: pl.y, r: 6, fill: 'var(--map-edge)' }));
-      gTiles.append(sv('text', { x: pl.x + 12, y: pl.y + 5, fill: 'var(--map-label)', 'font-size': 18, 'font-weight': 700, 'font-family': 'var(--font)' }, pl.n));
-    });
-    mapSvg.append(gTiles);
-    gMarkers = sv('g', {});
-    gDraft = sv('g', {});
-    gLegal = sv('g', {});
-    gOsm = sv('g', { 'pointer-events': 'none' });
-    mapSvg.append(gOsm, gLegal, gMarkers, gDraft);
-
-    var drag = null;
-    mapSvg.addEventListener('pointerdown', function (e) {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      var m = mapSvg.getScreenCTM();
-      drag = { x: e.clientX, y: e.clientY, cx: mv.cx, cy: mv.cy, moved: false, target: e.target, k: m ? 1 / m.a : 1 };
-    });
-    mapSvg.addEventListener('pointermove', function (e) {
-      if (!drag || mv.z <= 1) return;
-      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      if (!drag.moved && Math.hypot(dx, dy) < 6) return;
-      drag.moved = true;
-      mv.cx = drag.cx - dx * drag.k;
-      mv.cy = drag.cy - dy * drag.k;
-      applyView();
-    });
-    mapSvg.addEventListener('pointerup', function (e) {
-      var d = drag; drag = null;
-      if (!d || d.moved) return;
-      var mk = d.target.closest ? d.target.closest('[data-rid]') : null;
-      if (mk) { openDetail(mk.getAttribute('data-rid')); return; }
-      var pt = mapSvg.createSVGPoint();
-      pt.x = e.clientX; pt.y = e.clientY;
-      var p = pt.matrixTransform(mapSvg.getScreenCTM().inverse());
-      placePin(clamp(p.x, 0, MAP_W), clamp(p.y, 0, MAP_H));
-    });
-    mapSvg.addEventListener('pointercancel', function () { drag = null; });
-    mapSvg.addEventListener('keydown', function (e) {
-      var mk = e.target.closest ? e.target.closest('[data-rid]') : null;
-      if (mk && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDetail(mk.getAttribute('data-rid')); }
-    });
-
-    mapSvg.addEventListener('wheel', function (e) {
-      if (!e.ctrlKey && !e.metaKey) return;
-      e.preventDefault();
-      var pt = mapSvg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
-      var p = pt.matrixTransform(mapSvg.getScreenCTM().inverse()), oz = mv.z, nz = clamp(oz * (e.deltaY < 0 ? 1.3 : 1 / 1.3), 1, 8);
-      mv.cx = p.x - (p.x - mv.cx) * oz / nz; mv.cy = p.y - (p.y - mv.cy) * oz / nz; mv.z = nz; applyView();
-    }, { passive: false });
-    $('zin').addEventListener('click', function () { zoomTo(mv.z * 1.5); });
-    $('zout').addEventListener('click', function () { zoomTo(mv.z / 1.5); });
-    $('tilesw').addEventListener('click', function () {
-      var i = (tileIdx + 1) % TILE_SOURCES.length;
-      setTileSource(i);
-      toast('底圖來源：' + TILE_SOURCES[i].name);
-    });
-    $('mapAttr').textContent = TILE_SOURCES[tileIdx].attr;
-    $('zhome').addEventListener('click', function () { mv = { z: 1, cx: MAP_W / 2, cy: MAP_H / 2 }; applyView(); });
-    applyView();
-  }
-  function zoomTo(z) { mv.z = clamp(z, 1, 8); applyView(); }
-  function focusOn(x, y, z) { mv.z = z; mv.cx = x; mv.cy = y; applyView(); }
-  function applyView() {
-    var w = MAP_W / mv.z, hh = MAP_H / mv.z;
-    mv.cx = clamp(mv.cx, w / 2, MAP_W - w / 2);
-    mv.cy = clamp(mv.cy, hh / 2, MAP_H - hh / 2);
-    mapSvg.setAttribute('viewBox', (mv.cx - w / 2) + ' ' + (mv.cy - hh / 2) + ' ' + w + ' ' + hh);
-    mapSvg.style.touchAction = mv.z > 1 ? 'none' : 'pan-y';
-    updateTiles();
-    renderMarkers();
-  }
-  var PIN_D = 'M0 -24 C-11 -24 -17 -15 -17 -8 C-17 3 0 20 0 20 C0 20 17 3 17 -8 C17 -15 11 -24 0 -24Z';
-  function pinEl(cls, x, y, glyph, extra) {
-    var k = 1 / Math.pow(mv.z, 0.6) * (extra || 1);
-    var g = sv('g', { class: cls, transform: 'translate(' + x + ' ' + y + ') scale(' + k + ')' });
-    g.append(sv('path', { class: 'p', d: PIN_D }));
-    g.append(sv('text', { class: 'g', x: 0, y: -4 }, glyph));
-    return g;
-  }
-  var ORDER = { parking: 1, obstruct: 2, ticket: 3 };
-  function onMap(r, now) {
-    if (r.kind === 'legal') return false;
-    if (!r.hasPin || !matches(r)) return false;
-    return stateOf(r) === 'active';
-  }
-  function renderMarkers() {
-    gMarkers.replaceChildren();
-    gLegal.replaceChildren();
-    var sw = 7 / Math.pow(mv.z, 0.6);
-    gOsm.replaceChildren();
-    if (showLegal) osmLines.slice(0, 2000).forEach(function (l) {
-      var pts = l[1].map(function (q) { return q[0] + ',' + q[1]; }).join(' '), col = LTYPES[l[0]][1], w = sw * 0.8, g = sv('g', {});
-      g.append(sv('polyline', { points: pts, fill: 'none', stroke: '#13233d', 'stroke-opacity': 0.55, 'stroke-width': w + 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
-      g.append(sv('polyline', { points: pts, fill: 'none', stroke: col, 'stroke-width': w, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'stroke-dasharray': l[0] === 'paid' ? (w * 1.6) + ' ' + (w * 0.9) : 'none' }));
-      gOsm.append(g);
-    });
-    if (showLegal) reports.filter(function (r) { return r.kind === 'legal' && r.hasLine && stateOf(r) === 'active' && mapVis(r) && matches(r); }).slice(0, 300).forEach(function (r) {
-      var g = lineEl(r.x, r.y, r.x2, r.y2, r.ltype, sw * (r.id === selectedId ? 1.5 : 1));
-      g.append(sv('line', { x1: r.x, y1: r.y, x2: r.x2, y2: r.y2, stroke: '#000', 'stroke-opacity': 0, 'stroke-width': sw + 16, 'stroke-linecap': 'round', 'pointer-events': 'stroke' }));
-      g.setAttribute('class', 'mk'); g.setAttribute('data-rid', r.id); g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
-      g.setAttribute('aria-label', toneLabel(r) + '：' + r.address);
-      gLegal.append(g);
-    });
-    reports.filter(function (r) { return r.kind === 'obstruct' && r.hasLine && stateOf(r) === 'active' && matches(r); }).slice(0, 100).forEach(function (r) {
-      gLegal.append(sv('line', { x1: r.x, y1: r.y, x2: r.x2, y2: r.y2, stroke: '#0d9488', 'stroke-opacity': 0.45, 'stroke-width': sw * 2.2, 'stroke-linecap': 'round', 'pointer-events': 'none' }));
-    });
-    var now = Date.now();
-    var list = reports.filter(function (r) { return onMap(r, now); }).slice(0, 150)
-      .sort(function (a, b) { return ORDER[a.kind] - ORDER[b.kind]; });
-    list.forEach(function (r) {
-      var tone = toneOf(r);
-      var glyph = r.kind === 'nopark' ? '禁' : r.kind === 'obstruct' ? '擋' : tone === 'green' ? 'P' : '!';
-      var big = r.kind === 'ticket' ? 1.2 : 1;
-      var g = pinEl('mk ' + tone + (r.id === selectedId ? ' sel' : ''), r.x, r.y, glyph, (r.id === selectedId ? 1.25 : 1) * big);
-      if (r.kind === 'ticket' && !reduceMotion) {
-        var ring = sv('circle', { class: 'ring', cx: 0, cy: -6, r: 18 });
-        ring.append(sv('animate', { attributeName: 'r', values: '18;40;18', dur: '1.6s', repeatCount: 'indefinite' }));
-        ring.append(sv('animate', { attributeName: 'opacity', values: '1;0;1', dur: '1.6s', repeatCount: 'indefinite' }));
-        g.insertBefore(ring, g.firstChild);
-      }
-      g.setAttribute('data-rid', r.id);
-      g.setAttribute('tabindex', '0');
-      g.setAttribute('role', 'button');
-      g.setAttribute('aria-label', toneLabel(r) + '：' + r.address);
-      gMarkers.append(g);
-    });
-    gDraft.replaceChildren();
-    if (draft.kind === 'obstruct' && draft.pin && draft.pin2) gDraft.append(sv('line', { x1: draft.pin.x, y1: draft.pin.y, x2: draft.pin2.x, y2: draft.pin2.y, stroke: '#0d9488', 'stroke-opacity': 0.5, 'stroke-width': sw * 2.2, 'stroke-linecap': 'round' }));
-    if (draft.kind === 'legal' && draft.pin && draft.pin2) gDraft.append(lineEl(draft.pin.x, draft.pin.y, draft.pin2.x, draft.pin2.y, draft.ltype || 'white', sw));
-    if (draft.pin) gDraft.append(pinEl('draft', draft.pin.x, draft.pin.y, '＋', 1.15));
-    if (draft.pin2) gDraft.append(pinEl('draft', draft.pin2.x, draft.pin2.y, '＋', 1.15));
-    var need2 = (draft.kind === 'legal' || (draft.kind === 'obstruct' && draft.seg)) && draft.pin && !draft.pin2;
-    $('pickhint').hidden = !!draft.pin && !need2;
-    $('pickhint').textContent = need2 ? (draft.kind === 'obstruct' ? '再點一下，標記這段路的終點' : '再點一下，標記線的終點') : draft.kind === 'legal' ? '點地圖，標記線的起點' : '點地圖，標記位置';
-  }
-
-  var pinToken = 0;
-  function placePin(x, y) {
-    if ((draft.kind === 'legal' || (draft.kind === 'obstruct' && draft.seg)) && draft.pin && !draft.pin2) { draft.pin2 = { x: Math.round(x), y: Math.round(y) }; renderMarkers(); renderPinState(); return; }
-    draft.pin2 = null;
-    draft.pin = { x: Math.round(x), y: Math.round(y) };
-    var token = ++pinToken;
-    if (!draft.addrTouched) {
-      var near = nearestName(x, y);
-      $('addr').value = near ? near + ' 附近' : '地圖標記位置';
-      lookupAddress(x, y).then(function (name) {
-        if (name && token === pinToken && !draft.addrTouched && draft.pin) $('addr').value = name;
-      });
-    }
-    renderMarkers();
-    renderPinState();
-  }
-  function renderPinState() {
-    $('pinstate').textContent = !draft.pin ? '' : ((draft.kind === 'legal' || (draft.kind === 'obstruct' && draft.seg)) && !draft.pin2) ? '起點已標記，請再點地圖標記終點。' : '已在地圖標記，可在上方補上巷口或門牌。';
-    $('relocateT').textContent = draft.pin ? '重新標記位置' : '在地圖上選位置';
-  }
-
-  /* ---------- built-in parking lines (OpenStreetMap via Overpass, cached 7 days) ---------- */
-  function osmClass(t) {
-    var kind = '', fee = false;
-    Object.keys(t).forEach(function (k) {
-      var v = t[k];
-      if (/^parking:lane:(both|left|right)$/.test(k)) {
-        if (v === 'no_stopping') kind = 'red';
-        else if (v === 'no_parking' && kind !== 'red') kind = 'yellow';
-        else if (!kind && /^(parallel|diagonal|perpendicular|marked|yes)$/.test(v)) kind = 'white';
-      } else if (/^parking:(both|left|right)$/.test(k) && !kind && /^(lane|street_side|on_kerb)$/.test(v)) kind = 'white';
-      if ((/fee/.test(k) && v === 'yes') || (/^parking:condition/.test(k) && v === 'ticket')) fee = true;
-    });
-    if (t.amenity === 'parking') { kind = fee || t.fee === 'yes' ? 'paid' : 'white'; }
-    return kind === 'white' && fee ? 'paid' : kind;
-  }
-  function loadOsm() {
-    var note = $('osmNote');
-    function show(list, msg) { osmLines = list.filter(function (l) { return l[0] !== 'white'; }); note.textContent = msg; renderMarkers(); }
-    try {
-      var c = JSON.parse(localStorage.getItem('ycb-osm-v1') || 'null');
-      if (c && Date.now() - c.t < 7 * 86400000 && c.lines) { show(c.lines, '內建車線：OpenStreetMap 資料，涵蓋不完整，請以現場標線為準。'); return; }
-    } catch (e) {}
-    note.textContent = '車線資料載入中…';
-    var a = mapToGeo(0, MAP_H), b = mapToGeo(MAP_W, 0);
-    var bb = [a.lat, a.lng, b.lat, b.lng].map(function (v) { return v.toFixed(5); }).join(',');
-    var q = '[out:json][timeout:25];(' + ['parking:lane:both', 'parking:lane:left', 'parking:lane:right', 'parking:both', 'parking:left', 'parking:right'].map(function (k) { return 'way["' + k + '"](' + bb + ');'; }).join('') + 'way["amenity"="parking"](' + bb + '););out tags geom;';
-    fetch('https://overpass-api.de/api/interpreter', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(q) })
-      .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
-      .then(function (d) {
-        var lines = [];
-        (d.elements || []).forEach(function (e) {
-          var k = osmClass(e.tags || {});
-          if (!k || !e.geometry || e.geometry.length < 2) return;
-          lines.push([k, e.geometry.map(function (g) { var m = geoToMap(g.lat, g.lon); return [Math.round(m.x), Math.round(m.y)]; })]);
-        });
-        try { localStorage.setItem('ycb-osm-v1', JSON.stringify({ t: Date.now(), lines: lines })); } catch (e) {}
-        show(lines, lines.length ? '內建車線：OpenStreetMap 資料，涵蓋不完整，請以現場標線為準。' : 'OpenStreetMap 在這個範圍沒有車線資料，可自行標示補充。');
-      })
-      .catch(function () { note.textContent = '內建車線載入失敗（需要網路），可自行標示車線。'; });
-  }
-
-  /* ---------- lists ---------- */
-  function thumbEl(r) {
-    var t = h('span', { class: 'thumb ' + (toneOf(r) === 'grey' ? '' : toneOf(r)) });
-    if (r.thumb) t.append(h('img', { src: r.thumb, alt: '' }));
-    else t.append(icon(kindIcon(r), 24));
-    return t;
-  }
-  function rowEl(r) {
-    var tone = toneOf(r);
-    var bits = [];
-    var sum = summary(r);
-    if (sum.length) bits.push(sum.join('・'));
-    if (r.photoCount) bits.push(r.photoCount + ' 張照片');
-    var n = confirmCount(r);
-    if (n) bits.push(n + ' 人' + (r.kind === 'parking' ? '確認有位' : '確認還在'));
-    var info = h('span', {},
-      h('span', { class: 'tl ' + tone }, icon(kindIcon(r), 16), toneLabel(r)),
-      h('span', { class: 'addr', style: 'display:block' }, r.address),
-      h('span', { class: 'meta', style: 'display:block' },
-        h('span', { class: 'time', 'data-t': lastSeen(r) }, rel(lastSeen(r))),
-        bits.map(function (b) { return ' ・ ' + b; }).join('')));
-    var btn = h('button', { type: 'button', class: 'row', onclick: function () { openDetail(r.id); } },
-      thumbEl(r), info, h('span', { class: 'pill ' + tone }, pillLabel(r)), h('span', { class: 'chev' }, icon('chev', 18)));
-    return h('li', {}, btn);
-  }
-  function emptyEl(filtered) {
-    return h('li', { class: 'empty' },
-      h('strong', {}, filtered ? '沒有符合條件的通報' : '還沒有人通報'),
-      filtered ? '換個關鍵字或放寬篩選看看。' : '有車位或正在開單，都可以通報；按右上角「開單警報」最快。');
-  }
-  function latestSort(a, b) {
-    var la = isLive(a) ? 1 : 0, lb = isLive(b) ? 1 : 0;
-    if (a.kind === 'ticket' && la && !(b.kind === 'ticket' && lb)) return -1;
-    if (b.kind === 'ticket' && lb && !(a.kind === 'ticket' && la)) return 1;
-    return lastSeen(b) - lastSeen(a);
-  }
-  function renderLatest() {
-    var list = $('latestList');
-    if (loading) { list.replaceChildren(h('li', { class: 'empty' }, '讀取通報中…')); return; }
-    var rows = reports.filter(function (r) { return r.kind !== 'legal' && matches(r); }).sort(latestSort).slice(0, 6);
-    list.replaceChildren.apply(list, rows.length ? rows.map(rowEl) : [emptyEl(!!search && reports.length > 0)]);
-  }
-  function grpOf(r) {
-    var st = stateOf(r);
-    if (st === 'done' || st === 'ended') return 'ended';
-    if (st === 'expired') return 'expired';
-    return 'active';
-  }
-  function renderRecords() {
-    var list = $('recList');
-    if (loading) { list.replaceChildren(h('li', { class: 'empty' }, '讀取通報中…')); return; }
-    var lim = rf.range === 'all' ? Infinity : Number(rf.range) * 3600000, now = Date.now();
-    var rows = reports.filter(function (r) {
-      return (isLong(r) || now - r.createdAt <= lim) && vis(r) && matches(r) &&
-        (rf.kind === 'all' || r.kind === rf.kind) &&
-        (rf.status === 'all' || grpOf(r) === rf.status);
-    });
-    list.replaceChildren.apply(list, rows.length ? rows.map(rowEl) : [emptyEl(reports.length > 0)]);
-  }
-
-  function activeTickets() {
-    return reports.filter(function (r) { return r.kind === 'ticket' && stateOf(r) === 'active'; })
-      .sort(function (a, b) { return lastSeen(b) - lastSeen(a); });
-  }
-  function renderAlertBar() {
-    var bar = $('alertBar');
-    var al = activeTickets();
-    if (!al.length) { bar.hidden = true; bar.replaceChildren(); return; }
-    bar.hidden = false;
-    bar.replaceChildren(
-      icon('siren', 26),
-      h('div', { class: 'ab-t' },
-        h('strong', {}, '目前有 ' + al.length + ' 處正在' + (al.every(function (r) { return r.tkind === 'tow'; }) ? '拖吊' : '開單')),
-        h('span', { class: 's' }, al.slice(0, 3).map(function (r) { return r.address + '（' + rel(lastSeen(r)) + '）'; }).join('、'))),
-      h('button', { type: 'button', class: 'btn', onclick: function () {
-        showView('map');
-        focusOn(al[0].x, al[0].y, 1.8);
-        openDetail(al[0].id);
-      } }, '看詳情'));
-  }
-  function renderBell() {
-    var tickets = activeTickets();
-    var b = $('badge');
-    var n = tickets.length;
-    b.hidden = !n;
-    b.textContent = n > 9 ? '9+' : String(n);
-    if (!$('pop').hidden) renderPop();
-  }
-  function renderPop() {
-    var pop = $('pop');
-    var items = reports.filter(isLive).sort(latestSort).slice(0, 6);
-    pop.replaceChildren(h('h3', {}, '進行中的警報與通報'));
-    if (!items.length) pop.append(h('p', { class: 'none' }, '目前沒有進行中的通報。'));
-    items.forEach(function (r) {
-      pop.append(h('button', { type: 'button', onclick: function () { closePop(); openDetail(r.id); } },
-        h('strong', { class: 'tl ' + toneOf(r), style: 'display:flex;gap:6px;align-items:center' }, icon(kindIcon(r), 16), toneLabel(r) + '・' + r.address),
-        h('span', { class: 'meta', style: 'display:block;font-size:13px;color:var(--muted)' }, rel(lastSeen(r)))));
-    });
-  }
-  function closePop() { $('pop').hidden = true; $('bell').setAttribute('aria-expanded', 'false'); }
-
-  function renderReview() {
-    var list = $('revList'), rows = reports.filter(function (r) { return r.kind === 'legal' && r.review === 'pending'; }).sort(function (a, b) { return b.createdAt - a.createdAt; });
-    list.replaceChildren.apply(list, rows.length ? rows.map(rowEl) : [h('li', { class: 'empty' }, h('strong', {}, '目前沒有待審核的申請'), '有人申請新增停車地點時會出現在這裡。')]);
-    var rb = document.querySelector('#nav [data-v="review"]');
-    if (rb && rb.lastChild) rb.lastChild.textContent = '審核' + (rows.length ? '（' + rows.length + '）' : '');
-  }
-  function renderAll() {
-    renderReview();
-    renderMarkers();
-    renderLatest();
-    if (view === 'records') renderRecords();
-    renderAlertBar();
-    renderBell();
-    if ($('overlay').firstChild && selectedId) refreshDetail();
-    tickTimes();
-  }
-  function tickTimes() {
-    document.querySelectorAll('.time[data-t]').forEach(function (el) { el.textContent = rel(Number(el.getAttribute('data-t'))); });
-  }
-
-  /* ---------- detail dialog ---------- */
-  var lastFocus = null;
-  function openDetail(id) {
-    var r = reports.filter(function (x) { return x.id === id; })[0];
-    if (!r) return;
-    selectedId = id;
-    lastFocus = document.activeElement;
-    detailSig = '';
-    buildDetail(r);
-    renderMarkers();
-  }
-  function closeDialog() {
-    $('overlay').replaceChildren();
-    selectedId = null;
-    renderMarkers();
-    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
-  }
-  function sigOf(r) { return [r.id, r.status, r.note, r.address, confirmCount(r), !!(confirms[r.id] && confirms[r.id][uid]), stateOf(r), r.review, canWrite].join('|'); }
-  function refreshDetail() {
-    var r = reports.filter(function (x) { return x.id === selectedId; })[0];
-    if (!r) { closeDialog(); return; }
-    if (sigOf(r) !== detailSig) buildDetail(r, true);
-  }
-  function shareText(r) {
-    var s = summary(r).join('、');
-    return '【移車快報】' + toneLabel(r) + '｜' + r.address + (s ? '｜' + s : '') + (r.note ? '\n' + r.note : '') + '\n' + rel(lastSeen(r)) + '回報';
-  }
-  function copyShare(r, host) {
-    var text = shareText(r);
-    var fallback = function () {
-      var box = host.querySelector('textarea');
-      if (!box) { box = h('textarea', { class: 'field', readonly: true, rows: '3', 'aria-label': '請手動複製這段文字', style: 'flex-basis:100%' }); host.append(box); }
-      box.value = text; box.focus(); box.select();
-    };
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast('已複製，可貼到 LINE 群組'); }, fallback);
-      else fallback();
-    } catch (ex) { fallback(); }
-  }
-  function nudgeEl(r) {
-    var box = h('div', { class: 'nudge' }, h('h3', {}, '先勸導，再考慮其他方式'),
-      h('p', { class: 'msg' }, nudgeText(r)));
-    var row = h('div', { class: 'row2' });
-    row.append(h('button', { type: 'button', class: 'btn teal', onclick: function () {
-      var t = nudgeText(r);
-      try { if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { toast('已複製友善提醒，可貼到訊息或寫在紙條上'); }); else toast('請長按文字手動複製'); } catch (e) { toast('請長按文字手動複製'); }
-    } }, '複製提醒文字'));
-    if (r.status !== 'done') row.append(h('button', { type: 'button', class: 'btn teal' + (r.status === 'handling' ? ' on' : ''), disabled: canWrite === false || r.status === 'handling',
-      onclick: guard(function () { return setStatus(r, 'handling').then(function () { toast('謝謝你的提醒！'); }); }) }, r.status === 'handling' ? '已有人勸導' : '我已勸導'));
-    box.append(row, h('p', { class: 'lead' }, '提醒時請保持禮貌，不要拍或公開車牌。若有人受傷或救護、消防受阻，請直接撥 110／119。'));
-    return box;
-  }
-  function buildDetail(r, keepFocus) {
-    detailSig = sigOf(r);
-    var tone = toneOf(r);
-    var writable = canWrite !== false;
-    var mine = !!(confirms[r.id] && confirms[r.id][uid]);
-    var canDel = writable && (localMode || (uid && r.createdBy === uid) || canEdit);
-
-    var photos = h('div', { class: 'photos' });
-    if (r.photoCount) {
-      photos.append(h('p', { class: 'wait' }, '照片載入中…'));
-      loadPhotos(r).then(function (imgs) {
-        if (selectedId !== r.id) return;
-        photos.replaceChildren.apply(photos, imgs.length ? imgs.map(function (u) { return h('img', { src: u, alt: '現場照片' }); }) : [h('p', { class: 'wait' }, '照片無法顯示')]);
-      }).catch(function () { photos.replaceChildren(h('p', { class: 'wait' }, '照片無法顯示')); });
-    }
-
-    var act = h('div', { class: 'dact' });
-    act.append(h('button', {
-      type: 'button', class: 'btn' + (mine ? ' on' : ''), 'aria-pressed': mine ? 'true' : 'false', disabled: !uid || !writable,
-      onclick: guard(function () { return toggleConfirm(r); })
-    }, CONFIRM_LABEL[r.kind] + ' · ' + confirmCount(r)));
-    var ended = r.status === 'done';
-    if (!isLong(r) || canDel) act.append(h('button', {
-      type: 'button', class: 'btn', disabled: !writable,
-      onclick: guard(function () { return setStatus(r, ended ? 'open' : 'done'); })
-    }, ended ? '重新開啟' : (r.kind === 'parking' ? '已滿了' : r.kind === 'obstruct' ? '已改善' : isLong(r) ? '撤銷' : '已離開')));
-    act.append(h('button', { type: 'button', class: 'btn', onclick: function () { copyShare(r, act); } }, '複製分享文字'));
-    act.append(h('a', {
-      class: 'btn', target: '_blank', rel: 'noopener',
-      href: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('台中市西屯區 ' + r.address.replace(/ (附近|周邊)$/, ''))
-    }, '在 Google 地圖開啟'));
-    if (canEdit && r.kind === 'legal' && r.review === 'pending') {
-      act.append(h('button', { type: 'button', class: 'btn on', onclick: guard(function () { return setReview(r, 'approved').then(function () { toast('已核准，地圖會顯示淺綠色標線'); }); }) }, '核准'),
-        h('button', { type: 'button', class: 'btn danger', onclick: guard(function () { return setReview(r, 'rejected').then(function () { toast('已退回申請'); }); }) }, '退回'));
-    }
-    if (canDel) {
-      var armed = false, timer;
-      var del = h('button', { type: 'button', class: 'btn danger' }, '刪除');
-      del.addEventListener('click', function () {
-        if (!armed) { armed = true; del.textContent = '再按一次刪除'; timer = setTimeout(function () { armed = false; del.textContent = '刪除'; }, 3000); return; }
-        clearTimeout(timer);
-        del.disabled = true;
-        guard(function () { return removeReport(r).then(function () { toast('已刪除'); }); })().then(function () { del.disabled = false; });
-      });
-      act.append(del);
-    }
-
-    var closeBtn = h('button', { type: 'button', class: 'xbtn', 'aria-label': '關閉', onclick: closeDialog }, icon('close', 18));
-    var dlg = h('div', { class: 'dlg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dT' },
-      h('div', { class: 'dlg-top' },
-        h('div', { class: 'seg' }, h('span', { class: 'pill ' + tone }, KIND_NAME[r.kind] + '・' + toneLabel(r) + '・' + pillLabel(r))),
-        closeBtn),
-      h('h2', { id: 'dT' }, r.address),
-      h('div', { class: 'chips' }, summary(r).map(function (l) { return h('span', { class: 'chip' }, l); }),
-        h('span', { class: 'chip', title: abs(r.createdAt) }, abs(r.createdAt))),
-      h('p', { class: 'lead' }, isLong(r) ? '這是長期有效的標示，不會自動過期，只有發布者可以撤銷。僅供參考，請以現場標線與告示為準。' : '最後確認：' + rel(lastSeen(r)) + '。' + (r.kind === 'ticket' ? '45' : r.kind === 'obstruct' ? '90' : '30') + ' 分鐘沒人確認會自動變成已過期。'),
-      r.photoCount ? photos : null,
-      r.note ? h('p', { class: 'dnote' }, r.note) : null,
-      r.kind === 'obstruct' ? nudgeEl(r) : null,
-      act);
-    var veil = h('div', { class: 'veil', onclick: function (e) { if (e.target === veil) closeDialog(); } }, dlg);
-    $('overlay').replaceChildren(veil);
-    if (!keepFocus) closeBtn.focus();
-  }
-
-  /* ---------- alarm dialog ---------- */
-  function openAlarm() {
-    if (canWrite === false) { toast('你目前是檢視者，不能送出警報'); return; }
-    ensureAudio();
-    lastFocus = document.activeElement;
-    selectedId = null;
-    var sel = { spot: null, tkind: 'ticket' };
-    var spots = ROADS.map(function (n) { return { n: n, road: true, addr: n + ' 路段' }; });
-    if (draft.pin) {
-      spots.unshift({ n: '地圖上標記的位置', x: draft.pin.x, y: draft.pin.y, addr: $('addr').value.trim() || ((nearestName(draft.pin.x, draft.pin.y) || '地圖標記位置')) });
-      sel.spot = spots[0];
-    }
-    var err = h('p', { class: 'formErr', role: 'alert' });
-    var go = h('button', { type: 'button', class: 'alarm-go' }, icon('siren', 26), '按下警鈴');
-    var spotBox = h('div', { class: 'opts' });
-    var kindBox = h('div', { class: 'opts' });
-    function paint() {
-      spotBox.replaceChildren.apply(spotBox, spots.map(function (s) {
-        return h('button', { type: 'button', class: 'pt v', 'aria-pressed': sel.spot === s ? 'true' : 'false', onclick: function () { sel.spot = s; err.textContent = ''; paint(); } }, s.n);
-      }));
-      kindBox.replaceChildren.apply(kindBox, [['ticket', '正在開單'], ['tow', '正在拖吊']].map(function (k) {
-        return h('button', { type: 'button', class: 'pt v', 'aria-pressed': sel.tkind === k[0] ? 'true' : 'false', onclick: function () { sel.tkind = k[0]; paint(); } }, k[1]);
-      }));
-    }
-    paint();
-    var note = h('input', { class: 'field', type: 'text', maxlength: '40', placeholder: '例如：約 3 個人，從巷口往內走', 'aria-label': '補充說明（選填）' });
-    go.addEventListener('click', function () {
-      if (!sel.spot) { err.textContent = '請先選一個路段'; return; }
-      if (Date.now() - lastAlarm < 30000) { err.textContent = '剛剛才按過警鈴，請等 30 秒再按'; return; }
-      go.disabled = true;
-      var s = sel.spot;
-      (s.road ? roadPoint(s.n).then(function (p) { s = Object.assign({}, s, p); }) : Promise.resolve()).then(function () { return createReport({
-        kind: 'ticket', tkind: sel.tkind, address: s.addr.slice(0, 60), x: s.x, y: s.y, note: note.value.trim().slice(0, 40),
-        status: 'open', createdAt: Date.now(), createdBy: uid || ''
-      }, []); }).then(function () {
-        lastAlarm = Date.now();
-        closeDialog();
-        toast('警鈴已送出，大家都收到了');
-        showView('map');
-        focusOn(s.x, s.y, 1.6);
-      }).catch(function (ex) { err.textContent = errText(ex); go.disabled = false; });
-    });
-    var closeBtn = h('button', { type: 'button', class: 'xbtn', 'aria-label': '關閉', onclick: closeDialog }, icon('close', 18));
-    var dlg = h('div', { class: 'dlg', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'aT' },
-      h('div', { class: 'dlg-top' }, h('h2', { id: 'aT' }, '開單警報'), closeBtn),
-      h('p', { class: 'lead' }, '看到有人正在開單或拖吊？選所在路段，按警鈴，所有開著這個頁面的人會馬上收到。'),
-      h('div', {}, h('p', { class: 'opt-lab' }, '在哪個路段'), spotBox),
-      h('div', {}, h('p', { class: 'opt-lab' }, '正在做什麼'), kindBox),
-      h('div', {}, h('p', { class: 'opt-lab' }, '補充（選填）'), note),
-      err, go);
-    var veil = h('div', { class: 'veil', onclick: function (e) { if (e.target === veil) closeDialog(); } }, dlg);
-    $('overlay').replaceChildren(veil);
-    closeBtn.focus();
-  }
-
-  /* ---------- form ---------- */
-  function ptBtn(label, pressed, onclick) {
-    var b = h('button', { type: 'button', class: 'pt', 'aria-pressed': pressed ? 'true' : 'false' }, label);
-    b.addEventListener('click', function () { onclick(b); });
-    return b;
-  }
-  function renderStep2() {
-    var box = $('step2');
-    if (draft.kind === 'nopark') return renderNopark(box);
-    if (draft.kind === 'legal') return renderLegal(box);
-    if (draft.kind === 'obstruct') return renderObstruct(box);
-    var veh = h('div', { class: 'opts' }), slots = h('div', { class: 'opts' }), fee = h('div', { class: 'opts' });
-    Object.keys(VEH).forEach(function (k) {
-      veh.append(ptBtn(VEH[k], draft.vehicles[k], function (b) { draft.vehicles[k] = !draft.vehicles[k]; b.setAttribute('aria-pressed', draft.vehicles[k] ? 'true' : 'false'); }));
-    });
-    function paintOne(wrap, list, key) {
-      wrap.replaceChildren.apply(wrap, list.map(function (o) {
-        return ptBtn(o[1], draft[key] === o[0], function () { draft[key] = draft[key] === o[0] ? '' : o[0]; paintOne(wrap, list, key); });
-      }));
-    }
-    paintOne(slots, SLOTS, 'slots');
-    paintOne(fee, FEES, 'fee');
-    box.replaceChildren(h('h3', {}, '2. 車位資訊'),
-      h('p', { class: 'opt-lab' }, '可停的車種（可複選）'), veh,
-      h('p', { class: 'opt-lab' }, '大約剩幾個位置'), slots,
-      h('p', { class: 'opt-lab' }, '是否收費'), fee);
-  }
-  function modes() { return [['parking', '回報車位'], ['obstruct', '占用勸導'], ['nopark', '店家禁停'], ['legal', canEdit ? '編輯車線（創建者）' : '申請新增停車地點']]; }
-  var KCFG = {
-    parking: ['例如：巷子底還有兩個機車位，剛有車離開', 'parking', '回報有車位', 'btn primary green', '車位變動很快，30 分鐘沒人確認會自動變成已過期。到場請以現場為準。'],
-    obstruct: ['例如：機車停滿人行道，推嬰兒車的人要繞到馬路上', 'alert', '送出占用提醒', 'btn primary teal', '這不是檢舉，不會轉交警方，也不會公開車牌。目的是讓大家看到並善意提醒，請對方方便時移車。'],
-    nopark: ['例如：門口與對面巷子都不能停，違停會請拖吊', 'alert', '發布禁停公告', 'btn primary', '禁停時段每天自動套用，不會過期，只有發布者可以撤銷。僅供參考，請以現場告示為準。'],
-    legal: ['例如：這側是收費格，平日 8–22 點收費', 'parking', '送出車線標示', 'btn primary', '車線標示是民眾標示，不是官方資料，請以現場標線為準。']
-  };
-  function renderNopark(box) {
-    var shop = h('input', { class: 'field', type: 'text', maxlength: '30', placeholder: '店名（例：○○早餐店）', 'aria-label': '店名', value: draft.shop || '', oninput: function (e) { draft.shop = e.target.value; } });
-    var f = h('input', { type: 'time', 'aria-label': '每天幾點開始禁止停車', value: draft.from || '', oninput: function (e) { draft.from = e.target.value; } });
-    var t = h('input', { type: 'time', 'aria-label': '幾點結束（選填）', value: draft.to || '', oninput: function (e) { draft.to = e.target.value; } });
-    box.replaceChildren(h('h3', {}, '2. 店家禁停時段'),
-      h('p', { class: 'opt-lab' }, '店名'), shop,
-      h('p', { class: 'opt-lab' }, '每天幾點開始禁止停車'), f,
-      h('p', { class: 'opt-lab' }, '到幾點結束（選填，不填就到午夜）'), t);
-  }
-  function renderObstruct(box) {
-    var wrap = h('div', { class: 'opts' }), segBtn = h('button', { type: 'button', class: 'relocate' });
-    function paint() {
-      wrap.replaceChildren.apply(wrap, Object.keys(OBS).map(function (k) {
-        var b = ptBtn(OBS[k][0], draft.otype === k, function () { draft.otype = draft.otype === k ? '' : k; paint(); });
-        b.classList.add('t'); return b;
-      }));
-      segBtn.replaceChildren(icon('locate'), draft.seg ? (draft.pin2 ? '已標記一段路（按此取消）' : '請在地圖點這段路的終點（按此取消）') : '標記一段路（選填，占用範圍較長時使用）');
-    }
-    segBtn.addEventListener('click', function () { draft.seg = !draft.seg; if (!draft.seg) draft.pin2 = null; paint(); renderMarkers(); renderPinState(); });
-    paint();
-    box.replaceChildren(h('h3', {}, '2. 占用情況'),
-      h('div', { class: 'gentle' }, h('strong', {}, '勸導優先'), '先用友善的方式讓對方知道，多數人只是沒注意到。這裡不會公開車牌，也不是正式檢舉。'),
-      h('p', { class: 'opt-lab' }, '選最接近的情況'), wrap, segBtn);
-  }
-  function renderLegal(box) {
-    if (!canEdit) {
-      draft.ltype = 'white';
-      box.replaceChildren(h('h3', {}, '2. 申請類型'), h('div', { class: 'gentle' }, h('strong', {}, '申請新增可停車路段'), '請在地圖點出可停車路段的起點和終點，並附上現場照片。創建者審核通過後，會顯示為淺綠色標線。'));
-      return;
-    }
-    var wrap = h('div', { class: 'opts' });
-    function paint() {
-      wrap.replaceChildren.apply(wrap, Object.keys(LTYPES).map(function (k) {
-        return ptBtn(LTYPES[k][0], draft.ltype === k, function () { draft.ltype = draft.ltype === k ? '' : k; paint(); renderMarkers(); });
-      }));
-    }
-    paint();
-    box.replaceChildren(h('h3', {}, '2. 這段是什麼線'), wrap);
-  }
-  function renderKind() {
-    var c = KCFG[draft.kind];
-    var applying = draft.kind === 'legal' && !canEdit;
-    if (applying) { c = ['例如：這條巷子路邊可停車，晚上人較少', 'parking', '送出審核申請', 'btn primary', '新增停車地點需經創建者審核，通過後才會以淺綠色標線顯示在地圖上。申請必須附上現場照片。']; draft.ltype = 'white'; }
-    $('s3em').textContent = applying ? '（必填）' : '（選填）';
-    $('note').setAttribute('placeholder', c[0]);
-    var send = $('send');
-    send.className = c[3];
-    send.replaceChildren(icon(c[1], 22), c[2]);
-    $('fineT').textContent = c[4];
-    var dh = $('dropHint'); if (dh) dh.hidden = draft.kind !== 'obstruct';
-    $('s1t').textContent = draft.kind === 'legal' ? '1. 在地圖點線的起點和終點' : '1. 選擇位置';
-    var box = $('modes');
-    box.replaceChildren.apply(box, modes().map(function (m) {
-      return ptBtn(m[1], draft.kind === m[0], function () { draft.kind = m[0]; draft.pin2 = null; draft.seg = false; renderKind(); renderPinState(); renderMarkers(); });
-    }));
-    formErr('');
-    renderStep2();
-  }
-
-  function buildForm() {
-    $('addr').addEventListener('input', function () { draft.addrTouched = $('addr').value.length > 0; });
-    $('relocate').addEventListener('click', function () {
-      $('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      toast('在地圖上點一下，標記位置');
-    });
-    $('note').addEventListener('input', function () { $('count').textContent = $('note').value.length + '/200'; });
-
-    var drop = $('drop'), file = $('file');
-    drop.addEventListener('click', function () { file.click(); });
-    ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
-    ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
-    drop.addEventListener('drop', function (e) { addPhotos(e.dataTransfer ? e.dataTransfer.files : []); });
-    file.addEventListener('change', function () { addPhotos(file.files); file.value = ''; });
-    $('form').addEventListener('submit', onSubmit);
-    renderKind();
-  }
-
-  var ocrP = null;
-  function loadOcr() {
-    if (ocrP) return ocrP;
-    ocrP = new Promise(function (res, rej) {
-      if (window.Tesseract) return res(window.Tesseract);
-      var sc = document.createElement('script');
-      sc.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
-      sc.onload = function () { res(window.Tesseract); };
-      sc.onerror = function () { rej(new Error('ocr')); };
-      document.head.append(sc);
-    }).then(function (T) {
-      return T.createWorker('eng', 1, { langPath: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng/4.0.0_best_int' });
-    }).then(function (w) {
-      return w.setParameters({ tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-', tessedit_pageseg_mode: '11' }).then(function () { return w; });
-    }).catch(function () { ocrP = null; throw new Error('ocr'); });
-    return ocrP;
-  }
-  /* black out digits (and O / I, which Taiwan plates never use as letters so they are misread digits); keep the other letters */
-  function maskPlates(cv) {
-    return loadOcr().then(function (w) { return w.recognize(cv); }).catch(function () { throw new Error('ocr'); }).then(function (res) {
-      var d = res.data || {}, ctx = cv.getContext('2d'), n = 0;
-      ctx.fillStyle = '#000';
-      function nz(t) { return String(t || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''); }
-      function plateLike(t) { return /^[A-Z0-9]{2,4}-?[A-Z0-9]{2,4}$/.test(t) && /[A-Z]/.test(t) && /[0-9OI]/.test(t) && t.replace(/-/g, '').length >= 5; }
-      function blk(b) { if (!b) return; var p = 3; ctx.fillRect(b.x0 - p, b.y0 - p, b.x1 - b.x0 + 2 * p, b.y1 - b.y0 + 2 * p); }
-      function hide(wd) {
-        if (wd._m) return; wd._m = 1;
-        var sy = wd.symbols || [];
-        if (sy.length) sy.forEach(function (c) { if (/[0-9OI]/i.test(c.text)) blk(c.bbox); }); else blk(wd.bbox);
-      }
-      var lines = d.lines && d.lines.length ? d.lines : [{ words: d.words || [] }];
-      lines.forEach(function (ln) {
-        var ws = ln.words || [];
-        for (var i = 0; i < ws.length; i++) {
-          var a = nz(ws[i].text), b = i + 1 < ws.length ? nz(ws[i + 1].text) : '';
-          if (plateLike(a)) { hide(ws[i]); n++; }
-          else if (b && plateLike(a + '-' + b)) { hide(ws[i]); hide(ws[i + 1]); n++; }
-        }
-      });
-      return n;
-    });
-  }
-  function loadImg(file) {
-    return new Promise(function (res, rej) {
-      var u = URL.createObjectURL(file), im = new Image();
-      im.onload = function () { URL.revokeObjectURL(u); res(im); };
-      im.onerror = function () { URL.revokeObjectURL(u); rej(new Error('bad image')); };
-      im.src = u;
-    });
-  }
-  function scaled(src, side) {
-    var sc = Math.min(1, side / Math.max(src.width, src.height)), c = document.createElement('canvas');
-    c.width = Math.max(1, Math.round(src.width * sc));
-    c.height = Math.max(1, Math.round(src.height * sc));
-    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
-    return c;
-  }
-  async function shrink(file) {
-    var cv = scaled(await loadImg(file), 1280);
-    var masked = await maskPlates(cv);
-    var tries = [[800, 0.62], [640, 0.5], [520, 0.42], [420, 0.36]], full = '';
-    for (var i = 0; i < tries.length; i++) {
-      full = scaled(cv, tries[i][0]).toDataURL('image/jpeg', tries[i][1]);
-      if (full.length <= 70000) break;
-    }
-    if (full.length > 70000) throw new Error('too big');
-    return { full: full, thumb: scaled(cv, 160).toDataURL('image/jpeg', 0.6), masked: masked };
-  }
-  async function addPhotos(files) {
-    var list = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\/(jpeg|png)$/.test(f.type) && f.size < 20 * 1024 * 1024; });
-    if (!list.length) { formErr('請選擇 JPG 或 PNG 照片'); return; }
-    var room = 3 - draft.photos.length;
-    if (room <= 0) { formErr('最多上傳 3 張照片'); return; }
-    formErr('');
-    for (var i = 0; i < Math.min(room, list.length); i++) {
-      toast('正在自動遮蔽車牌數字，請稍候…');
-      try {
-        var ph = await shrink(list[i]);
-        draft.photos.push(ph);
-        toast(ph.masked ? '已遮蔽 ' + ph.masked + ' 組車牌數字' : '沒偵測到車牌；請確認照片裡沒有清楚的車牌');
-      } catch (e) {
-        formErr(e && e.message === 'ocr' ? '無法自動遮蔽車牌（需要網路載入辨識模組），為保護隱私，這張照片沒有加入。' : '有一張照片無法處理，請換一張');
-      }
-    }
-    renderShots();
-  }
-  function renderShots() {
-    var box = $('shots');
-    box.replaceChildren.apply(box, draft.photos.map(function (p, i) {
-      return h('div', { class: 'shot' }, h('img', { src: p.thumb, alt: '已選照片 ' + (i + 1) }),
-        h('button', { type: 'button', 'aria-label': '移除照片 ' + (i + 1), onclick: function () { draft.photos.splice(i, 1); renderShots(); } }, icon('close', 14)));
-    }));
-  }
-  function formErr(msg) { $('formErr').textContent = msg || ''; }
-
-  async function onSubmit(e) {
-    e.preventDefault();
-    formErr('');
-    var addr = $('addr').value.trim();
-    var data = {
-      kind: draft.kind, address: addr.slice(0, 60), note: $('note').value.trim().slice(0, 200),
-      thumb: draft.photos.length ? draft.photos[0].thumb : '', photoCount: draft.photos.length,
-      status: 'open', createdAt: Date.now(), createdBy: uid || ''
-    };
-    if (!draft.pin) return formErr('請先在地圖上點選位置');
-    if (!addr) return formErr('請填寫位置描述');
-    data.x = draft.pin.x; data.y = draft.pin.y;
-    if (draft.kind === 'nopark') {
-      if (!draft.from) return formErr('請選每天幾點開始禁止停車');
-      data.shop = draft.shop.trim().slice(0, 30); data.from = draft.from; data.to = draft.to || '';
-    } else if (draft.kind === 'legal') {
-      if (!draft.pin2) return formErr('請在地圖上再點一下，標記線的終點');
-      if (!draft.ltype) return formErr('請選這段是什麼線');
-      if (!canEdit && !draft.photos.length) return formErr('申請新增停車地點需要附上現場照片');
-      data.x2 = draft.pin2.x; data.y2 = draft.pin2.y; data.ltype = draft.ltype; data.review = canEdit ? 'approved' : 'pending';
-    }
-    if (draft.kind === 'obstruct') {
-      if (!draft.otype) return formErr('請選占用情況');
-      data.otype = draft.otype;
-      if (draft.seg && draft.pin2) { data.x2 = draft.pin2.x; data.y2 = draft.pin2.y; }
-    }
-    if (draft.kind === 'parking') {
-    data.vehicles = Object.keys(VEH).filter(function (k) { return draft.vehicles[k]; });
-    if (!data.vehicles.length) return formErr('請選可停的車種');
-    if (!draft.slots) return formErr('請選大約剩幾個位置');
-    data.slots = draft.slots;
-    data.fee = draft.fee || 'unknown';
-    }
-    if (Date.now() - lastSubmit < 15000) return formErr('剛剛才送出一則，請等幾秒再送');
-    var btn = $('send');
-    btn.disabled = true;
-    try {
-      await createReport(data, draft.photos.map(function (p) { return p.full; }));
-      lastSubmit = Date.now();
-      draft = newDraft(draft.kind);
-      $('addr').value = ''; $('note').value = ''; $('count').textContent = '0/200';
-      renderShots(); renderPinState(); renderStep2(); renderMarkers();
-      toast(draft.kind === 'obstruct' ? '已送出占用提醒，謝謝你的善意' : draft.kind === 'parking' ? '已回報車位' : draft.kind === 'nopark' ? '已發布禁停公告' : canEdit ? '已標示車線' : '已送出申請，審核通過後會顯示在地圖上');
-    } catch (ex) {
-      formErr(errText(ex));
-    } finally {
-      btn.disabled = false;
+/* ---------- 面板事件（委派） ---------- */
+const pbEl=$('#panel');
+pbEl.addEventListener('input',e=>{
+  const t=e.target;if(t.dataset.f&&form)form.v[t.dataset.f]=t.value;
+  if(t.id==='noteTa')$('#noteC').textContent=t.value.length;
+  if(t.id==='carNote'&&car){car.note=t.value.slice(0,40);saveCar()}
+  if(t.dataset.fb){S.fbDraft[t.dataset.fb]=t.value;if(t.dataset.fb==='text')$('#fbC').textContent=t.value.length}
+  if(t.dataset.rep)S.rdraft[t.dataset.rep]=t.value;
+});
+pbEl.addEventListener('change',async e=>{
+  const t=e.target;
+  if(t.id==='fileIn'){
+    const files=[...t.files];t.value='';
+    for(const f of files){
+      if(form.photos.length>=3){toast('最多 3 張照片');break}
+      const out=await maskPhoto(f);if(out){form.photos.push(out);renderPanel()}
     }
   }
+  if(t.dataset.act==='lntype'){try{await ops.updLine(t.dataset.v,{type:t.value});renderMap();toast('已更新車線');renderPanel()}catch(er){toast(er.message)}}
+});
+pbEl.addEventListener('click',async e=>{
+  const f=e.target.closest('[data-focus]');if(f){focusItem(f.dataset.focus);return}
+  const lf=e.target.closest('[data-lnfocus]');if(lf){const l=S.lines.find(x=>x.id===lf.dataset.lnfocus);if(l){if(isMobile())closePanel();map.fitBounds(L.latLngBounds(l.coords),{maxZoom:18,padding:[40,40]})}return}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,v=b.dataset.v;
+  try{
+  switch(a){
+   case 'close':clearPreview();closePanel();S.view='feed';break;
+   case 'newreport':openReport(v);break;
+   case 'go':setView(v);break;
+   case 'carGps':carGps();break;
+   case 'carPick':await carPick();break;
+   case 'carLook':carLook();break;
+   case 'carNav':window.open('https://www.google.com/maps/dir/?api=1&destination='+car.ll.join(',')+'&travelmode=walking','_blank','noopener');break;
+   case 'carR':car.radius=+v;saveCar();renderCar();checkNearby();renderPanel();break;
+   case 'carOpt':car[v]=!car[v];saveCar();renderPanel();break;
+   case 'carNotif':Notification.requestPermission().then(()=>renderPanel());break;
+   case 'carClear':if(confirm('已取車？將清除停車位置記錄。')){car=null;saveCar();renderCar();renderPanel();toast('已清除，一路平安！')}break;
+   case 'redit':openEdit(v);break;
+   case 'delmine':if(confirm('確定刪除這則訊息？')){await ops.delReport(v);form=null;clearPreview();S.view='feed';refresh();if(isMobile())closePanel();toast('已刪除')}break;
+   case 'fbcat':S.fbDraft.cat=v;renderPanel();break;
+   case 'fbsend':await fbSend();break;
+   case 'fbstat':{const[id,st]=v.split('|');await fbOps.patch(id,{status:st});break}
+   case 'fbreply':{const t=($('[data-rep="'+v+'"]')?.value||'').trim();if(!t){toast('請先輸入回覆內容');break}await fbOps.patch(v,{reply:t});delete S.rdraft[v];toast('已回覆');break}
+   case 'fbreadall':for(const x of S.fb.filter(x=>x.status==='new'))await fbOps.patch(x.id,{status:'read'});break;
+   case 'fbdel':if(confirm('刪除這則回饋？'))await fbOps.del(v);break;
+   case 'opensub':openSub();break;
+   case 'kind':form.kind=v;renderPanel();drawPreview();break;
+   case 'gm':form.gm=v;if(form.geom&&form.geom.type!==v){form.geom=null;clearPreview()}renderPanel();break;
+   case 'occ':form.v.subtype=v;renderPanel();break;
+   case 'veh':{const s=new Set(form.v.vehicles);s.has(v)?s.delete(v):s.add(v);form.v.vehicles=[...s];renderPanel();break}
+   case 'slots':form.v.slots=+v;renderPanel();break;
+   case 'fee':form.v.fee=v;renderPanel();break;
+   case 'gps':locateMe(ll=>{form.gm='point';form.geom={type:'point',coords:[ll.map(x=>+x.toFixed(6))]};drawPreview();map.flyTo(ll,18);renderPanel()});break;
+   case 'pick':{
+     const g=await pickGeometry(form.gm,2);
+     if(g){form.geom=g;drawPreview();const c=g.coords;map.fitBounds(L.latLngBounds(c),{maxZoom:18,padding:[60,60]})}
+     S.view='report';openPanel();renderPanel();syncNav('report');break}
+   case 'addphoto':if(form.photos.length>=3)toast('最多 3 張照片');else $('#fileIn').click();break;
+   case 'rmph':form.photos.splice(+v,1);renderPanel();break;
+   case 'submit':await submitReport();break;
+   case 'login':await doLogin();break;
+   case 'logout':logout();break;
+   case 'ctab':S.ctab=v;renderPanel();break;
+   case 'approve':await ops.review(v,'approved');toast('已核准，車位已公開');refresh();break;
+   case 'reject':if(confirm('退回並刪除此車位回報？')){await ops.delReport(v);toast('已退回');refresh()}break;
+   case 'rdel':if(confirm('確定刪除？')){await ops.delReport(v);toast('已刪除');refresh()}break;
+   case 'lndel':if(confirm('確定刪除這條車線？')){await ops.delLine(v);toast('已刪除');refresh()}break;
+   case 'drawline':{
+     const type=$('#lnType').value,name=$('#lnName').value.trim();
+     const g=await pickGeometry('line',2);
+     S.view='creator';openPanel();
+     if(g){await ops.addLine({type,name,coords:g.coords});toast('已新增 '+LINE_TYPES[type].name);refresh()}else renderPanel();
+     syncNav('creator');break}
+  }}catch(er){toast(er.message||'操作失敗')}
+});
+pbEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='cpw')doLogin()});
 
-  /* ---------- nav / search / views ---------- */
-  var NAV = [['map', 'map', '即時地圖'], ['records', 'list', '通報紀錄'], ['help', 'help', '使用說明'], ['about', 'info', '關於我們']];
-  function buildNav() {
-    var nav = $('nav');
-    nav.replaceChildren();
-    NAV.concat(canEdit ? [['review', 'shield', '審核']] : []).forEach(function (n) {
-      nav.append(h('button', { type: 'button', 'data-v': n[0], onclick: function () { showView(n[0]); } }, icon(n[1], 22), n[2]));
-    });
+async function doLogin(){
+  const pw=$('#cpw').value;if(!pw){$('#cmsg').innerHTML='<div class="msg er">請輸入密碼</div>';return}
+  try{
+    if(S.server){const j=await api('/api/creator/login',{method:'POST',body:JSON.stringify({password:pw})});S.token=j.token}
+    else{if(pw!==DEMO_PW)throw new Error('密碼錯誤');S.token='demo'}
+    sessionStorage.setItem('mcb_tok',S.token);toast('創建者登入成功');await loadAll();await loadFb(true);renderMap();renderPanel();
+  }catch(er){$('#cmsg').innerHTML=`<div class="msg er">${esc(er.message)}</div>`}
+}
+
+async function submitReport(){
+  const f=form,v=f.v,btn=$('#subBtn');
+  if(!f.geom)return toast('請先在地圖上選擇位置');
+  let r={kind:f.kind,geom:f.geom,place:(v.place||'').trim(),note:(v.note||'').trim(),photos:f.photos.slice()};
+  if(f.kind==='occupy')r.subtype=v.subtype;
+  else if(f.kind==='store'){
+    if(!(v.store||'').trim())return toast('請填寫店名');
+    if(!v.start||!v.end)return toast('請填寫禁停開始與結束時間');
+    Object.assign(r,{store:v.store.trim(),start:v.start,end:v.end});
+  }else{
+    if(!v.vehicles.length)return toast('請選擇可停車種');
+    if(!f.photos.length)return toast('回報車位必須上傳照片');
+    Object.assign(r,{vehicles:v.vehicles,slots:v.slots,fee:v.fee,feeNote:v.fee==='paid'?(v.feeNote||'').trim():''});
   }
-  function showView(v) {
-    view = v;
-    ['map', 'records', 'review', 'help', 'about'].forEach(function (id) { $('v-' + id).hidden = id !== v; });
-    document.querySelectorAll('#nav button').forEach(function (b) {
-      if (b.getAttribute('data-v') === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
-    });
-    if (v === 'records') renderRecords();
-    if (v === 'review') renderReview();
-    window.scrollTo(0, 0);
-  }
-  function buildMisc() {
-    document.querySelectorAll('[data-ic]').forEach(function (el) {
-      var ic = icon(el.getAttribute('data-ic'), el.classList.contains('avatar') ? 22 : 20);
-      if (el.classList.contains('avatar')) el.append(ic); else el.replaceWith(ic);
-    });
-    $('fKind').addEventListener('change', function () { rf.kind = $('fKind').value; renderRecords(); });
-    $('fStatus').addEventListener('change', function () { rf.status = $('fStatus').value; renderRecords(); });
-    $('fRange').addEventListener('change', function () { rf.range = $('fRange').value; renderRecords(); });
-    $('toAll').addEventListener('click', function () { showView('records'); });
-    $('lyLegal').addEventListener('change', function () { showLegal = this.checked; renderMarkers(); });
+  btn.disabled=true;btn.textContent='送出中…';
+  try{
+    let saved;
+    if(f.editId){const p={...r};delete p.kind;await ops.updReport(f.editId,p);saved=S.reports.find(x=>x.id===f.editId)}
+    else{saved=await ops.addReport(r);markSeen(saved.id)}
+    const msg=f.editId?(f.kind==='parking'&&!isCreator()?'已儲存，車位資訊需重新審核':'已儲存修改'):f.kind==='parking'&&!isCreator()?'已送出，等待創建者審核後公開':'通報已送出，謝謝您！';
+    const at=saved.geom.type==='line'?midpoint(saved.geom.coords):saved.geom.coords[0];
+    form=null;clearPreview();S.view='feed';renderMap();renderPanel();syncNav('feed');
+    if(isMobile())closePanel();
+    toast(msg,3500);map.flyTo(at,Math.max(map.getZoom(),18),{duration:.6});
+  }catch(er){toast(er.message||'送出失敗');btn.disabled=false;btn.textContent=f.editId?'💾 儲存修改':'📨 送出通報'}
+}
+function refresh(){renderMap();renderPanel()}
 
-    $('alarmTop').addEventListener('click', openAlarm);
-    $('alarmFab').addEventListener('click', openAlarm);
-    $('snd').addEventListener('click', function () {
-      soundOn = !soundOn;
-      try { localStorage.setItem('ycb-sound', soundOn ? '1' : '0'); } catch (e) {}
-      ensureAudio();
-      renderSound();
-      if (soundOn) siren();
-    });
-    document.addEventListener('pointerdown', ensureAudio, { passive: true });
-
-    var q = $('q');
-    q.addEventListener('input', function () { search = q.value.trim(); renderAll(); });
-    q.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' || !search) return;
-      var hit = PLACES.filter(function (p) { return p.n.indexOf(search) >= 0; })[0];
-      if (hit) { showView('map'); focusOn(hit.x, hit.y, 2.5); return; }
-      geoSearch(search);
-    });
-
-    $('bell').addEventListener('click', function (e) {
-      e.stopPropagation();
-      var pop = $('pop');
-      if (pop.hidden) { renderPop(); pop.hidden = false; $('bell').setAttribute('aria-expanded', 'true'); } else closePop();
-    });
-    document.addEventListener('click', function (e) { if (!$('pop').hidden && !$('pop').contains(e.target)) closePop(); });
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      if ($('overlay').firstChild) closeDialog(); else closePop();
-    });
-    renderSound();
-  }
-
-  /* ---------- init ---------- */
-  async function init() {
-    buildNav();
-    buildMisc();
-    buildMap();
-    buildForm();
-    showView('map');
-    renderAll();
-    loadOsm();
-
-    var user = null;
-    try {
-      if (window.claude && window.claude.use) {
-        db = await window.claude.use('db');
-        user = await window.claude.use('user');
-      }
-    } catch (e) { db = null; }
-
-    try {
-      if (user) {
-        if (user.id) uid = await user.id();
-        if (user.canEdit) canEdit = !!user.canEdit();
-        if (user.can) canWrite = await user.can('data.write');
-      }
-    } catch (e) {}
-
-    if (!db) { canEdit = true; }
-    buildNav(); showView(view); renderKind();
-    if (!db) {
-      localMode = true;
-      uid = 'local';
-      loading = false;
-      banner('目前是離線示範模式：通報只會留在這個頁面，重新整理後就會消失，也不會有其他人收到警報。登入後開啟，才能和大家共用通報。');
-      renderAll();
-    } else {
-      $('who').textContent = '已登入';
-      if (canWrite === false) {
-        ['addr', 'note', 'send', 'relocate', 'drop'].forEach(function (id) { $(id).disabled = true; });
-        banner('你目前是檢視者，可以看通報，但不能新增或更新。');
-      }
-      db.collection('reports').orderBy('createdAt', 'desc').limit(200).onSnapshot(function (snap) {
-        var fresh = [];
-        if (seenFirst) {
-          snap.docChanges().forEach(function (c) {
-            if (c.type !== 'added') return;
-            var d = c.doc.data() || {};
-            if (d.kind === 'ticket' && Date.now() - (Number(d.createdAt) || 0) < 180000 && str(d.createdBy, 80) !== uid) fresh.push(norm(c.doc.id, d));
-          });
-        }
-        reports = snap.docs.map(function (d) { return norm(d.id, d.data()); }).filter(Boolean);
-        loading = false;
-        seenFirst = true;
-        renderAll();
-        if (fresh.length) onNewAlert(fresh[0]);
-      }, function (e) {
-        loading = false;
-        banner(e && e.code === 'revoked' ? '存取權已變更，請重新開啟頁面。' : '無法讀取通報，請重新整理頁面。');
-        renderAll();
-      });
-      db.collection('confirms').limit(1000).onSnapshot(function (snap) {
-        var map = {};
-        snap.docs.forEach(function (d) {
-          var v = d.data() || {};
-          var rid = str(v.rid, 80), u = str(v.uid, 80);
-          if (!rid || !u) return;
-          (map[rid] || (map[rid] = {}))[u] = Number(v.at) || 1;
-        });
-        confirms = map;
-        renderAll();
-      }, function () {});
+/* ---------- 車牌遮蔽 ---------- */
+let MS=null;
+const readImg=file=>new Promise((ok,no)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);ok(i)};i.onerror=()=>{URL.revokeObjectURL(u);no()};i.src=u});
+const digitsRect=(r,left)=>left?{x:r.x+r.w*.42,y:r.y,w:r.w*.58,h:r.h}:{x:r.x,y:r.y,w:r.w*.64,h:r.h};
+async function maskPhoto(file){
+  let img;try{img=await readImg(file)}catch{toast('無法讀取這張照片');return null}
+  const sc=Math.min(1,1100/Math.max(img.naturalWidth,img.naturalHeight)),W=Math.round(img.naturalWidth*sc),H=Math.round(img.naturalHeight*sc);
+  const base=document.createElement('canvas');base.width=W;base.height=H;base.getContext('2d').drawImage(img,0,0,W,H);
+  const cv=$('#maskCv');cv.width=W;cv.height=H;
+  return new Promise(async res=>{
+    MS={base,cv,ctx:cv.getContext('2d'),rects:[],left:true,drag:null,W,H,res};
+    $('#mkL').classList.add('on');$('#mkR').classList.remove('on');$('#mkAuto').textContent='';
+    $('#maskModal').classList.add('show');drawMask();
+    if('TextDetector' in window){        // 瀏覽器支援時自動偵測疑似車牌
+      try{
+        const bl=await new window.TextDetector().detect(base);let n=0;
+        bl.forEach(b=>{const t=(b.rawValue||'').replace(/[\s·.]/g,'');
+          if(/^[A-Za-z0-9]{2,4}-?[A-Za-z0-9]{2,4}$/.test(t)&&/\d/.test(t)&&/[A-Za-z]/.test(t)){const bb=b.boundingBox;MS.rects.push({x:bb.x-4,y:bb.y-4,w:bb.width+8,h:bb.height+8});n++}});
+        if(n){$('#mkAuto').textContent=`🤖 已自動偵測到 ${n} 處疑似車牌，請確認位置是否正確，漏掉的請手動框選。`;drawMask()}
+      }catch{}
     }
-    setInterval(function () { tickTimes(); renderAlertBar(); renderBell(); renderMarkers(); }, 30000);
+  });
+}
+function drawMask(){
+  const{ctx,base,rects,left,drag}=MS;ctx.drawImage(base,0,0);
+  rects.forEach(r=>{const d=digitsRect(r,left);ctx.fillStyle='#111';ctx.fillRect(d.x,d.y,d.w,d.h);ctx.strokeStyle='#facc15';ctx.lineWidth=Math.max(2,MS.W/300);ctx.setLineDash([8,6]);ctx.strokeRect(r.x,r.y,r.w,r.h);ctx.setLineDash([])});
+  if(drag){ctx.strokeStyle='#38bdf8';ctx.lineWidth=Math.max(2,MS.W/300);ctx.strokeRect(drag.x,drag.y,drag.w,drag.h)}
+}
+function mpt(e){const b=MS.cv.getBoundingClientRect();return{x:(e.clientX-b.left)*MS.W/b.width,y:(e.clientY-b.top)*MS.H/b.height}}
+const mcv=$('#maskCv');let m0=null;
+mcv.addEventListener('pointerdown',e=>{if(!MS)return;mcv.setPointerCapture(e.pointerId);m0=mpt(e)});
+mcv.addEventListener('pointermove',e=>{if(!MS||!m0)return;const p=mpt(e);MS.drag={x:Math.min(m0.x,p.x),y:Math.min(m0.y,p.y),w:Math.abs(p.x-m0.x),h:Math.abs(p.y-m0.y)};drawMask()});
+mcv.addEventListener('pointerup',()=>{if(!MS||!m0)return;const d=MS.drag;m0=null;MS.drag=null;if(d&&d.w>MS.W*.03&&d.h>MS.H*.01)MS.rects.push(d);drawMask()});
+$('#mkL').onclick=()=>{MS.left=true;$('#mkL').classList.add('on');$('#mkR').classList.remove('on');drawMask()};
+$('#mkR').onclick=()=>{MS.left=false;$('#mkR').classList.add('on');$('#mkL').classList.remove('on');drawMask()};
+$('#mkUndo').onclick=()=>{MS.rects.pop();drawMask()};
+$('#mkCancel').onclick=()=>{$('#maskModal').classList.remove('show');const r=MS.res;MS=null;r(null)};
+$('#mkDone').onclick=()=>{
+  if(!MS.rects.length&&!confirm('您沒有框選任何車牌。\n請確認照片中沒有清楚可辨識的車牌，確定直接使用？'))return;
+  const out=document.createElement('canvas');out.width=MS.W;out.height=MS.H;const c=out.getContext('2d');c.drawImage(MS.base,0,0);
+  c.fillStyle='#111';MS.rects.forEach(r=>{const d=digitsRect(r,MS.left);c.fillRect(d.x,d.y,d.w,d.h)});
+  const url=out.toDataURL('image/jpeg',.78);       // 遮蔽已燒進像素，並自動移除 EXIF（含 GPS）
+  $('#maskModal').classList.remove('show');const r=MS.res;MS=null;r(url);
+};
+
+/* ---------- 開單警報 ---------- */
+let aAct='開單';
+const AL={coords:null},RD=ROADS.slice(0,-1);
+$('#aRoad').innerHTML=RD.map((r,i)=>`<option value="${i}">${r.n}</option>`).join('')+'<option value="custom">✏️ 其他路段（自行輸入名稱）</option>';
+function alertUi(){
+  const cu=$('#aRoad').value==='custom';$('#aName').style.display=(cu||AL.coords)?'':'none';
+  const l=$('#aLoc');l.className='sum'+(AL.coords?' ok':'');
+  l.textContent=AL.coords?`✅ 已指定位置（${AL.coords[0].toFixed(5)}, ${AL.coords[1].toFixed(5)}），路段名稱可修改`:cu?'請按「用我的位置」或「在地圖上點選」標出位置':'未指定精確位置時，會標示在該路段的約略位置';
+}
+function setAlertPos(ll){
+  AL.coords=[+ll[0].toFixed(6),+ll[1].toFixed(6)];let best=-1,bd=250;
+  RD.forEach((r,i)=>{const d=L.latLng(ll).distanceTo(L.latLng(r.c));if(d<bd){bd=d;best=i}});
+  $('#aRoad').value=best>=0?String(best):'custom';$('#aName').value=best>=0?RD[best].n:'';alertUi();
+}
+$('#aRoad').onchange=()=>{AL.coords=null;$('#aName').value='';alertUi()};
+$('#aGps').onclick=()=>locateMe(ll=>setAlertPos(ll));
+$('#aPick').onclick=async()=>{$('#alertModal').classList.remove('show');const g=await pickGeometry('point');$('#alertModal').classList.add('show');if(g)setAlertPos(g.coords[0])};
+$('#alarmFab').onclick=()=>{$('#aMsg').innerHTML='';$('#aSend').disabled=false;AL.coords=null;$('#aName').value='';alertUi();$('#alertModal').classList.add('show')};
+$$('[data-act2]').forEach(b=>b.onclick=()=>{aAct=b.dataset.act2;$$('[data-act2]').forEach(x=>x.classList.toggle('on',x===b))});
+$$('[data-close]').forEach(b=>b.onclick=()=>$('#'+b.dataset.close).classList.remove('show'));
+$$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m&&m.id!=='maskModal')m.classList.remove('show')}));
+function openSub(){$('#sMail').value=localStorage.getItem('mcb_email')||'';$('#sMsg').innerHTML='';$('#sSend').disabled=false;$('#alertModal').classList.remove('show');$('#subModal').classList.add('show')}
+$('#aOpenSub').onclick=openSub;
+$('#aSend').onclick=async()=>{
+  const sel=$('#aRoad').value,msg=$('#aMsg'),btn=$('#aSend');let name,coords;
+  if(sel==='custom'||AL.coords){
+    name=$('#aName').value.trim();
+    if(!name){msg.innerHTML='<div class="msg er">請輸入路段名稱</div>';return}
+    if(!AL.coords){msg.innerHTML='<div class="msg er">請按「用我的位置」或「在地圖上點選」標出位置</div>';return}
+    coords=AL.coords;
+  }else{const r=RD[+sel];name=r.n;coords=r.c}
+  if(!confirm(`確定要通知所有訂閱者「${name} 正在${aAct}」嗎？\n請勿惡作劇，以免影響其他人。`))return;
+  btn.disabled=true;btn.textContent='發送中…';
+  try{
+    const j=await ops.alert({road:name,action:aAct,coords});
+    if(j.alert)markSeen('a'+j.alert.id);
+    renderMap();if(S.view==='feed')renderPanel();
+    if(!S.server)msg.innerHTML='<div class="msg ok">✅ 警鈴已顯示在地圖上。<br>（示範模式未連接後端，無法寄信；正式模式會寄給所有已訂閱的使用者。）</div>';
+    else if(j.duplicate)msg.innerHTML='<div class="msg ok">✅ 這個路段剛剛已有人發出相同警報，地圖已更新；為避免洗版，未重複寄信。</div>';
+    else if(!j.mailConfigured)msg.innerHTML=`<div class="msg er">警鈴已顯示在地圖上，但伺服器尚未設定 SMTP，沒有實際寄信（目前 ${j.recipients} 位訂閱者）。</div>`;
+    else msg.innerHTML=`<div class="msg ok">✅ 警鈴已發出，正在寄信通知 ${j.recipients} 位訂閱者。</div>`;
+    map.flyTo(coords,17,{duration:.6});
+  }catch(er){msg.innerHTML=`<div class="msg er">${esc(er.message)}</div>`}
+  btn.disabled=false;btn.textContent='🔔 按下警鈴，通知所有人';
+};
+$('#sSend').onclick=async()=>{
+  const email=$('#sMail').value.trim(),msg=$('#sMsg'),btn=$('#sSend');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.innerHTML='<div class="msg er">請輸入正確的電子信箱</div>';return}
+  if(!S.server){msg.innerHTML='<div class="msg er">示範模式沒有後端，無法訂閱。請啟動 server.js 後使用。</div>';return}
+  btn.disabled=true;
+  try{
+    const j=await api('/api/subscribe',{method:'POST',body:JSON.stringify({email})});
+    localStorage.setItem('mcb_email',email);
+    msg.innerHTML=`<div class="msg ok">📨 已寄出確認信到 ${esc(email)}，請到信箱點擊確認連結後才會生效（沒收到請看垃圾郵件匣）。${j.mailConfigured?'':'<br>（伺服器尚未設定 SMTP，確認連結只會印在伺服器 console。）'}</div>`;
+  }catch(er){msg.innerHTML=`<div class="msg er">${esc(er.message)}</div>`}
+  btn.disabled=false;
+};
+
+/* ---------- 搜尋 ---------- */
+$('#search').addEventListener('submit',async e=>{
+  e.preventDefault();const q=$('#q').value.trim();if(!q)return;$('#q').blur();
+  const road=ROADS.find(r=>q.includes(r.n.replace('（逢甲周邊）',''))&&r.n!==ROADS[ROADS.length-1].n);
+  if(/逢甲/.test(q)&&!road){map.flyTo(CENTER,17);return}
+  if(road){map.flyTo(road.c,17);return}
+  try{
+    const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tw&accept-language=zh-TW&q='+encodeURIComponent(q.includes('台中')?q:'台中 '+q));
+    const j=await r.json();if(j[0])map.flyTo([+j[0].lat,+j[0].lon],17);else toast('找不到這個地點');
+  }catch{toast('搜尋失敗，請稍後再試')}
+});
+
+/* ---------- 編輯訊息 ---------- */
+function openEdit(id){
+  const r=S.reports.find(x=>x.id===id);if(!r)return;
+  if(!canEdit(r)){toast('這是創建者設置的訊息，只有創建者能修改');return}
+  clearPreview();map.closePopup();
+  form={kind:r.kind,gm:r.geom.type,geom:JSON.parse(JSON.stringify(r.geom)),photos:(r.photos||[]).slice(),editId:id,
+    v:{subtype:r.subtype||OCCUPY_TYPES[0],vehicles:(r.vehicles||['car']).slice(),slots:r.slots||3,fee:r.fee||'unknown',feeNote:r.feeNote||'',store:r.store||'',start:r.start||'',end:r.end||'',place:r.place||'',note:r.note||''}};
+  setView('report');drawPreview();
+}
+
+/* ---------- 我的愛車：記錄停車位置・附近提醒 ---------- */
+const CARKEY='mcb_car',SEENKEY='mcb_seen',FBKEY='mcb_fb_v1',FBSEEN='mcb_fbseen';
+const jget=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},jset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+let car=jget(CARKEY,null);if(!car||!Array.isArray(car.ll))car=null;
+const saveCar=()=>car?jset(CARKEY,car):localStorage.removeItem(CARKEY);
+function markSeen(k){const s=jget(SEENKEY,[]);if(!s.includes(k))jset(SEENKEY,[...s,k].slice(-150))}
+const dur=ms=>{const m=Math.floor(ms/6e4);return m<1?'不到 1 分鐘':m<60?m+' 分鐘':Math.floor(m/60)+' 小時 '+(m%60)+' 分'};
+function distTo(ll,c){
+  if(c.length===1)return L.latLng(ll).distanceTo(L.latLng(c[0]));
+  const k=Math.cos(ll[0]*Math.PI/180)*111320,P=p=>[(p[1]-ll[1])*k,(p[0]-ll[0])*111320];let best=1e9;
+  for(let i=1;i<c.length;i++){const a=P(c[i-1]),b=P(c[i]),dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy;let t=l2?-(a[0]*dx+a[1]*dy)/l2:0;t=Math.max(0,Math.min(1,t));best=Math.min(best,Math.hypot(a[0]+t*dx,a[1]+t*dy))}
+  return best;
+}
+function nearbyItems(onlyNew){
+  if(!car)return[];const o=[],ok=t=>!onlyNew||t>=car.at;
+  if(car.alr)activeAlerts().forEach(a=>{const d=L.latLng(car.ll).distanceTo(L.latLng(a.coords||CENTER));if(d<=car.radius+150&&ok(a.createdAt))o.push({key:'a'+a.id,icon:a.action==='拖吊'?'🚛':'📝',title:a.road+' 正在'+a.action,d})});
+  if(car.occ)visibleReports().forEach(r=>{if(r.kind!=='occupy'||r.status!=='approved'||expired(r))return;const d=distTo(car.ll,r.geom.coords);if(d<=car.radius&&ok(r.createdAt))o.push({key:r.id,icon:'🚧',title:r.subtype+(r.place?'・'+r.place:''),d})});
+  return o.sort((a,b)=>a.d-b.d);
+}
+function renderCar(){
+  LY.car.clearLayers();if(!car)return;
+  L.circle(car.ll,{radius:car.radius,color:'#1d6bf3',weight:1.5,dashArray:'6 6',fillOpacity:.05,interactive:false}).addTo(LY.car);
+  L.marker(car.ll,{icon:L.divIcon({className:'',html:'<div class="carpin">🚗</div>',iconSize:[38,38],iconAnchor:[19,19]}),zIndexOffset:700})
+   .bindPopup(()=>`<span class="pp-tag" style="background:#1d6bf3">我的愛車</span><br>已停 <b>${dur(Date.now()-car.at)}</b>${car.note?'<br>📍 '+esc(car.note):''}<br><span style="font-size:12px;color:#64748b">提醒範圍 ${car.radius} 公尺</span>`).addTo(LY.car);
+}
+function sysNotify(t,b){if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){try{new Notification(t,{body:b})}catch{}}}
+function checkNearby(){
+  if(!car)return;const seen=jget(SEENKEY,[]),fresh=nearbyItems(true).filter(x=>!seen.includes(x.key));if(!fresh.length)return;
+  jset(SEENKEY,[...seen,...fresh.map(x=>x.key)].slice(-150));
+  $('#carAlert').innerHTML=`<div class="ca"><div class="ca-h">🚗 愛車附近有新動態</div>${fresh.slice(0,3).map(x=>`<div class="ca-i">${x.icon} ${esc(x.title)}<small>距離約 ${Math.round(x.d)} 公尺</small></div>`).join('')}${fresh.length>3?`<div class="ca-i">…還有 ${fresh.length-3} 則</div>`:''}<div class="row" style="margin-top:8px"><button class="btn sm pri" data-ca="go" data-k="${fresh[0].key}">查看</button><button class="btn sm" data-ca="x">我知道了</button></div></div>`;
+  $('#carAlert').classList.add('show');try{navigator.vibrate&&navigator.vibrate([250,120,250])}catch{}
+  sysNotify('🚗 愛車附近有新動態',fresh.map(x=>x.title).join('、'));
+}
+$('#carAlert').addEventListener('click',e=>{const b=e.target.closest('[data-ca]');if(!b)return;$('#carAlert').classList.remove('show');if(b.dataset.ca==='go')focusItem(b.dataset.k)});
+function setCar(ll,note){car={ll:[+ll[0].toFixed(6),+ll[1].toFixed(6)],at:Date.now(),note:String(note??car?.note??'').trim().slice(0,40),radius:car?.radius||300,occ:car?.occ!==false,alr:car?.alr!==false};saveCar();renderCar()}
+function carGps(){
+  const note=$('#carNote')?.value;toast('定位中…',1500);
+  locateMe((ll,acc)=>{setCar(ll,note);map.flyTo(ll,18);renderPanel();toast(acc>60?`已記錄（定位誤差約 ${Math.round(acc)} 公尺，可改用「地圖上點選」微調）`:'✅ 已記錄停車位置',3500)});
+}
+async function carPick(){
+  const note=$('#carNote')?.value,g=await pickGeometry('point');
+  if(g){setCar(g.coords[0],note);toast('✅ 已記錄停車位置')}
+  S.view='mycar';openPanel();renderPanel();syncNav('mycar');
+}
+function carLook(){if(!car)return;if(isMobile())closePanel();map.flyTo(car.ll,18,{duration:.6});setTimeout(()=>LY.car.eachLayer(l=>l.getPopup&&l.getPopup()&&l.openPopup()),650)}
+function carCard(){
+  if(!car)return `<div class="card" style="margin-top:14px"><b style="font-size:14px">🚗 我的愛車</b><p class="hint">記錄停車位置，附近出現占用勸導或開單時提醒你。</p><button class="btn pri block" data-act="carGps">🎯 記錄目前停車位置</button></div>`;
+  const n=nearbyItems(false).length;
+  return `<div class="card" style="margin-top:14px"><div class="hd" style="margin-bottom:4px"><b style="font-size:14px">🚗 我的愛車</b><span class="pill ${n?'r':'g'}">${n?'附近 '+n+' 則動態':'附近平安'}</span></div><div class="hint" style="margin:0 0 8px">已停 ${dur(Date.now()-car.at)}${car.note?'・'+esc(car.note):''}・提醒 ${car.radius} 公尺內</div><div class="row"><button class="btn sm" data-act="go" data-v="mycar">管理</button><button class="btn sm" data-act="carLook">📍 看位置</button></div></div>`;
+}
+function viewCar(){
+  const head=`<div class="hd"><h2>🚗 我的愛車</h2><button class="x" data-act="close" aria-label="關閉">✕</button></div>`;
+  if(!car)return `<div class="card">${head}<p class="hint" style="margin-top:-4px">記錄你現在停車的位置。之後只要附近出現<b>占用勸導</b>或<b>開單／拖吊警報</b>，系統就會提醒你。</p>
+   <input id="carNote" class="in" maxlength="40" placeholder="位置備註（選填）例：文華路 100 號前">
+   <div class="row" style="margin-top:10px"><button class="btn pri" data-act="carGps" style="flex:1">🎯 記錄目前位置</button><button class="btn ghost" data-act="carPick" style="flex:1">📍 地圖上點選</button></div>
+   <p class="hint">🔒 位置只存在這支裝置，不會上傳或公開。</p></div>`;
+  const near=nearbyItems(false),perm='Notification' in window?Notification.permission:'denied';
+  return `<div class="card">${head}<div class="sum ok">✅ 已記錄・已停 <b>${dur(Date.now()-car.at)}</b></div>
+   <input id="carNote" class="in" maxlength="40" placeholder="位置備註（選填）" value="${esc(car.note)}">
+   <div class="row" style="margin-top:10px"><button class="btn pri" data-act="carNav" style="flex:1">🧭 導航回車</button><button class="btn ghost" data-act="carLook" style="flex:1">📍 看位置</button></div>
+   <div class="step" style="margin-top:16px"><b>提醒範圍</b><div class="chips">${[100,200,300,500].map(m=>`<button class="chipb ${car.radius===m?'on':''}" data-act="carR" data-v="${m}">${m} 公尺</button>`).join('')}</div></div>
+   <div class="step"><b>提醒哪些事？</b><div class="chips"><button class="chipb ${car.occ?'on':''}" style="--c:#0d9488" data-act="carOpt" data-v="occ">🚧 占用勸導</button><button class="chipb ${car.alr?'on':''}" style="--c:#e11d48" data-act="carOpt" data-v="alr">🚨 開單／拖吊</button></div>
+    <p class="hint">開單警報位置多為路段約略位置，已自動多抓 150 公尺。需保持頁面開啟才會即時提醒；關閉時可搭配「訂閱警報信件」。</p></div>
+   <div class="row"><button class="btn ghost" data-act="carGps">🔄 更新位置</button>${perm==='default'?'<button class="btn ghost" data-act="carNotif">🔔 開啟系統通知</button>':''}</div>
+   <button class="btn red block" style="margin-top:10px" data-act="carClear">✅ 我已取車（清除記錄）</button></div>
+  <div class="card" style="margin-top:14px"><h3 style="font-size:15px;margin-bottom:6px">附近動態（${car.radius} 公尺內）</h3>${near.length?near.map(x=>`<button class="fi" data-focus="${x.key}"><div class="th">${x.icon}</div><div class="tx"><div class="tt">${esc(x.title)}</div><div class="sb">約 ${Math.round(x.d)} 公尺</div></div></button>`).join(''):'<div class="empty">目前附近沒有占用勸導或開單 👍</div>'}</div>`;
+}
+const CarCtl=L.Control.extend({options:{position:'topleft'},onAdd(){const b=L.DomUtil.create('div','leaflet-bar'),a=L.DomUtil.create('a','',b);a.href='#';a.title='我的愛車';a.innerHTML='🚗';a.style.cssText='font-size:16px;line-height:30px;text-align:center;width:30px;height:30px;display:block;background:#fff';
+  L.DomEvent.disableClickPropagation(b);L.DomEvent.on(a,'click',e=>{L.DomEvent.preventDefault(e);setView('mycar')});return b}});
+map.addControl(new CarCtl());
+
+/* ---------- 聯絡創建者（即時回饋） ---------- */
+const FB_CATS={bug:{n:'功能問題',i:'🐞'},idea:{n:'建議改進',i:'💡'},data:{n:'資料有誤',i:'📍'},other:{n:'其他',i:'💬'}};
+const FB_ST={new:['尚未讀','n'],read:['創建者已讀','b'],done:['已處理','g']};
+const lsFb=()=>jget(FBKEY,[]),fbN=()=>S.fb.filter(x=>x.status==='new').length;
+const seenMap=()=>jget(FBSEEN,{}),unseen=()=>{const m=seenMap();return S.fb.filter(x=>(x.replies?.length||0)>(m[x.id]||0))};
+const typing=()=>{const a=document.activeElement;return !!a&&$('#panel').contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)};
+/* 後端有 /api/feedback 就即時走後端；沒有就退回本機示範（只有同一瀏覽器看得到） */
+async function loadFb(reset){
+  if(reset)S.fbKnown=null;let list=null;
+  if(S.server&&S.fbApi!==false){
+    try{const j=await api('/api/feedback'+(isCreator()?'?all=1':'?owner='+encodeURIComponent(MY_ID)));if(!Array.isArray(j.items))throw 0;list=j.items;S.fbApi=true}
+    catch{if(S.fbApi===true)return;S.fbApi=false}
   }
-  init();
+  if(!list)list=lsFb().filter(x=>isCreator()||x.owner===MY_ID);
+  S.fb=list.sort((a,b)=>b.createdAt-a.createdAt);
+  if(isCreator()){
+    const un=S.fb.filter(x=>x.status==='new');
+    if(S.fbKnown){const f=un.filter(x=>!S.fbKnown.has(x.id));if(f.length){toast(`💬 新回饋（${(FB_CATS[f[0].cat]||FB_CATS.other).n}）：${f[0].text.slice(0,40)}${f.length>1?` 等 ${f.length} 則`:''}`,6000);sysNotify('💬 收到新的使用者回饋',f[0].text.slice(0,80));try{navigator.vibrate&&navigator.vibrate(150)}catch{}}}
+    else if(un.length)toast(`💬 有 ${un.length} 則未讀的使用者回饋`,4500);
+    S.fbKnown=new Set(S.fb.map(x=>x.id));
+  }else{
+    const k=unseen().map(x=>x.id+':'+x.replies.length).join();
+    if(k&&k!==S.fbNote&&S.view!=='feedback'){toast('💬 創建者回覆了你的留言',5000);sysNotify('💬 創建者回覆了你','點開「我的留言」查看')}
+    S.fbNote=k;
+  }
+  updFbBadge();
+  const sig=S.fb.map(x=>x.id+x.status+(x.replies?.length||0)).join('|'),rel=S.view==='feedback'||(S.view==='creator'&&S.ctab==='fb');
+  if(sig!==S.fbSig&&(!rel||!typing())){S.fbSig=sig;if(rel)renderPanel()}
+  S.fbInit=true;
+}
+function updFbBadge(){const n=isCreator()?fbN():unseen().length,b=$('#fbN');b.style.display=n?'grid':'none';b.textContent=n}
+function fbMarkSeen(){if(isCreator())return;const m=seenMap();S.fb.forEach(x=>m[x.id]=x.replies?.length||0);jset(FBSEEN,m);updFbBadge()}
+const fbOps={
+  async add(x){if(S.fbApi===true)await api('/api/feedback',{method:'POST',body:JSON.stringify(x)});else{const a=lsFb();a.push({id:uid(),createdAt:Date.now(),status:'new',replies:[],...x});jset(FBKEY,a)}await loadFb()},
+  async patch(id,p){
+    if(S.fbApi===true)await api('/api/feedback/'+id,{method:'PATCH',body:JSON.stringify(p)});
+    else{const a=lsFb(),it=a.find(x=>x.id===id);if(!it)return;if(p.status)it.status=p.status;if(p.reply){(it.replies=it.replies||[]).push({at:Date.now(),text:p.reply});if(it.status==='new')it.status='read'}jset(FBKEY,a)}
+    await loadFb()},
+  async del(id){if(S.fbApi===true)await api('/api/feedback/'+id,{method:'DELETE'});else jset(FBKEY,lsFb().filter(x=>x.id!==id));await loadFb()}
+};
+async function fbSend(){
+  const d=S.fbDraft,text=(d.text||'').trim();
+  if(text.length<5)return toast('請多寫幾個字，讓創建者知道哪裡要改進');
+  if(Date.now()-(S.fbLast||0)<15000)return toast('送出太頻繁，請稍後再試');
+  const btn=$('#fbSend');btn.disabled=true;
+  try{await fbOps.add({cat:d.cat,text:text.slice(0,500),contact:(d.contact||'').trim().slice(0,60),owner:MY_ID});S.fbLast=Date.now();S.fbDraft={cat:d.cat,text:'',contact:d.contact};toast('✅ 已即時送給創建者，謝謝你的回饋！',3500);renderPanel()}
+  catch(er){toast(er.message||'送出失敗');btn.disabled=false}
+}
+const repHtml=x=>(x.replies||[]).map(r=>`<div class="rep">🛡️ 創建者・${ago(r.at)}<br>${esc(r.text)}</div>`).join('');
+function viewFeedback(){
+  const d=S.fbDraft,mine=isCreator()?S.fb.filter(x=>x.owner===MY_ID):S.fb;
+  return `<div class="card"><div class="hd"><h2>💬 聯絡創建者</h2><button class="x" data-act="close" aria-label="關閉">✕</button></div>
+   <p class="hint" style="margin-top:-4px">發現問題、資料不準，或想要新功能？留言後創建者會<b>即時</b>收到，回覆也會顯示在下方。</p>
+   <div class="chips" style="margin-bottom:10px">${Object.entries(FB_CATS).map(([k,c])=>`<button class="chipb ${d.cat===k?'on':''}" data-act="fbcat" data-v="${k}">${c.i} ${c.n}</button>`).join('')}</div>
+   <textarea class="in" data-fb="text" maxlength="500" placeholder="請描述遇到的問題或建議，例：文華路的紅線位置不對…">${esc(d.text)}</textarea><div class="cnt"><span id="fbC">${d.text.length}</span>/500</div>
+   <input class="in" style="margin-top:8px" data-fb="contact" maxlength="60" placeholder="聯絡方式（選填，方便創建者追問）" value="${esc(d.contact)}">
+   <button class="btn pri block" style="margin-top:10px" id="fbSend" data-act="fbsend">📨 送給創建者</button>
+   ${S.fbApi===true?'':'<p class="hint warn" style="margin-top:10px">目前為示範模式：留言只存在這個瀏覽器；連接後端 /api/feedback 後，創建者才能在任何裝置即時收到。</p>'}</div>
+  <div class="card" style="margin-top:14px"><h3 style="font-size:15px;margin-bottom:8px">我的留言</h3>${mine.length?mine.map(x=>{const c=FB_CATS[x.cat]||FB_CATS.other,st=FB_ST[x.status]||FB_ST.new;return `<div class="pc"><div class="hd" style="margin:0"><b>${c.i} ${c.n}</b><span class="pill ${st[1]}">${st[0]}</span></div><div class="meta">${ago(x.createdAt)}</div><div style="white-space:pre-wrap;font-size:14px">${esc(x.text)}</div>${repHtml(x)}</div>`}).join(''):'<div class="empty">還沒有留言</div>'}</div>`;
+}
+function fbCreatorBody(){
+  const n=fbN();
+  return `<div class="row" style="margin-bottom:10px;align-items:center"><span class="pill ${S.fbApi?'g':'n'}">${S.fbApi?'即時連線':'本機示範'}</span><span class="hint" style="margin:0;flex:1">每 8 秒自動更新</span>${n?'<button class="btn sm" data-act="fbreadall">全部標為已讀</button>':''}</div>`+
+  (S.fb.map(x=>{const c=FB_CATS[x.cat]||FB_CATS.other,st=FB_ST[x.status]||FB_ST.new;return `<div class="pc" style="${x.status==='new'?'border-color:#1d6bf3;background:#f5f9ff':''}"><div class="hd" style="margin:0"><b>${c.i} ${c.n}</b><span class="pill ${st[1]}">${st[0]}</span></div><div class="meta">${ago(x.createdAt)}${x.contact?'・'+esc(x.contact):''}</div><div style="white-space:pre-wrap;font-size:14px">${esc(x.text)}</div>${repHtml(x)}
+   <textarea class="in" style="min-height:60px;margin-top:8px" data-rep="${x.id}" maxlength="300" placeholder="回覆使用者…">${esc(S.rdraft[x.id]||'')}</textarea>
+   <div class="row" style="margin-top:6px"><button class="btn pri sm" data-act="fbreply" data-v="${x.id}">送出回覆</button>${x.status==='new'?`<button class="btn sm" data-act="fbstat" data-v="${x.id}|read">已讀</button>`:''}${x.status!=='done'?`<button class="btn ok sm" data-act="fbstat" data-v="${x.id}|done">已處理</button>`:''}<button class="btn red sm" data-act="fbdel" data-v="${x.id}">🗑</button></div></div>`}).join('')||'<div class="empty">還沒有使用者回饋</div>');
+}
+$('#fbBtn').onclick=()=>{if(isCreator()){S.ctab='fb';setView('creator')}else setView('feedback')};
+setInterval(()=>{if(!document.hidden&&S.fbInit&&(isCreator()||S.fb.length))loadFb()},8000);
+window.addEventListener('storage',e=>{if(e.key===FBKEY&&S.fbApi!==true)loadFb()});
+
+/* ---------- 啟動 ---------- */
+(async()=>{
+  await loadAll();await loadFb();renderMap();setView('feed');closePanel();syncNav('map');
+  setInterval(renderMap,30000);                         // 店家禁停紅／黃自動切換、過期通報清除
+  setInterval(async()=>{if(S.server&&!pick&&!document.hidden&&!(S.view==='report')){await loadAll();renderMap();if(S.view==='feed')renderPanel()}},20000);
+})();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
